@@ -4,7 +4,7 @@ This uses webusb/winusb to allow a webpage to become a terminal emulator for a c
 
 Click "Connect" to select your cdc/acm serial port USB device and then enter commands in the command line!
 
-Your cdc/acm serial port USB device must not be claimed by usbser.sys or you will get an access denied error.
+Your cdc/acm serial port USB device must not be claimed by usbser.sys or you will get an access denied error in the F12 console.
 
 You may need to edit the default endpoint numbers and vendor/product filter:
 
