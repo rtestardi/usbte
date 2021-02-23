@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<!-- USBTE -->
+<head>
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+<title>USBTE</title>
+</head>
+
+<body onload='Body()'>
+
+<h1>USBTE</h1>
+<button type='button' onclick="Connect();">Connect</button>
+<h2>results</h2>
+<pre id='results'></pre>
+<input id='command' name='command' size='80' disabled='true'/>
+
+<script>
+
+var device;
+const epin = 2;  // bulk endpoint from cdc/acm device
+const epout = 3;  // bulk endpoint to cdc/acm device
+var enc = new TextEncoder();
+var dec = new TextDecoder();
+
+function Body()
+{
+    document.body.addEventListener("keyup", function(event) {
+        if (event.keyCode === 13) {
+            // enter -- run the command line
+            event.preventDefault();
+            Enter();
+        }
+    })
+}
+
+async function Connect()
+{
+    const filters = [
+        {vendorId: 0x0403, productId: 0xa660}  // CpuStick with cdc/acm class/subclass 02/02 replaced with FF/00
+    ];
+
+    device = await navigator.usb.requestDevice({filters: filters});
+    await device.open();
+    await device.selectConfiguration(1);
+    await device.claimInterface(1);
+    setTimeout(Poll, 100);
+    document.getElementById("command").disabled = false;
+}
+
+async function Poll()
+{
+    let inresult = await device.transferIn(epin, 64);
+    document.getElementById("results").innerHTML += dec.decode(inresult.data.buffer);
+    setTimeout(Poll, 100);
+}
+
+async function Enter()
+{
+    var str = document.getElementById("command").value + "\r";
+    let outresult = await device.transferOut(epout, enc.encode(str).buffer);
+    document.getElementById("command").value = "";
+}
+
+</script>
+</body>
+</html>
