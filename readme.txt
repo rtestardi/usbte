@@ -6,4 +6,4 @@ Click "Connect" to select your cdc/acm serial port USB device and then enter com
 
 Your cdc/acm serial port USB device must not be claimed by usbser.sys or you will get an access denied error.
 
-Try it here: [https://rtestardi.github.io/usbte/usbte.html](https://rtestardi.github.io/usbte/usbte.html)
+Try it here: https://rtestardi.github.io/usbte/usbte.html
