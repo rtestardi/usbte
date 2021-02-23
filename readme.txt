@@ -1,4 +1,4 @@
-Web USB terminal emulator
+Web USB terminal emulator (well, without actual emulation :-)
 
 This uses webusb/winusb to allow a webpage to become a terminal emulator for a cdc/acm serial port USB device!
 

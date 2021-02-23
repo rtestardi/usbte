@@ -52,7 +52,7 @@ async function Connect()
 async function Poll()
 {
     let inresult = await device.transferIn(epin, 64);
-    document.getElementById("results").innerHTML += dec.decode(inresult.data.buffer);
+    document.getElementById("results").innerHTML += dec.decode(inresult.data.buffer).replace(/</g,'&lt;').replace(/>/g,'&gt;');
     setTimeout(Poll, 100);
 }
 
