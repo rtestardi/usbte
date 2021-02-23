@@ -57,7 +57,7 @@ async function Poll()
 async function Enter()
 {
     var str = document.getElementById("command").value + "\r";
-    let outresult = await device.transferOut(epout, enc.encode(str).buffer);
+    await device.transferOut(epout, enc.encode(str).buffer);
     document.getElementById("command").value = "";
 }
 
