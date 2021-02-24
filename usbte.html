@@ -31,7 +31,6 @@ productId: <input id='productId' name='productId' size='6' value='0xa660'/>
 var device;
 var enc = new TextEncoder();
 var dec = new TextDecoder();
-var filter = {};
 
 function Body()
 {
@@ -51,6 +50,7 @@ function Body()
 
 async function Connect()
 {
+    var filter = {};
     if (document.getElementById("vendorId").value != "") {
       filter["vendorId"] = document.getElementById("vendorId").value;
     }
