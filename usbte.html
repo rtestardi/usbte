@@ -27,6 +27,11 @@ var dec = new TextDecoder();
 function Body()
 {
     document.body.addEventListener("keyup", function(event) {
+        if (event.keyCode === 67 && event.ctrlKey) {
+            // ctrl-c -- stop the program
+            event.preventDefault();
+            CtrlC();
+        }
         if (event.keyCode === 13) {
             // enter -- run the command line
             event.preventDefault();
@@ -54,6 +59,11 @@ async function Poll()
     let inresult = await device.transferIn(epin, 64);
     document.getElementById("results").innerHTML += dec.decode(inresult.data.buffer).replace(/</g,'&lt;').replace(/>/g,'&gt;');
     setTimeout(Poll, 100);
+}
+
+async function CtrlC()
+{
+    await device.transferOut(epout, enc.encode("\003").buffer);
 }
 
 async function Enter()
