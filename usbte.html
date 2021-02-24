@@ -9,6 +9,16 @@
 <body onload='Body()'>
 
 <h1>USBTE</h1>
+<!-- bulk endpoint from device -->
+epin: <input id='epin' name='epin' size='4' value='2'/>
+
+<!-- bulk endpoint to device -->
+epout: <input id='epout' name='epout' size='4' value='3'/>
+
+<!-- CpuStick with cdc/acm class/subclass 02/02 replaced with FF/00 -->
+vendorId: <input id='vendorId' name='vendorId' size='6' value='0x0403'/>
+productId: <input id='productId' name='productId' size='6' value='0xa660'/>
+
 <button type='button' onclick="Connect();">Connect</button>
 <h2>results</h2>
 <pre id='results'></pre>
@@ -19,10 +29,9 @@
 <script>
 
 var device;
-const epin = 2;  // bulk endpoint from cdc/acm device
-const epout = 3;  // bulk endpoint to cdc/acm device
 var enc = new TextEncoder();
 var dec = new TextDecoder();
+var filter = {};
 
 function Body()
 {
@@ -42,29 +51,36 @@ function Body()
 
 async function Connect()
 {
-    const filters = [
-        {vendorId: 0x0403, productId: 0xa660}  // CpuStick with cdc/acm class/subclass 02/02 replaced with FF/00
-    ];
+    if (document.getElementById("vendorId").value != "") {
+      filter["vendorId"] = document.getElementById("vendorId").value;
+    }
+    if (document.getElementById("productId").value != "") {
+      filter["productId"] = document.getElementById("productId").value;
+    }
 
-    device = await navigator.usb.requestDevice({filters: filters});
-    await device.open();
-    await device.selectConfiguration(1);
-    await device.claimInterface(1);
-    setTimeout(Poll, 100);
-    document.getElementById("command").disabled = false;
-    document.getElementById("command").focus();
+    try {
+        device = await navigator.usb.requestDevice({filters: [filter]});
+        await device.open();
+        await device.selectConfiguration(1);
+        await device.claimInterface(1);
+        setTimeout(Poll, 100);
+        document.getElementById("command").disabled = false;
+        document.getElementById("command").focus();
+    } catch(err) {
+        document.getElementById("results").innerHTML += err.message;
+    }
 }
 
 async function Poll()
 {
-    let inresult = await device.transferIn(epin, 64);
+    let inresult = await device.transferIn(document.getElementById("epin").value, 64);
     document.getElementById("results").innerHTML += dec.decode(inresult.data.buffer).replace(/</g,'&lt;').replace(/>/g,'&gt;');
     setTimeout(Poll, 100);
 }
 
 async function Enter(str)
 {
-    await device.transferOut(epout, enc.encode(str).buffer);
+    await device.transferOut(document.getElementById("epout").value, enc.encode(str).buffer);
     document.getElementById("command").value = "";
     document.getElementById("command").focus();
 }
