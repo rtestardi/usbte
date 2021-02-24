@@ -27,15 +27,15 @@ var dec = new TextDecoder();
 function Body()
 {
     document.body.addEventListener("keyup", function(event) {
-        if (event.keyCode === 67 && event.ctrlKey) {
-            // ctrl-c -- stop the program
+        if (event.keyCode === 67 && event.ctrlKey && document.activeElement === document.getElementById("command")) {
+            // ctrl-c in command line -- stop the program
             event.preventDefault();
-            CtrlC();
+            Enter("\003");
         }
         if (event.keyCode === 13) {
             // enter -- run the command line
             event.preventDefault();
-            Enter();
+            Enter(document.getElementById("command").value + "\r");
         }
     })
 }
@@ -52,6 +52,7 @@ async function Connect()
     await device.claimInterface(1);
     setTimeout(Poll, 100);
     document.getElementById("command").disabled = false;
+    document.getElementById("command").focus();
 }
 
 async function Poll()
@@ -61,16 +62,11 @@ async function Poll()
     setTimeout(Poll, 100);
 }
 
-async function CtrlC()
+async function Enter(str)
 {
-    await device.transferOut(epout, enc.encode("\003").buffer);
-}
-
-async function Enter()
-{
-    var str = document.getElementById("command").value + "\r";
     await device.transferOut(epout, enc.encode(str).buffer);
     document.getElementById("command").value = "";
+    document.getElementById("command").focus();
 }
 
 </script>
