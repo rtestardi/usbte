@@ -67,7 +67,7 @@ async function Connect()
         document.getElementById("command").disabled = false;
         document.getElementById("command").focus();
     } catch(err) {
-        document.getElementById("results").innerHTML += err.message;
+        document.getElementById("results").innerHTML += err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
     }
 }
 
