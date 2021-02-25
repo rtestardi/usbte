@@ -53,6 +53,11 @@ function Body()
             event.preventDefault();
             Enter("\003");
         }
+        if ((event.keyCode === 65 || event.keyCode === 68) && event.ctrlKey && document.activeElement === document.getElementById("command")) {
+            // ctrl-a or ctrl-d in command line -- log out of remote
+            event.preventDefault();
+            Enter("\004");
+        }
         if (event.keyCode === 13) {
             // enter -- run the command line
             event.preventDefault();
