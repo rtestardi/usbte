@@ -19,7 +19,8 @@ Filter to USB:
 VID: <input id='vendorId' name='vendorId' size='4'/>
 PID: <input id='productId' name='productId' size='4'/>
 
-<p>If your device exposes a virtual serial port, select:
+<p>
+If your device exposes a virtual serial port, select:
 <button type='button' onclick="Comm();">COMM</button>
 
 <p>Otherwise, for bulk endpoint access, set:
@@ -30,9 +31,15 @@ epout: <input id='epout' name='epout' size='1' value='3'/>
 and select:
 <button type='button' onclick="Usb();">USB</button>
 
+<p>
+Ctrl-C and Ctrl-D flow thru the command line when in focus; Ctrl-A maps to Ctrl-D since web browsers may intercept Ctrl-D.
+
 <h2>results</h2>
 <pre id='results'></pre>
+
+<h2> command line</h2>
 <input id='command' name='command' size='80' disabled='true'/>
+
 <p>
 <a href=https://github.com/rtestardi/usbte target=_blank>https://github.com/rtestardi/usbte</a>
 
