@@ -11,8 +11,10 @@ Click "USB" to connect to your cdc/acm serial port USB device thru webusb/winusb
 
 Or click "COMM" to connect to your cdc/acm serial port USB device thru usbser and communicate with its emulated comm port.
 
-  * The Web Serial API needs to be enabled in your browser thru edge://flags/#enable-experimental-web-platform-features
+  * The Web Serial API needs to be enabled in your web browser thru edge://flags/#enable-experimental-web-platform-features
 
 Then enter commands in the command line!
+
+Ctrl-C and Ctrl-D flow thru the command line when in focus; Ctrl-A maps to Ctrl-D since web browsers may intercept Ctrl-D.
 
 Try it here: https://rtestardi.github.io/usbte/usbte.html
