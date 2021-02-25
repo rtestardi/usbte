@@ -109,7 +109,7 @@ async function Comm()
     if ('serial' in navigator) {
         try {
             comm = await navigator.serial.requestPort("usbVendorId" in filter ? { filters: [filter] } : {});
-            await comm.open({ baudRate: 9600 });
+            await comm.open({ baudRate: 115200, bufferSize: 64 });
             reader = comm.readable.getReader();
             writer = comm.writable.getWriter();
             setTimeout(Poll, 100);
@@ -126,17 +126,26 @@ async function Comm()
 async function Poll()
 {
     var result;
-    var buffer;
+    var str;
     if (usb) {
         result = await usb.transferIn(document.getElementById("epin").value, 64);
-        buffer = result.data.buffer;
+        str = dec.decode(result.data.buffer);
     } else {
         result = await reader.read();
-        buffer = result.value;
+        str = dec.decode(result.value);
     }
-    document.getElementById("results").innerHTML += dec.decode(buffer).replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'');
+    if (str.match(/\033[[]2J/)) {
+        // clear screen on cls  XXX -- misses fragmented escape
+        document.getElementById("results").innerHTML = "";
+        str = "";
+    }
+    if (str.match(/\033[[]K/)) {
+        // clear line on ctrl-c  XXX -- misses fragmented escape
+        str = str.replace(/\033[[]K/g, '<Ctrl-C>\r');
+    }
+    document.getElementById("results").innerHTML += str.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'');
     document.getElementById("command").scrollIntoView();
-    setTimeout(Poll, 100);
+    setTimeout(Poll, 10);
 }
 
 async function Enter(str)
