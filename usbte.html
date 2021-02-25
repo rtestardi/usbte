@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
 <!-- USBTE -->
+<!-- See: https://wicg.github.io/webusb/ -->
+<!-- See: https://wicg.github.io/serial/ -->
+
 <head>
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
 <title>USBTE</title>
@@ -9,17 +12,24 @@
 <body onload='Body()'>
 
 <h1>USBTE</h1>
+
+<!-- For bulk endpoint access, CpuStick vendorId/productId 0x0403/0xa660 with cdc/acm class/subclass 02/02 is replaced with FF/00 -->
+
+Filter to USB:
+VID: <input id='vendorId' name='vendorId' size='4'/>
+PID: <input id='productId' name='productId' size='4'/>
+
+<p>If your device exposes a virtual serial port, select:
+<button type='button' onclick="Comm();">COMM</button>
+
+<p>Otherwise, for bulk endpoint access, set:
 <!-- bulk endpoint from device -->
-epin: <input id='epin' name='epin' size='4' value='2'/>
-
+epin: <input id='epin' name='epin' size='1' value='2'/>
 <!-- bulk endpoint to device -->
-epout: <input id='epout' name='epout' size='4' value='3'/>
+epout: <input id='epout' name='epout' size='1' value='3'/>
+and select:
+<button type='button' onclick="Usb();">USB</button>
 
-<!-- CpuStick with cdc/acm class/subclass 02/02 replaced with FF/00 -->
-vendorId: <input id='vendorId' name='vendorId' size='6' value='0x0403'/>
-productId: <input id='productId' name='productId' size='6' value='0xa660'/>
-
-<button type='button' onclick="Connect();">Connect</button>
 <h2>results</h2>
 <pre id='results'></pre>
 <input id='command' name='command' size='80' disabled='true'/>
@@ -28,7 +38,10 @@ productId: <input id='productId' name='productId' size='6' value='0xa660'/>
 
 <script>
 
-var device;
+var comm;
+var reader;
+var writer;
+var usb;
 var enc = new TextEncoder();
 var dec = new TextDecoder();
 
@@ -48,21 +61,21 @@ function Body()
     })
 }
 
-async function Connect()
+async function Usb()
 {
     var filter = {};
     if (document.getElementById("vendorId").value != "") {
-      filter["vendorId"] = document.getElementById("vendorId").value;
-    }
-    if (document.getElementById("productId").value != "") {
-      filter["productId"] = document.getElementById("productId").value;
+        filter["vendorId"] = document.getElementById("vendorId").value;
+        if (document.getElementById("productId").value != "") {
+            filter["productId"] = document.getElementById("productId").value;
+        }
     }
 
     try {
-        device = await navigator.usb.requestDevice({filters: [filter]});
-        await device.open();
-        await device.selectConfiguration(1);
-        await device.claimInterface(1);
+        usb = await navigator.usb.requestDevice({ filters: [filter] });
+        await usb.open();
+        await usb.selectConfiguration(1);
+        await usb.claimInterface(1);
         setTimeout(Poll, 100);
         document.getElementById("command").disabled = false;
         document.getElementById("command").focus();
@@ -71,16 +84,56 @@ async function Connect()
     }
 }
 
+async function Comm()
+{
+    var filter = {};
+    if (document.getElementById("vendorId").value != "") {
+        filter["usbVendorId"] = document.getElementById("vendorId").value;
+        if (document.getElementById("productId").value != "") {
+            filter["usbProductId"] = document.getElementById("productId").value;
+        }
+    }
+
+    if ('serial' in navigator) {
+        try {
+            comm = await navigator.serial.requestPort("usbVendorId" in filter ? { filters: [filter] } : {});
+            await comm.open({ baudRate: 9600 });
+            reader = comm.readable.getReader();
+            writer = comm.writable.getWriter();
+            setTimeout(Poll, 100);
+            document.getElementById("command").disabled = false;
+            document.getElementById("command").focus();
+        } catch(err) {
+            document.getElementById("results").innerHTML += err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
+        }
+    } else {
+        document.getElementById("results").innerHTML += "The Web serial API needs to be enabled in your browser thru edge://flags/#enable-experimental-web-platform-features\r"
+    }
+}
+
 async function Poll()
 {
-    let inresult = await device.transferIn(document.getElementById("epin").value, 64);
-    document.getElementById("results").innerHTML += dec.decode(inresult.data.buffer).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    var result;
+    var buffer;
+    if (usb) {
+        result = await usb.transferIn(document.getElementById("epin").value, 64);
+        buffer = result.data.buffer;
+    } else {
+        result = await reader.read();
+        buffer = result.value;
+    }
+    document.getElementById("results").innerHTML += dec.decode(buffer).replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'');
+    document.getElementById("command").scrollIntoView();
     setTimeout(Poll, 100);
 }
 
 async function Enter(str)
 {
-    await device.transferOut(document.getElementById("epout").value, enc.encode(str).buffer);
+    if (usb) {
+        await usb.transferOut(document.getElementById("epout").value, enc.encode(str).buffer);
+    } else {
+        await writer.write(enc.encode(str).buffer);
+    }
     document.getElementById("command").value = "";
     document.getElementById("command").focus();
 }
