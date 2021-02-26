@@ -11,7 +11,8 @@ directly.
     denied error.
   * You may need to edit the default endpoint numbers.
 
-Or click "COMM" to connect to your cdc/acm serial port USB device thru usbser and communicate with its emulated comm port.
+Or click "COMM" to connect to your cdc/acm serial port USB device thru usbser and communicate with its emulated comm
+port.
 
   * The Web Serial API needs to be enabled in your web browser thru:
     - edge://flags/#enable-experimental-web-platform-features
