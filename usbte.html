@@ -18,7 +18,7 @@
 
 <body onload='Body()'>
 
-<h1>WebUSB terminal emulator</h1>
+<h1>Web USB terminal emulator</h1>
 
 <!-- For bulk endpoint access, CpuStick vendorId/productId 0x0403/0xa660 with cdc/acm class/subclass 02/02 is replaced with FF/00 -->
 
@@ -45,14 +45,14 @@ Ctrl-C and Ctrl-D flow thru the command line when in focus.
 <pre id='results'></pre>
 
 <h2> command line</h2>
-<input id='command' name='command' size='40' disabled='true' autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false'/>
+<input id='command' name='command' size='36' disabled='true' autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false'/>
 <button type='button' onclick="Paste();">Paste</button>
 
 <p>
 <a href=https://github.com/rtestardi/usbte target=_blank>github/usbte</a>
-&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;
 <a href=https://github.com/rtestardi/StickOS target=_blank>github/StickOS</a>
-&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;
 <a href=https://rtestardi.github.io/StickOS/ target=_blank>StickOS</a>
 
 <script>
