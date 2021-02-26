@@ -5,7 +5,7 @@ device!
 
 You can filter USB devices by specifying VID and/or PID.
 
-Click "COMM" to connect to your cdc/acm serial port USB device thru usbser and communicate with its emulated comm
+Click "COM" to connect to your cdc/acm serial port USB device thru usbser and communicate with its emulated comm
 port.
 
   * The Web Serial API needs to be enabled in your web browser thru:
