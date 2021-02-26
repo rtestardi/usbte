@@ -7,6 +7,9 @@
 <head>
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
 <title>USBTE</title>
+    <style>
+        pre { white-space: pre-wrap; word-wrap: break-word; }
+    </style>
 </head>
 
 <body onload='Body()'>
@@ -32,16 +35,21 @@ and select:
 <button type='button' onclick="Usb();">USB</button>
 
 <p>
-Ctrl-C and Ctrl-D flow thru the command line when in focus; Ctrl-A maps to Ctrl-D since web browsers may intercept Ctrl-D.
+Ctrl-C and Ctrl-D flow thru the command line when in focus.
 
 <h2>results</h2>
 <pre id='results'></pre>
 
 <h2> command line</h2>
 <input id='command' name='command' size='80' disabled='true'/>
+<button type='button' onclick="Paste();">Paste</button>
 
 <p>
 <a href=https://github.com/rtestardi/usbte target=_blank>https://github.com/rtestardi/usbte</a>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<a href=https://github.com/rtestardi/StickOS target=_blank>https://github.com/rtestardi/StickOS</a>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<a href=https://rtestardi.github.io/StickOS/ target=_blank>Old StickOS Website</a>
 
 <script>
 
@@ -54,15 +62,17 @@ var dec = new TextDecoder();
 
 function Body()
 {
-    document.body.addEventListener("keyup", function(event) {
+    document.body.addEventListener("keydown", function(event) {
         if (event.keyCode === 67 && event.ctrlKey && document.activeElement === document.getElementById("command")) {
             // ctrl-c in command line -- stop the program
             event.preventDefault();
+            event.stopPropagation();
             Enter("\003");
         }
-        if ((event.keyCode === 65 || event.keyCode === 68) && event.ctrlKey && document.activeElement === document.getElementById("command")) {
-            // ctrl-a or ctrl-d in command line -- log out of remote
+        if (event.keyCode === 68 && event.ctrlKey && document.activeElement === document.getElementById("command")) {
+            // ctrl-d in command line -- log out of remote
             event.preventDefault();
+            event.stopPropagation();
             Enter("\004");
         }
         if (event.keyCode === 13) {
@@ -119,7 +129,12 @@ async function Comm()
             document.getElementById("results").innerHTML += err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
         }
     } else {
-        document.getElementById("results").innerHTML += "The Web serial API needs to be enabled in your browser thru edge://flags/#enable-experimental-web-platform-features\r"
+        document.getElementById("results").innerHTML +=
+`The Web serial API needs to be enabled in your browser thru:
+   - edge://flags/#enable-experimental-web-platform-features
+   - chrome://flags/#enable-experimental-web-platform-features
+   - opera://flags/#enable-experimental-web-platform-features
+`;
     }
 }
 
@@ -139,10 +154,6 @@ async function Poll()
         document.getElementById("results").innerHTML = "";
         str = "";
     }
-    if (str.match(/\033[[]K/)) {
-        // clear line on ctrl-c  XXX -- misses fragmented escape
-        str = str.replace(/\033[[]K/g, '<Ctrl-C>\r');
-    }
     document.getElementById("results").innerHTML += str.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'');
     document.getElementById("command").scrollIntoView();
     setTimeout(Poll, 10);
@@ -157,6 +168,12 @@ async function Enter(str)
     }
     document.getElementById("command").value = "";
     document.getElementById("command").focus();
+}
+
+async function Paste()
+{
+    text = await navigator.clipboard.readText();
+    Enter(text + "\r");
 }
 
 </script>
