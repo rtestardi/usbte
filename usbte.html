@@ -8,52 +8,65 @@
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
 <title>USBTE</title>
     <style>
-        pre { white-space: pre-wrap; word-wrap: break-word; }
-        html,button,input { font: 36px Arial, Helvetica, sans-serif; }
-        @media(min-width:80em){ html,button,input { font: 24px Arial, Helvetica, sans-serif; } }
-        @supports(-webkit-touch-callout:none) { button,input { -webkit-appearance: none; border-radius: 2px; } }
-        body,html { margin: 0px; }
+pre { white-space: pre-wrap; word-wrap: break-word; }
+a { text-decoration: none; }
+#results { line-height: 1.4; }
+#command { width: 96%; font-size:120%; }
+#copyright { font-size:65%; padding: 0px; }
+* { overflow-wrap: anywhere; word-wrap: anywhere; }
+button { overflow-wrap: normal; word-wrap: normal; }
+html,button,input { font: 36px Arial, Helvetica, sans-serif; padding: 15px 10px 15px 10px; margin: 15px 0px 15px 0px; }
+@media(min-width:80em){ html,button,input { font: 24px Arial, Helvetica, sans-serif; padding: 10px; margin: 10px 0px 10px 0px; } }
+@supports(-webkit-touch-callout:none) { button,input { -webkit-appearance: none; border-radius: 2px; } }
+img { padding: 0px; margin: 10px 10px 0px 0px; }
+table,tr,td { margin: 0px; padding: 0px; }
+.table1,.table2 { width: 100%; }
+.td3 { width: 4%; vertical-align: bottom; }
+.i4 { filter: grayscale(75%) opacity(75%); }
+hr { height: 2px; }
+body,html { margin: 0px; }
+#columns { column-width: 300px; column-count: 8; }
     </style>
 </head>
 
 <body onload='Body()'>
 
-<h1>Web USB terminal emulator</h1>
+<h1>Web USB Terminal Emulator</h1>
 
 <!-- For bulk endpoint access, CpuStick vendorId/productId 0x0403/0xa660 with cdc/acm class/subclass 02/02 is replaced with FF/00 -->
 
-Filter to USB:
+Optional filter to
 VID: <input id='vendorId' name='vendorId' size='4'/>
 PID: <input id='productId' name='productId' size='4'/>
 
 <p>
-If your device exposes a virtual serial port, select:
-<button type='button' onclick="Comm();">COMM</button>
+Select:
+<button type='button' onclick="Comm();">COM</button>
 
-<p>Or set:
+Or
 <!-- bulk endpoint from device -->
 epin: <input id='epin' name='epin' size='1' value='2'/>
 <!-- bulk endpoint to device -->
 epout: <input id='epout' name='epout' size='1' value='3'/>
-and select:
+and:
 <button type='button' onclick="Usb();">USB</button>
 
-<p>
-Ctrl-C and Ctrl-D flow thru the command line when in focus.
-
-<h2>results</h2>
 <pre id='results'></pre>
 
-<h2> command line</h2>
-<input id='command' name='command' size='36' disabled='true' autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false'/>
-<button type='button' onclick="Paste();">Paste</button>
+<input id='command' name='command' disabled='true' autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false'/>
+<br>
+<button type='button' onclick='Enter(document.getElementById("command").value + "\r");'>Enter</button>
+<button type='button' onclick='Enter("\003");'>Ctrl-C</button>
+<button type='button' onclick='Enter("\004");'>Ctrl-D</button>
+<button type='button' onclick='Paste();'>Paste</button>
+<button type='button' onclick='document.getElementById("results").innerHTML = "";'>Clear</button>
 
-<p>
-<a href=https://github.com/rtestardi/usbte target=_blank>github/usbte</a>
+<p id='copyright'>
+<a href=https://github.com/rtestardi/usbte target=_blank>github.com/rtestardi/usbte</a>
 &nbsp;&nbsp;&nbsp;
-<a href=https://github.com/rtestardi/StickOS target=_blank>github/StickOS</a>
+<a href=https://github.com/rtestardi/StickOS target=_blank>github.com/rtestardi/StickOS</a>
 &nbsp;&nbsp;&nbsp;
-<a href=https://rtestardi.github.io/StickOS/ target=_blank>StickOS</a>
+<a href=https://rtestardi.github.io/StickOS target=_blank>rtestardi.github.io/StickOS</a>
 
 <script>
 
@@ -67,17 +80,11 @@ var dec = new TextDecoder();
 function Body()
 {
     document.body.addEventListener("keydown", function(event) {
-        if (event.keyCode === 67 && event.ctrlKey && document.activeElement === document.getElementById("command")) {
-            // ctrl-c in command line -- stop the program
+        if ((event.keyCode === 67 || event.keyCode === 68) && event.ctrlKey && document.activeElement === document.getElementById("command")) {
+            // ctrl-c or ctrl-d in command line -- flow thru to device
             event.preventDefault();
             event.stopPropagation();
-            Enter("\003");
-        }
-        if (event.keyCode === 68 && event.ctrlKey && document.activeElement === document.getElementById("command")) {
-            // ctrl-d in command line -- log out of remote
-            event.preventDefault();
-            event.stopPropagation();
-            Enter("\004");
+            Enter(String.fromCharCode(event.keyCode - 64));
         }
         if (event.keyCode === 13) {
             // enter -- run the command line
@@ -135,9 +142,9 @@ async function Comm()
     } else {
         document.getElementById("results").innerHTML +=
 `The Web serial API needs to be enabled in your browser thru:
-   - edge://flags/#enable-experimental-web-platform-features
-   - chrome://flags/#enable-experimental-web-platform-features
-   - opera://flags/#enable-experimental-web-platform-features
+   - <a href=edge://flags/#enable-experimental-web-platform-features>edge://flags/#enable-experimental-web-platform-features</a>
+   - <a href=chrome://flags/#enable-experimental-web-platform-features>chrome://flags/#enable-experimental-web-platform-features</a>
+   - <a href=opera://flags/#enable-experimental-web-platform-features>opera://flags/#enable-experimental-web-platform-features</a>
 `;
     }
 }
