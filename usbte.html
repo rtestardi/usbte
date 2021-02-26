@@ -9,14 +9,14 @@
 <title>USBTE</title>
     <style>
         pre { white-space: pre-wrap; word-wrap: break-word; }
-        html,button,input,p { font: 36px Arial, Helvetica, sans-serif; }
-        @media(min-width:80em){ html,button,input,p { font: 24px Arial, Helvetica, sans-serif; } }
+        html,button,input { font: 36px Arial, Helvetica, sans-serif; }
+        @media(min-width:80em){ html,button,input { font: 24px Arial, Helvetica, sans-serif; } }
     </style>
 </head>
 
 <body onload='Body()'>
 
-<h1>USBTE -- Web USB terminal emulator</h1>
+<h1>WebUSB terminal emulator</h1>
 
 <!-- For bulk endpoint access, CpuStick vendorId/productId 0x0403/0xa660 with cdc/acm class/subclass 02/02 is replaced with FF/00 -->
 
@@ -28,7 +28,7 @@ PID: <input id='productId' name='productId' size='4'/>
 If your device exposes a virtual serial port, select:
 <button type='button' onclick="Comm();">COMM</button>
 
-<p>Otherwise, for bulk endpoint access, set:
+<p>Or set:
 <!-- bulk endpoint from device -->
 epin: <input id='epin' name='epin' size='1' value='2'/>
 <!-- bulk endpoint to device -->
@@ -47,9 +47,9 @@ Ctrl-C and Ctrl-D flow thru the command line when in focus.
 <button type='button' onclick="Paste();">Paste</button>
 
 <p>
-<a href=https://github.com/rtestardi/usbte target=_blank>github.com/usbte</a>
+<a href=https://github.com/rtestardi/usbte target=_blank>github/usbte</a>
 &nbsp;&nbsp;&nbsp;&nbsp;
-<a href=https://github.com/rtestardi/StickOS target=_blank>github.com/StickOS</a>
+<a href=https://github.com/rtestardi/StickOS target=_blank>github/StickOS</a>
 &nbsp;&nbsp;&nbsp;&nbsp;
 <a href=https://rtestardi.github.io/StickOS/ target=_blank>StickOS</a>
 
