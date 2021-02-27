@@ -10,7 +10,7 @@
     <style>
 pre { white-space: pre-wrap; word-wrap: break-word; }
 a { text-decoration: none; }
-#results { line-height: 1.4; }
+#results { line-height: 1.2; }
 #command { width: 96%; font-size:120%; }
 #copyright { font-size:65%; padding: 0px; }
 * { overflow-wrap: anywhere; word-wrap: anywhere; }
@@ -18,14 +18,7 @@ button { overflow-wrap: normal; word-wrap: normal; }
 html,button,input { font: 36px Arial, Helvetica, sans-serif; padding: 15px 10px 15px 10px; margin: 15px 0px 15px 0px; }
 @media(min-width:80em){ html,button,input { font: 24px Arial, Helvetica, sans-serif; padding: 10px; margin: 10px 0px 10px 0px; } }
 @supports(-webkit-touch-callout:none) { button,input { -webkit-appearance: none; border-radius: 2px; } }
-img { padding: 0px; margin: 10px 10px 0px 0px; }
-table,tr,td { margin: 0px; padding: 0px; }
-.table1,.table2 { width: 100%; }
-.td3 { width: 4%; vertical-align: bottom; }
-.i4 { filter: grayscale(75%) opacity(75%); }
-hr { height: 2px; }
 body,html { margin: 0px; }
-#columns { column-width: 300px; column-count: 8; }
     </style>
 </head>
 
@@ -43,7 +36,7 @@ PID: <input id='productId' name='productId' size='4'/>
 Select:
 <button type='button' onclick="Comm();">COM</button>
 
-Or
+or
 <!-- bulk endpoint from device -->
 epin: <input id='epin' name='epin' size='1' value='2'/>
 <!-- bulk endpoint to device -->
