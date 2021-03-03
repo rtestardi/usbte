@@ -234,8 +234,9 @@ async function Paste()
 // the user clicked the Clear button; clear the command, results, and history list
 async function Clear()
 {
-    document.getElementById("command").value = "";
     document.getElementById("results").innerHTML = "";
+    document.getElementById("command").value = "";
+    document.getElementById("command").focus();
     //lines = [];
 }
 
