@@ -48,11 +48,11 @@ and:
 
 <input id='command' name='command' disabled='true' autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false'/>
 <br>
-<button type='button' onclick='Enter(document.getElementById("command").value + "\r");'>Enter</button>
-<button type='button' onclick='Enter("\003");'>Ctrl-C</button>
-<button type='button' onclick='Enter("\004");'>Ctrl-D</button>
+<button type='button' onclick='Enter();'>Enter</button>
+<button type='button' onclick='Send("\003");'>Ctrl-C</button>
+<button type='button' onclick='Send("\004");'>Ctrl-D</button>
 <button type='button' onclick='Paste();'>Paste</button>
-<button type='button' onclick='document.getElementById("results").innerHTML = "";'>Clear</button>
+<button type='button' onclick='Clear();'>Clear</button>
 
 <p id='copyright'>
 <a href=https://github.com/rtestardi/usbte target=_blank>github.com/rtestardi/usbte</a>
@@ -69,7 +69,11 @@ var writer;
 var usb;
 var enc = new TextEncoder();
 var dec = new TextDecoder();
+var lines = [];
+var cursor = 0;
+var first = false;
 
+// the user loaded the webpage; set up keyboard listeners
 function Body()
 {
     document.body.addEventListener("keydown", function(event) {
@@ -77,16 +81,27 @@ function Body()
             // ctrl-c or ctrl-d in command line -- flow thru to device
             event.preventDefault();
             event.stopPropagation();
-            Enter(String.fromCharCode(event.keyCode - 64));
+            Send(String.fromCharCode(event.keyCode - 64));
         }
         if (event.keyCode === 13) {
             // enter -- run the command line
             event.preventDefault();
-            Enter(document.getElementById("command").value + "\r");
+            Enter();
+        }
+        if (event.keyCode === 40) {
+            // down arrow -- recall a newer command line
+            event.preventDefault();
+            UpDown(false);
+        }
+        if (event.keyCode === 38) {
+            // up arrow -- recall an older command line
+            event.preventDefault();
+            UpDown(true);
         }
     })
 }
 
+// the user wants to connect to a USB device's bulk endpoints directly
 async function Usb()
 {
     var filter = {};
@@ -102,7 +117,7 @@ async function Usb()
         await usb.open();
         await usb.selectConfiguration(1);
         await usb.claimInterface(1);
-        setTimeout(Poll, 100);
+        setTimeout(Receive, 100);
         document.getElementById("command").disabled = false;
         document.getElementById("command").focus();
     } catch(err) {
@@ -110,6 +125,7 @@ async function Usb()
     }
 }
 
+// the user wants to connect to an emulated COM port
 async function Comm()
 {
     var filter = {};
@@ -126,7 +142,7 @@ async function Comm()
             await comm.open({ baudRate: 115200, bufferSize: 64 });
             reader = comm.readable.getReader();
             writer = comm.writable.getWriter();
-            setTimeout(Poll, 100);
+            setTimeout(Receive, 100);
             document.getElementById("command").disabled = false;
             document.getElementById("command").focus();
         } catch(err) {
@@ -142,7 +158,8 @@ async function Comm()
     }
 }
 
-async function Poll()
+// receive a string from the device
+async function Receive()
 {
     var result;
     var str;
@@ -155,15 +172,16 @@ async function Poll()
     }
     if (str.match(/\033[[]2J/)) {
         // clear screen on cls  XXX -- misses fragmented escape
-        document.getElementById("results").innerHTML = "";
-        str = "";
+        Clear();
+    } else {
+        document.getElementById("results").innerHTML += str.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'');
     }
-    document.getElementById("results").innerHTML += str.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'');
     document.getElementById("command").scrollIntoView();
-    setTimeout(Poll, 10);
+    setTimeout(Receive, 10);
 }
 
-async function Enter(str)
+// send a string to the device
+async function Send(str)
 {
     if (usb) {
         await usb.transferOut(document.getElementById("epout").value, enc.encode(str).buffer);
@@ -174,10 +192,51 @@ async function Enter(str)
     document.getElementById("command").focus();
 }
 
+// the user clicked the Enter button; run the user command line
+async function Enter()
+{
+    var str = document.getElementById("command").value;
+    if (str.length && (! lines.length || str != lines[lines.length-1])) {
+        lines.push(str);
+    }
+    Send(str + "\r");
+    first = true;
+}
+
+// the user typed up-arrow or down-arrow to recall an older or newer command line
+function UpDown(up)
+{
+    if (first && up) {
+        // an initial up-arrow recalls the last hyperlink from the results history
+        cursor = 0;
+    }
+    if (lines.length) {
+        // recall the requested hyperlink from the results history to the equation line
+        if (up) {
+            // older
+            cursor = (cursor+lines.length-1)%lines.length;
+        } else {
+            // newer
+            cursor = (cursor+1)%lines.length;
+        }
+        document.getElementById("command").value = lines[cursor];
+        first = false;
+    }
+}
+
+// the user clicked the Paste button; paste the clipboard into the command line
 async function Paste()
 {
     text = await navigator.clipboard.readText();
-    Enter(text + "\r");
+    Send(text + "\r");
+}
+
+// the user clicked the Clear button; clear the command, results, and history list
+async function Clear()
+{
+    document.getElementById("command").value = "";
+    document.getElementById("results").innerHTML = "";
+    //lines = [];
 }
 
 </script>
