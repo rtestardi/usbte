@@ -100,8 +100,14 @@ function Body()
 
 function getCursorPosition(canvas, event) {
     const rect = canvas.getBoundingClientRect()
-    analogY = event.clientY - rect.top
-    analogV = Math.floor((255-analogY)*4);
+    analogY = event.clientY - rect.top;
+    if (analogY > 255) {
+       analogY = 255;
+    }
+    if (analogY < 0) {
+        analogY = 0;
+    }
+    analogV = Math.floor((255-analogY)*1024/256);
 }
 
 // the user wants to connect to a USB device's bulk endpoints directly
