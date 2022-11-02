@@ -60,8 +60,7 @@ slew %:
 
 <br>
 
-<canvas id="canvas" width="1000" height="256">
-</canvas>
+<canvas id="canvas" width="1040" height="256"></canvas>
 
 <pre id='command'></pre>
 <pre id='results'></pre>
@@ -203,12 +202,16 @@ async function Receive()
         if (string.match(/done/)) {
             var lines = string.split(/\r?\n/);
 
-            ctx.clearRect(0, 0, 1000, 256);
+            ctx.clearRect(0, 0, 1040, 256);
+
+            ctx.fillText("3.3V", 1002, 8);
+            ctx.fillText(document.getElementById("usec").value + "ms", 1002, 127);
+            ctx.fillText("0V", 1002, 255);
 
             ctx.setLineDash([5,5])
             ctx.beginPath();
             ctx.moveTo(0, analogY);
-            ctx.lineTo(1023, analogY);
+            ctx.lineTo(1000, analogY);
             ctx.closePath();
             ctx.stroke();
 
