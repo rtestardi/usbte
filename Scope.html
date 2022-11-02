@@ -71,7 +71,7 @@ voltage:
 
 <br>
 
-<canvas id="canvas" width="1040" height="256"></canvas>
+<canvas id="canvas" width="1044" height="256"></canvas>
 
 <pre id='command'></pre>
 <pre id='results'></pre>
@@ -213,18 +213,14 @@ async function Receive()
         if (string.match(/done/)) {
             var lines = string.split(/\r?\n/);
 
-            ctx.clearRect(0, 0, 1040, 256);
+            ctx.clearRect(0, 0, 1044, 256);
 
-            ctx.fillText("3.3V", 1006, 8);
-            ctx.fillText(document.getElementById("usec").value + "ms", 1004, 128);
-            ctx.fillText("0V", 1006, 255);
+            ctx.fillText("3.3V", 1008, 8);
+            ctx.fillText("0V", 1008, 255);
 
-            for (var i = 1; i <= 10; i++) {
-                if (i == 10) {
-                    ctx.strokeStyle = '#ff0000';
-                    ctx.setLineDash([])
-                } else if (i == 5) {
-                    ctx.setLineDash([4,10])
+            for (var i = 0; i <= 10; i++) {
+                if (i/5*5 == i) {
+                    ctx.setLineDash([6,10])
                 } else {
                     ctx.setLineDash([2,10])
                 }
@@ -234,10 +230,21 @@ async function Receive()
                 ctx.stroke();
                 ctx.closePath();
                 ctx.setLineDash([])
-                ctx.strokeStyle = '#000000';
+                ctx.fillText("" + parseInt(document.getElementById("usec").value)*i + "ms", i*100+2, 126);
             }
 
-            ctx.setLineDash([8,10])
+            var x = ctx.lineWidth;
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#FF0000';
+            ctx.beginPath();
+            ctx.moveTo(1002, 0);
+            ctx.lineTo(1002, 255);
+            ctx.stroke();
+            ctx.closePath();
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = x;
+
+            ctx.setLineDash([10,10])
             ctx.beginPath();
             ctx.moveTo(0, analogY);
             ctx.lineTo(1000, analogY);
