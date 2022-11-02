@@ -136,13 +136,13 @@ async function Usb()
         document.getElementById("results").innerHTML = "";
         document.getElementById("config").hidden = true;
 
+        discard = 1;
         setTimeout(Receive, 2);
 
-        discard = 1;
         Send("echo off\n");
         Send("prompt off\n");
 
-        setTimeout(Scope, 100);
+        setTimeout(Scope, 500);
     } catch(err) {
         document.getElementById("results").innerHTML = err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
     }
@@ -165,13 +165,13 @@ async function Comm()
             document.getElementById("results").innerHTML = "";
             document.getElementById("config").hidden = true;
 
+            discard = 1;
             setTimeout(Receive, 2);
 
-            discard = 1;
             Send("echo off\n");
             Send("prompt off\n");
 
-            setTimeout(Scope, 100);
+            setTimeout(Scope, 500);
         } catch(err) {
             document.getElementById("results").innerHTML = err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
         }
@@ -215,22 +215,40 @@ async function Receive()
 
             ctx.clearRect(0, 0, 1040, 256);
 
-            ctx.fillText("3.3V", 1004, 8);
+            ctx.fillText("3.3V", 1006, 8);
             ctx.fillText(document.getElementById("usec").value + "ms", 1004, 128);
-            ctx.fillText("0V", 1004, 255);
+            ctx.fillText("0V", 1006, 255);
 
-            ctx.setLineDash([5,5])
+            for (var i = 1; i <= 10; i++) {
+                if (i == 10) {
+                    ctx.strokeStyle = '#ff0000';
+                    ctx.setLineDash([])
+                } else if (i == 5) {
+                    ctx.setLineDash([4,10])
+                } else {
+                    ctx.setLineDash([2,10])
+                }
+                ctx.beginPath();
+                ctx.moveTo(100*i, 0);
+                ctx.lineTo(100*i, 255);
+                ctx.stroke();
+                ctx.closePath();
+                ctx.setLineDash([])
+                ctx.strokeStyle = '#000000';
+            }
+
+            ctx.setLineDash([8,10])
             ctx.beginPath();
             ctx.moveTo(0, analogY);
             ctx.lineTo(1000, analogY);
-            ctx.closePath();
             ctx.stroke();
+            ctx.closePath();
+            ctx.setLineDash([])
 
             if (lines.length < 10) {
                 document.getElementById("command").innerHTML += " no trigger";
                 delay = 200;
             } else {
-                ctx.setLineDash([])
                 ctx.beginPath();
                 ctx.moveTo(0, 255);
                 for (var i = 0; i < 1000 && i < lines.length; i++) {
@@ -238,8 +256,8 @@ async function Receive()
                     ctx.lineTo(i, 255-parseInt(words[0])/4);
                 }
                 ctx.moveTo(1023, 255);
-                ctx.closePath();
                 ctx.stroke();
+                ctx.closePath();
                 document.getElementById("command").innerHTML = " ";
                 delay=100;
             }
