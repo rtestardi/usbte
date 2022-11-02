@@ -44,9 +44,13 @@ sample usec:
 <option>1000</option>
 </select>
 
+--
+
 <input type="radio" name="trigger" value="+">rise</input>
 <input type="radio" name="trigger" value="" checked>level</input>
 <input type="radio" name="trigger" value="-">fall</input>
+
+--
 
 slew %:
 <select id="slew">
@@ -56,6 +60,13 @@ slew %:
 <option value="51">20</option>
 <option value="77">30</option>
 <option value="102">40</option>
+</select>
+
+--
+
+voltage:
+<select id="voltage">
+<option value="3.3">3.3</option>
 </select>
 
 <br>
@@ -204,9 +215,9 @@ async function Receive()
 
             ctx.clearRect(0, 0, 1040, 256);
 
-            ctx.fillText("3.3V", 1002, 8);
-            ctx.fillText(document.getElementById("usec").value + "ms", 1002, 127);
-            ctx.fillText("0V", 1002, 255);
+            ctx.fillText("3.3V", 1004, 8);
+            ctx.fillText(document.getElementById("usec").value + "ms", 1004, 128);
+            ctx.fillText("0V", 1004, 255);
 
             ctx.setLineDash([5,5])
             ctx.beginPath();
