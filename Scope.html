@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+<html>
+<!-- SCOPE -->
+<!-- See: https://wicg.github.io/webusb/ -->
+<!-- See: https://wicg.github.io/serial/ -->
+
+<head>
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+<title>SCOPE</title>
+    <style>
+pre { white-space: pre-wrap; word-wrap: break-word; }
+a { text-decoration: none; }
+#results { line-height: 1.2; }
+#copyright { font-size:65%; padding: 0px; }
+* { overflow-wrap: anywhere; word-wrap: anywhere; }
+button { overflow-wrap: normal; word-wrap: normal; }
+html,button,input { font: 36px Arial, Helvetica, sans-serif; padding: 15px 10px 15px 10px; margin: 15px 0px 15px 0px; }
+@media(min-width:80em){ html,button,input { font: 24px Arial, Helvetica, sans-serif; padding: 10px; margin: 10px 0px 10px 0px; } }
+@supports(-webkit-touch-callout:none) { button,input { -webkit-appearance: none; border-radius: 2px; } }
+body,html { margin: 0px; }
+#canvas { outline: red 1px solid; padding: 1px; }
+    </style>
+</head>
+
+<body onload='Body()'>
+
+<h1>Web SCOPE</h1>
+
+<div id="config">
+Select:
+<button type='button' onclick="Comm();">COM</button>
+</div>
+
+sample usec:
+<select id="usec">
+<option>1</option>
+<option>3</option>
+<option>10</option>
+<option>30</option>
+<option>100</option>
+<option>300</option>
+<option>1000</option>
+</select>
+
+<input type="radio" name="trigger" value="+">rise
+<input type="radio" name="trigger" value="" checked>level
+<input type="radio" name="trigger" value="-">fall
+
+slew %:
+<select id="slew">
+<option value="0">0</option>
+<option value="26">10</option>
+<option value="51">20</option>
+<option value="77">30</option>
+<option value="102">40</option>
+</select>
+
+<br>
+
+<canvas id="canvas" width="1000" height="256">
+</canvas>
+
+<pre id='command'></pre>
+<pre id='results'></pre>
+
+<p id='copyright'>
+<a href=https://github.com/rtestardi/usbte target=_blank>github.com/rtestardi/usbte</a>
+&nbsp;&nbsp;&nbsp;
+<a href=https://github.com/rtestardi/StickOS target=_blank>github.com/rtestardi/StickOS</a>
+&nbsp;&nbsp;&nbsp;
+<a href=https://rtestardi.github.io/StickOS target=_blank>rtestardi.github.io/StickOS</a>
+
+<script>
+
+var comm;
+var reader;
+var writer;
+var enc = new TextEncoder();
+var dec = new TextDecoder();
+var canvas;
+var ctx;
+var discard;
+var string;
+var analogV = 512;
+var analogY = 128;
+
+// the user loaded the webpage; set up keyboard listeners
+function Body()
+{
+    canvas = document.getElementById('canvas');
+    canvas.addEventListener('mousedown', function(e) {
+        getCursorPosition(canvas, e)
+    })
+    ctx = canvas.getContext('2d');
+}
+
+function getCursorPosition(canvas, event) {
+    const rect = canvas.getBoundingClientRect()
+    analogY = event.clientY - rect.top
+    analogV = Math.floor((255-analogY)*4);
+}
+
+// the user wants to connect to an emulated COM port
+async function Comm()
+{
+    var filter = {};
+    filter["usbVendorId"] = 0x0403;
+    filter["usbProductId"] = 0xA660;
+
+    if ('serial' in navigator) {
+        try {
+            comm = await navigator.serial.requestPort({ filters: [filter] });
+            await comm.open({ baudRate: 115200, bufferSize: 64 });
+            reader = comm.readable.getReader();
+            writer = comm.writable.getWriter();
+
+            document.getElementById("results").innerHTML = "";
+            document.getElementById("config").hidden = true;
+
+            setTimeout(Receive, 2);
+
+            discard = 1;
+            Send("echo off\n");
+            Send("prompt off\n");
+
+            setTimeout(Scope, 100);
+        } catch(err) {
+            document.getElementById("results").innerHTML = err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
+        }
+    } else {
+        document.getElementById("results").innerHTML =
+`The Web serial API needs to be enabled in your browser thru:
+   - <a href=edge://flags/#enable-experimental-web-platform-features>edge://flags/#enable-experimental-web-platform-features</a>
+   - <a href=chrome://flags/#enable-experimental-web-platform-features>chrome://flags/#enable-experimental-web-platform-features</a>
+   - <a href=opera://flags/#enable-experimental-web-platform-features>opera://flags/#enable-experimental-web-platform-features</a>
+`;
+    }
+}
+
+async function Scope()
+{
+    discard = 0;
+    string = "";
+    var command = "scope " + document.getElementById("usec").value + " " + document.querySelector('input[name="trigger"]:checked').value + analogV + " " + document.getElementById("slew").value;
+    document.getElementById("command").innerHTML = command;
+    Send(command + "\n");
+}
+
+// receive a string from the device
+async function Receive()
+{
+    var str;
+    var delay;
+    var result;
+
+    result = await reader.read();
+    if (! discard) {
+        str = dec.decode(result.value);
+        string += str.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        if (string.match(/done/)) {
+            var lines = string.split(/\r?\n/);
+
+            ctx.clearRect(0, 0, 1000, 256);
+
+            ctx.setLineDash([5,5])
+            ctx.beginPath();
+            ctx.moveTo(0, analogY);
+            ctx.lineTo(1023, analogY);
+            ctx.closePath();
+            ctx.stroke();
+
+            if (lines.length < 10) {
+                document.getElementById("command").innerHTML += " no trigger";
+                delay = 200;
+            } else {
+                ctx.setLineDash([])
+                ctx.beginPath();
+                ctx.moveTo(0, 255);
+                for (var i = 0; i < 1000 && i < lines.length; i++) {
+                    var words = lines[i].split(/ /);
+                    ctx.lineTo(i, 255-parseInt(words[0])/4);
+                }
+                ctx.moveTo(1023, 255);
+                ctx.closePath();
+                ctx.stroke();
+                document.getElementById("command").innerHTML = " ";
+                delay=100;
+            }
+            setTimeout(Scope, delay);
+        }
+    }
+    setTimeout(Receive, 2);
+}
+
+// send a string to the device
+async function Send(str)
+{
+    await writer.write(enc.encode(str).buffer);
+}
+
+</script>
+</body>
+</html>
