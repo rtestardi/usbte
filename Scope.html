@@ -29,27 +29,29 @@ body,html { margin: 0px; }
 
 <div id="config">
 Select:
-<button type='button' onclick="Comm();">COM</button>
+<button type='button' onclick="Comm();">Windows</button>
+<button type='button' onclick="Usb();">Linux</button>
 </div>
 
 sample usec:
 <select id="usec">
 <option>1</option>
 <option>3</option>
-<option>10</option>
+<option selected>10</option>
 <option>30</option>
 <option>100</option>
 <option>300</option>
 <option>1000</option>
 </select>
 
-<input type="radio" name="trigger" value="+">rise
-<input type="radio" name="trigger" value="" checked>level
-<input type="radio" name="trigger" value="-">fall
+<input type="radio" name="trigger" value="+">rise</input>
+<input type="radio" name="trigger" value="" checked>level</input>
+<input type="radio" name="trigger" value="-">fall</input>
 
 slew %:
 <select id="slew">
 <option value="0">0</option>
+<option value="13">5</option>
 <option value="26">10</option>
 <option value="51">20</option>
 <option value="77">30</option>
@@ -73,6 +75,7 @@ slew %:
 
 <script>
 
+var usb;
 var comm;
 var reader;
 var writer;
@@ -99,6 +102,26 @@ function getCursorPosition(canvas, event) {
     const rect = canvas.getBoundingClientRect()
     analogY = event.clientY - rect.top
     analogV = Math.floor((255-analogY)*4);
+}
+
+// the user wants to connect to a USB device's bulk endpoints directly
+async function Usb()
+{
+    var filter = {};
+    filter["vendorId"] = 0x0403;
+    filter["productId"] = 0xA660;
+
+    try {
+        usb = await navigator.usb.requestDevice({ filters: [filter] });
+        await usb.open();
+        await usb.selectConfiguration(1);
+        await usb.claimInterface(1);
+        setTimeout(Receive, 100);
+        document.getElementById("command").disabled = false;
+        document.getElementById("command").focus();
+    } catch(err) {
+        document.getElementById("results").innerHTML += err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
+    }
 }
 
 // the user wants to connect to an emulated COM port
@@ -154,9 +177,14 @@ async function Receive()
     var delay;
     var result;
 
-    result = await reader.read();
-    if (! discard) {
+    if (usb) {
+        result = await usb.transferIn(document.getElementById("epin").value, 64);
+        str = dec.decode(result.data.buffer);
+    } else {
+        result = await reader.read();
         str = dec.decode(result.value);
+    }
+    if (! discard) {
         string += str.replace(/</g,'&lt;').replace(/>/g,'&gt;');
         if (string.match(/done/)) {
             var lines = string.split(/\r?\n/);
@@ -196,7 +224,11 @@ async function Receive()
 // send a string to the device
 async function Send(str)
 {
-    await writer.write(enc.encode(str).buffer);
+    if (usb) {
+        await usb.transferOut(document.getElementById("epout").value, enc.encode(str).buffer);
+    } else {
+        await writer.write(enc.encode(str).buffer);
+    }
 }
 
 </script>
