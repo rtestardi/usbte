@@ -116,11 +116,19 @@ async function Usb()
         await usb.open();
         await usb.selectConfiguration(1);
         await usb.claimInterface(1);
-        setTimeout(Receive, 100);
-        document.getElementById("command").disabled = false;
-        document.getElementById("command").focus();
+
+        document.getElementById("results").innerHTML = "";
+        document.getElementById("config").hidden = true;
+
+        setTimeout(Receive, 2);
+
+        discard = 1;
+        Send("echo off\n");
+        Send("prompt off\n");
+
+        setTimeout(Scope, 100);
     } catch(err) {
-        document.getElementById("results").innerHTML += err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
+        document.getElementById("results").innerHTML = err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
     }
 }
 
