@@ -127,6 +127,7 @@ function Body()
         var canvas = document.getElementById('canvas');
         var ctx = canvas.getContext('2d');
         ctx.strokeRect(dragX-2, dragY-2, 4, 4);
+        document.getElementById("status").innerHTML = "";
     })
     canvas.addEventListener('mousemove', function(e) {
         if (down) {
@@ -144,7 +145,6 @@ function Body()
             analogY = e.offsetY;
             analogV = Math.floor((255-analogY)*1024/256);
         }
-        document.getElementById("status").innerHTML = "";
     })
 }
 
