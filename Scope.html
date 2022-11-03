@@ -70,8 +70,8 @@ delay usec:
 
 --
 
-voltage:
-<select id="voltage">
+volts:
+<select id="volts">
 <option value="3.3">3.3</option>
 </select>
 
@@ -79,6 +79,7 @@ voltage:
 
 <canvas id="canvas" width="1044" height="256"></canvas>
 
+<pre id='status'></pre>
 <pre id='command'></pre>
 <pre id='results'></pre>
 
@@ -90,6 +91,7 @@ voltage:
 <a href=https://rtestardi.github.io/StickOS target=_blank>rtestardi.github.io/StickOS</a>
 
 <script>
+'use strict';
 
 var usb;
 var comm;
@@ -103,27 +105,45 @@ var discard;
 var string;
 var analogV = 0;  // 511;
 var analogY = 255;  // 128;
+var down = false;
+var drag = false;
+var dragX;
+var dragY;
+var dragT;
 
 // the user loaded the webpage; set up keyboard listeners
 function Body()
 {
     canvas = document.getElementById('canvas');
-    canvas.addEventListener('mousedown', function(e) {
-        getCursorPosition(canvas, e)
-    })
     ctx = canvas.getContext('2d');
-}
-
-function getCursorPosition(canvas, event) {
-    const rect = canvas.getBoundingClientRect()
-    analogY = event.clientY - rect.top;
-    if (analogY > 255) {
-       analogY = 255;
-    }
-    if (analogY < 0) {
-        analogY = 0;
-    }
-    analogV = Math.floor((255-analogY)*1024/256);
+    canvas.addEventListener('mousedown', function(e) {
+        down = true;
+        drag = false;
+        dragX = e.offsetX;
+        dragY = e.offsetY;
+        dragT = e.timeStamp;
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+        ctx.strokeRect(dragX-2, dragY-2, 4, 4);
+        document.getElementById("status").innerHTML = "";
+    })
+    canvas.addEventListener('mousemove', function(e) {
+        if (down) {
+            drag = true;
+            var dx = Math.abs(dragX - e.offsetX);
+            var dy = Math.abs(dragY - e.offsetY);
+            document.getElementById("status").innerHTML = "" + dx*parseInt(document.getElementById("usec").value) + " usec; " +
+                                                               (dy*parseInt(document.getElementById("volts").value)/256).toFixed(2) + " volts";
+        }
+    })
+    canvas.addEventListener('mouseup', function(e) {
+        down = false;
+        drag = false;
+        if (e.timeStamp - dragT < 500) {
+            analogY = e.offsetY;
+            analogV = Math.floor((255-analogY)*1024/256);
+        }
+    })
 }
 
 // the user wants to connect to a USB device's bulk endpoints directly
@@ -218,76 +238,80 @@ async function Receive()
     if (! discard) {
         string += str.replace(/</g,'&lt;').replace(/>/g,'&gt;');
         if (string.match(/done/)) {
-            var lines = string.split(/\r?\n/);
+            delay = 200;
 
-            ctx.clearRect(0, 0, 1044, 256);
+            if (! down) {
+                var lines = string.split(/\r?\n/);
 
-            ctx.fillText("3.3V", 1008, 8);
-            ctx.fillText("0V", 1008, 255);
+                ctx.clearRect(0, 0, 1044, 256);
 
-            for (var i = 0; i <= 10; i++) {
-                if (Math.floor(i/5)*5 == i) {
-                    ctx.setLineDash([6, 10])
-                } else {
-                    ctx.setLineDash([2, 10])
+                ctx.fillText("3.3V", 1008, 8);
+                ctx.fillText("0V", 1008, 255);
+
+                for (var i = 0; i <= 10; i++) {
+                    if (Math.floor(i/5)*5 == i) {
+                        ctx.setLineDash([6, 10])
+                    } else {
+                        ctx.setLineDash([2, 10])
+                    }
+                    ctx.beginPath();
+                    ctx.moveTo(100*i, 0);
+                    ctx.lineTo(100*i, 255);
+                    ctx.stroke();
+                    ctx.closePath();
+                    ctx.setLineDash([])
+
+                    ctx.fillText("" + parseInt(document.getElementById("usec").value)*i/10 + "ms", i*100+2, 126);
                 }
+
+                ctx.strokeStyle = '#FF0000';
                 ctx.beginPath();
-                ctx.moveTo(100*i, 0);
-                ctx.lineTo(100*i, 255);
+                ctx.moveTo(1002, 0);
+                ctx.lineTo(1002, 255);
                 ctx.stroke();
                 ctx.closePath();
+                ctx.strokeStyle = '#000000';
+
+                ctx.setLineDash([10, 4])
+                ctx.strokeStyle = '#00FF00';
+                ctx.beginPath();
+                ctx.moveTo(0, analogY);
+                ctx.lineTo(1000, analogY);
+                ctx.stroke();
+                ctx.closePath();
+                ctx.beginPath();
+                if (document.querySelector('input[name="trigger"]:checked').value == '+' && document.getElementById("slew").value != 0) {
+                    ctx.moveTo(0, analogY+document.getElementById("slew").value/4);
+                    ctx.setLineDash([4, 10]);
+                    ctx.lineTo(1000, analogY+document.getElementById("slew").value/4);
+                }
+                if (document.querySelector('input[name="trigger"]:checked').value == '-' && document.getElementById("slew").value != 0) {
+                    ctx.moveTo(0, analogY-document.getElementById("slew").value/4);
+                    ctx.setLineDash([4, 10]);
+                    ctx.lineTo(1000, analogY-document.getElementById("slew").value/4);
+                }
+                ctx.stroke();
+                ctx.closePath();
+                ctx.strokeStyle = '#000000';
                 ctx.setLineDash([])
 
-                ctx.fillText("" + parseInt(document.getElementById("usec").value)*i/10 + "ms", i*100+2, 126);
-            }
-
-            ctx.strokeStyle = '#FF0000';
-            ctx.beginPath();
-            ctx.moveTo(1002, 0);
-            ctx.lineTo(1002, 255);
-            ctx.stroke();
-            ctx.closePath();
-            ctx.strokeStyle = '#000000';
-
-            ctx.setLineDash([10, 4])
-            ctx.strokeStyle = '#00FF00';
-            ctx.beginPath();
-            ctx.moveTo(0, analogY);
-            ctx.lineTo(1000, analogY);
-            ctx.stroke();
-            ctx.closePath();
-            ctx.beginPath();
-            if (document.querySelector('input[name="trigger"]:checked').value == '+' && document.getElementById("slew").value != 0) {
-                ctx.moveTo(0, analogY+document.getElementById("slew").value/4);
-                ctx.setLineDash([4, 10]);
-                ctx.lineTo(1000, analogY+document.getElementById("slew").value/4);
-            }
-            if (document.querySelector('input[name="trigger"]:checked').value == '-' && document.getElementById("slew").value != 0) {
-                ctx.moveTo(0, analogY-document.getElementById("slew").value/4);
-                ctx.setLineDash([4, 10]);
-                ctx.lineTo(1000, analogY-document.getElementById("slew").value/4);
-            }
-            ctx.stroke();
-            ctx.closePath();
-            ctx.strokeStyle = '#000000';
-            ctx.setLineDash([])
-
-            if (lines.length < 10) {
-                document.getElementById("command").innerHTML += " no trigger";
-                delay = 200;
-            } else {
-                ctx.beginPath();
-                ctx.moveTo(0, 255);
-                for (var i = 0; i < 1000 && i < lines.length; i++) {
-                    var words = lines[i].split(/ /);
-                    ctx.lineTo(i, 255-parseInt(words[0])/4);
+                if (lines.length < 10) {
+                    document.getElementById("command").innerHTML += " no trigger";
+                } else {
+                    ctx.beginPath();
+                    ctx.moveTo(0, 255);
+                    for (var i = 0; i < 1000 && i < lines.length; i++) {
+                        var words = lines[i].split(/ /);
+                        ctx.lineTo(i, 255-parseInt(words[0])/4);
+                    }
+                    ctx.moveTo(1023, 255);
+                    ctx.stroke();
+                    ctx.closePath();
+                    document.getElementById("command").innerHTML = " ";
+                    delay=100;
                 }
-                ctx.moveTo(1023, 255);
-                ctx.stroke();
-                ctx.closePath();
-                document.getElementById("command").innerHTML = " ";
-                delay=100;
             }
+
             setTimeout(Scope, delay);
         }
     }
