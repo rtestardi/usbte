@@ -77,7 +77,7 @@ volts:
 
 <br>
 
-<canvas id="canvas" width="1044" height="512"></canvas>
+<canvas id="canvas" width="2044" height="512"></canvas>
 
 <pre id='status'></pre>
 <pre id='command'></pre>
@@ -229,10 +229,10 @@ async function Display()  // result is in string
 
     var lines = string.split(/\r?\n/);
 
-    ctx.clearRect(0, 0, 1044, 512);
+    ctx.clearRect(0, 0, 2044, 512);
 
-    ctx.fillText("3.3V", 1008, 8);
-    ctx.fillText("0V", 1008, 255);
+    ctx.fillText("3.3V", 2008, 8);
+    ctx.fillText("0V", 2008, 255);
 
     for (var i = 0; i <= 10; i++) {
         if (Math.floor(i/5)*5 == i) {
@@ -241,84 +241,91 @@ async function Display()  // result is in string
             ctx.setLineDash([2, 10])
         }
         ctx.beginPath();
-        ctx.moveTo(100*i, 0);
-        ctx.lineTo(100*i, 255);
+        ctx.moveTo(200*i, 0);
+        ctx.lineTo(200*i, 255);
         ctx.stroke();
-        ctx.closePath();
         ctx.setLineDash([])
 
-        ctx.fillText("" + parseInt(document.getElementById("usec").value)*i/10 + "ms", i*100+2, 126);
+        ctx.fillText("" + parseInt(document.getElementById("usec").value)*i/10 + "ms", i*200+2, 126);
     }
 
     ctx.strokeStyle = '#FF0000';
     ctx.beginPath();
-    ctx.moveTo(1002, 0);
-    ctx.lineTo(1002, 255);
+    ctx.moveTo(2002, 0);
+    ctx.lineTo(2002, 255);
     ctx.stroke();
-    ctx.closePath();
     ctx.strokeStyle = '#000000';
 
     ctx.setLineDash([10, 4])
     ctx.strokeStyle = '#00FF00';
     ctx.beginPath();
     ctx.moveTo(0, analogY);
-    ctx.lineTo(1000, analogY);
+    ctx.lineTo(2000, analogY);
     ctx.stroke();
-    ctx.closePath();
     ctx.beginPath();
     if (document.querySelector('input[name="trigger"]:checked').value == '+' && document.getElementById("slew").value != 0) {
         ctx.moveTo(0, analogY+document.getElementById("slew").value/4);
         ctx.setLineDash([4, 10]);
-        ctx.lineTo(1000, analogY+document.getElementById("slew").value/4);
+        ctx.lineTo(2000, analogY+document.getElementById("slew").value/4);
     }
     if (document.querySelector('input[name="trigger"]:checked').value == '-' && document.getElementById("slew").value != 0) {
         ctx.moveTo(0, analogY-document.getElementById("slew").value/4);
         ctx.setLineDash([4, 10]);
-        ctx.lineTo(1000, analogY-document.getElementById("slew").value/4);
+        ctx.lineTo(2000, analogY-document.getElementById("slew").value/4);
     }
     ctx.stroke();
-    ctx.closePath();
     ctx.strokeStyle = '#000000';
     ctx.setLineDash([])
 
     if (lines.length < 10) {
         document.getElementById("command").innerHTML += " no trigger";
     } else {
-        ctx.beginPath();
-        ctx.moveTo(0, 255);
+        var path;
+        path = new Path2D();  // analog
+        path.moveTo(0, 255);
+
+        var paths = [];
+        var lastBit = [];
+        for (var b = 0; b < 4; b++) {
+            paths[b] = new Path2D();  // digital
+            paths[b].moveTo(0, 290+b*30);
+            lastBit[b] = false;
+        }
+
         for (var i = 0; i < 1000 && i < lines.length; i++) {
             var words = lines[i].split(/ /);
-            ctx.lineTo(i, 255-parseInt(words[0])/4);
-        }
-        ctx.moveTo(1000, 255);
-        ctx.stroke();
-        ctx.closePath();
-        for (var b = 0; b < 8; b++) {
-            ctx.beginPath();
-            ctx.moveTo(0, 290+b*30);
-            var lastBit = false;
-            for (i = 0; i < 1000 && i < lines.length; i++) {
-                words = lines[i].split(/ /);
+
+            var adc = parseInt(words[0])
+            path.lineTo(i*2, 255-adc/4);
+
+            for (b = 0; b < 4; b++) {
                 var bit = (parseInt(words[1]) & (1 << b)) != 0;
-                if (bit == lastBit) {
-                    ctx.lineTo(i, 290+b*30 - (bit?20:0));
+                if (bit == lastBit[b]) {
+                    paths[b].lineTo(i*2, 290+b*30 - (bit?20:0));
                 } else {
-                    ctx.lineTo(i, 290+b*30 - (lastBit?20:0));
-                    ctx.lineTo(i, 290+b*30 - (bit?20:0));
+                    paths[b].lineTo(i*2, 290+b*30 - (lastBit?20:0));
+                    paths[b].lineTo(i*2, 290+b*30 - (bit?20:0));
                 }
-                lastBit = bit;
+                lastBit[b] = bit;
             }
-            if (lastBit) {
-                ctx.lineTo(i, 290+b*30 - (lastBit?20:0));
-                ctx.lineTo(i, 290+b*30 - (false?20:0));
-            } else {
-                ctx.lineTo(i, 290+b*30 - (false?20:0));
-            }
-            ctx.moveTo(1000, 290+b*30);
-            ctx.stroke();
-            ctx.closePath();
-            ctx.fillText("b"+b, 1008, 285+b*30);
         }
+
+        path.moveTo(2000, 255);
+        ctx.stroke(path);
+
+        for (b = 0; b < 4; b++) {
+            if (lastBit) {
+                paths[b].lineTo(i*2, 290+b*30 - (lastBit?20:0));
+                paths[b].lineTo(i*2, 290+b*30 - (false?20:0));
+            } else {
+                paths[b].lineTo(i*2, 290+b*30 - (false?20:0));
+            }
+            paths[b].moveTo(2000, 290+b*30);
+            ctx.stroke(paths[b]);
+
+            ctx.fillText("b"+b, 2008, 285+b*30);
+        }
+
         document.getElementById("command").innerHTML = " ";
         delay=100;
     }
