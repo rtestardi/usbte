@@ -233,7 +233,6 @@ async function Receive()
                 ctx.fillText("" + parseInt(document.getElementById("usec").value)*i + "ms", i*100+2, 126);
             }
 
-            var x = ctx.lineWidth;
             ctx.lineWidth = 1;
             ctx.strokeStyle = '#FF0000';
             ctx.beginPath();
@@ -242,14 +241,15 @@ async function Receive()
             ctx.stroke();
             ctx.closePath();
             ctx.strokeStyle = '#000000';
-            ctx.lineWidth = x;
 
             ctx.setLineDash([10,10])
+            ctx.strokeStyle = '#00FF00';
             ctx.beginPath();
             ctx.moveTo(0, analogY);
             ctx.lineTo(1000, analogY);
             ctx.stroke();
             ctx.closePath();
+            ctx.strokeStyle = '#000000';
             ctx.setLineDash([])
 
             if (lines.length < 10) {
