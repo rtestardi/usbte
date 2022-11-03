@@ -49,18 +49,24 @@ sample usec:
 <input type="radio" name="trigger" value="+">rise</input>
 <input type="radio" name="trigger" value="" checked>level</input>
 <input type="radio" name="trigger" value="-">fall</input>
+<input type="radio" name="trigger" value="=">auto</input>
 
 --
 
 slew %:
 <select id="slew">
 <option value="0">0</option>
-<option selected value="13">5</option>
-<option value="26">10</option>
-<option value="51">20</option>
-<option value="77">30</option>
-<option value="102">40</option>
+<option selected value="51">5</option>
+<option value="102">10</option>
+<option value="204">20</option>
+<option value="307">30</option>
+<option value="409">40</option>
 </select>
+
+--
+
+delay usec:
+<input type="text" id="delay" value="0" size="2"></input>
 
 --
 
@@ -95,8 +101,8 @@ var canvas;
 var ctx;
 var discard;
 var string;
-var analogV = 512;
-var analogY = 128;
+var analogV = 0;  // 511;
+var analogY = 255;  // 128;
 
 // the user loaded the webpage; set up keyboard listeners
 function Body()
@@ -189,7 +195,8 @@ async function Scope()
 {
     discard = 0;
     string = "";
-    var command = "scope " + document.getElementById("usec").value + " " + document.querySelector('input[name="trigger"]:checked').value + analogV + " " + document.getElementById("slew").value;
+    var command = "scope " + document.getElementById("usec").value + " " + document.querySelector('input[name="trigger"]:checked').value + analogV + " " +
+                  document.getElementById("slew").value + " " + document.getElementById("delay").value;
     document.getElementById("command").innerHTML = command;
     Send(command + "\n");
 }
@@ -219,10 +226,10 @@ async function Receive()
             ctx.fillText("0V", 1008, 255);
 
             for (var i = 0; i <= 10; i++) {
-                if (i/5*5 == i) {
-                    ctx.setLineDash([6,10])
+                if (Math.floor(i/5)*5 == i) {
+                    ctx.setLineDash([6, 10])
                 } else {
-                    ctx.setLineDash([2,10])
+                    ctx.setLineDash([2, 10])
                 }
                 ctx.beginPath();
                 ctx.moveTo(100*i, 0);
@@ -230,10 +237,10 @@ async function Receive()
                 ctx.stroke();
                 ctx.closePath();
                 ctx.setLineDash([])
+
                 ctx.fillText("" + parseInt(document.getElementById("usec").value)*i/10 + "ms", i*100+2, 126);
             }
 
-            ctx.lineWidth = 1;
             ctx.strokeStyle = '#FF0000';
             ctx.beginPath();
             ctx.moveTo(1002, 0);
@@ -242,11 +249,24 @@ async function Receive()
             ctx.closePath();
             ctx.strokeStyle = '#000000';
 
-            ctx.setLineDash([10,10])
+            ctx.setLineDash([10, 4])
             ctx.strokeStyle = '#00FF00';
             ctx.beginPath();
             ctx.moveTo(0, analogY);
             ctx.lineTo(1000, analogY);
+            ctx.stroke();
+            ctx.closePath();
+            ctx.beginPath();
+            if (document.querySelector('input[name="trigger"]:checked').value == '+' && document.getElementById("slew").value != 0) {
+                ctx.moveTo(0, analogY+document.getElementById("slew").value/4);
+                ctx.setLineDash([4, 10]);
+                ctx.lineTo(1000, analogY+document.getElementById("slew").value/4);
+            }
+            if (document.querySelector('input[name="trigger"]:checked').value == '-' && document.getElementById("slew").value != 0) {
+                ctx.moveTo(0, analogY-document.getElementById("slew").value/4);
+                ctx.setLineDash([4, 10]);
+                ctx.lineTo(1000, analogY-document.getElementById("slew").value/4);
+            }
             ctx.stroke();
             ctx.closePath();
             ctx.strokeStyle = '#000000';
