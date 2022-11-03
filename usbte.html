@@ -228,7 +228,7 @@ function UpDown(up)
 // the user clicked the Paste button; paste the clipboard into the command line
 async function Paste()
 {
-    text = await navigator.clipboard.readText();
+    var text = await navigator.clipboard.readText();
     Send(text + "\r");
 }
 
