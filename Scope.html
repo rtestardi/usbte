@@ -230,7 +230,7 @@ async function Receive()
                 ctx.stroke();
                 ctx.closePath();
                 ctx.setLineDash([])
-                ctx.fillText("" + parseInt(document.getElementById("usec").value)*i + "ms", i*100+2, 126);
+                ctx.fillText("" + parseInt(document.getElementById("usec").value)*i/10 + "ms", i*100+2, 126);
             }
 
             ctx.lineWidth = 1;
