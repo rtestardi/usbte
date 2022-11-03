@@ -282,7 +282,7 @@ async function Display()  // result is in string
             var lastBit = [];
             for (var b = 0; b < 4; b++) {
                 paths[b] = new Path2D();  // digital
-                paths[b].moveTo(0, 300+b*30);
+                paths[b].moveTo(0, 305+b*30);
                 lastBit[b] = false;
             }
 
@@ -295,10 +295,10 @@ async function Display()  // result is in string
                 for (b = 0; b < 4; b++) {
                     var bit = (parseInt(words[1]) & (1 << b)) != 0;
                     if (bit == lastBit[b]) {
-                        paths[b].lineTo(i*2, 300+b*30 - (bit?20:0));
+                        paths[b].lineTo(i*2, 305+b*30 - (bit?20:0));
                     } else {
-                        paths[b].lineTo(i*2, 300+b*30 - (lastBit?20:0));
-                        paths[b].lineTo(i*2, 300+b*30 - (bit?20:0));
+                        paths[b].lineTo(i*2, 305+b*30 - (lastBit[b]?20:0));
+                        paths[b].lineTo(i*2, 305+b*30 - (bit?20:0));
                     }
                     lastBit[b] = bit;
                 }
@@ -308,16 +308,15 @@ async function Display()  // result is in string
             ctx.stroke(path);
 
             for (b = 0; b < 4; b++) {
-                if (lastBit) {
-                    paths[b].lineTo(i*2, 300+b*30 - (lastBit?20:0));
-                    paths[b].lineTo(i*2, 300+b*30 - (false?20:0));
+                if (lastBit[b]) {
+                    paths[b].lineTo(i*2, 305+b*30 - (lastBit[b]?20:0));
+                    paths[b].lineTo(i*2, 305+b*30 - (false?20:0));
                 } else {
-                    paths[b].lineTo(i*2, 300+b*30 - (false?20:0));
+                    paths[b].lineTo(i*2, 305+b*30 - (false?20:0));
                 }
-                paths[b].moveTo(2000, 300+b*30);
                 ctx.stroke(paths[b]);
 
-                ctx.fillText("b"+b, 2008, 295+b*30);
+                ctx.fillText("b"+b, 2008, 305-5+b*30);
             }
 
             document.getElementById("command").innerHTML = " ";
