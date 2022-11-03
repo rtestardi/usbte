@@ -249,13 +249,6 @@ async function Display()  // result is in string
         ctx.fillText("" + parseInt(document.getElementById("usec").value)*i/10 + "ms", i*200+2, 126);
     }
 
-    ctx.strokeStyle = '#FF0000';
-    ctx.beginPath();
-    ctx.moveTo(2002, 0);
-    ctx.lineTo(2002, 255);
-    ctx.stroke();
-    ctx.strokeStyle = '#000000';
-
     ctx.setLineDash([10, 4])
     ctx.strokeStyle = '#00FF00';
     ctx.beginPath();
