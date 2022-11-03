@@ -19,7 +19,7 @@ html,button,input { font: 36px Arial, Helvetica, sans-serif; padding: 15px 10px 
 @media(min-width:80em){ html,button,input { font: 24px Arial, Helvetica, sans-serif; padding: 10px; margin: 10px 0px 10px 0px; } }
 @supports(-webkit-touch-callout:none) { button,input { -webkit-appearance: none; border-radius: 2px; } }
 body,html { margin: 0px; }
-#canvas { outline: red 1px solid; padding: 1px; }
+#canvas { outline: red 1px solid; padding: 3px; }
     </style>
 </head>
 
@@ -77,7 +77,7 @@ volts:
 
 <br>
 
-<canvas id="canvas" width="2044" height="400"></canvas>
+<canvas id="canvas" width="2044" height="456"></canvas>
 
 <pre id='status'></pre>
 <pre id='command'></pre>
@@ -280,7 +280,7 @@ async function Display()  // result is in string
 
             var paths = [];
             var lastBit = [];
-            for (var b = 0; b < 4; b++) {
+            for (var b = 0; b < 6; b++) {
                 paths[b] = new Path2D();  // digital
                 paths[b].moveTo(0, 305+b*30);
                 lastBit[b] = false;
@@ -292,7 +292,7 @@ async function Display()  // result is in string
                 var adc = parseInt(words[0])
                 path.lineTo(i*2, 255-adc/4);
 
-                for (b = 0; b < 4; b++) {
+                for (b = 0; b < 6; b++) {
                     var bit = (parseInt(words[1]) & (1 << b)) != 0;
                     if (bit == lastBit[b]) {
                         paths[b].lineTo(i*2, 305+b*30 - (bit?20:0));
@@ -307,7 +307,7 @@ async function Display()  // result is in string
             path.moveTo(2000, 255);
             ctx.stroke(path);
 
-            for (b = 0; b < 4; b++) {
+            for (b = 0; b < 6; b++) {
                 if (lastBit[b]) {
                     paths[b].lineTo(i*2, 305+b*30 - (lastBit[b]?20:0));
                     paths[b].lineTo(i*2, 305+b*30 - (false?20:0));
