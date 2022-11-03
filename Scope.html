@@ -103,8 +103,10 @@ var canvas;
 var ctx;
 var discard;
 var string;
+
 var analogV = 0;  // 511;
 var analogY = 255;  // 128;
+
 var down = false;
 var drag = false;
 var dragX;
@@ -125,7 +127,6 @@ function Body()
         var canvas = document.getElementById('canvas');
         var ctx = canvas.getContext('2d');
         ctx.strokeRect(dragX-2, dragY-2, 4, 4);
-        document.getElementById("status").innerHTML = "";
     })
     canvas.addEventListener('mousemove', function(e) {
         if (down) {
@@ -139,10 +140,11 @@ function Body()
     canvas.addEventListener('mouseup', function(e) {
         down = false;
         drag = false;
-        if (e.timeStamp - dragT < 500) {
+        if (e.timeStamp - dragT < 500 && e.offsetY <= 255) {
             analogY = e.offsetY;
             analogV = Math.floor((255-analogY)*1024/256);
         }
+        document.getElementById("status").innerHTML = "";
     })
 }
 
@@ -221,11 +223,113 @@ async function Scope()
     Send(command + "\n");
 }
 
+async function Display()  // result is in string
+{
+    var delay = 200;
+
+    var lines = string.split(/\r?\n/);
+
+    ctx.clearRect(0, 0, 1044, 512);
+
+    ctx.fillText("3.3V", 1008, 8);
+    ctx.fillText("0V", 1008, 255);
+
+    for (var i = 0; i <= 10; i++) {
+        if (Math.floor(i/5)*5 == i) {
+            ctx.setLineDash([6, 10])
+        } else {
+            ctx.setLineDash([2, 10])
+        }
+        ctx.beginPath();
+        ctx.moveTo(100*i, 0);
+        ctx.lineTo(100*i, 255);
+        ctx.stroke();
+        ctx.closePath();
+        ctx.setLineDash([])
+
+        ctx.fillText("" + parseInt(document.getElementById("usec").value)*i/10 + "ms", i*100+2, 126);
+    }
+
+    ctx.strokeStyle = '#FF0000';
+    ctx.beginPath();
+    ctx.moveTo(1002, 0);
+    ctx.lineTo(1002, 255);
+    ctx.stroke();
+    ctx.closePath();
+    ctx.strokeStyle = '#000000';
+
+    ctx.setLineDash([10, 4])
+    ctx.strokeStyle = '#00FF00';
+    ctx.beginPath();
+    ctx.moveTo(0, analogY);
+    ctx.lineTo(1000, analogY);
+    ctx.stroke();
+    ctx.closePath();
+    ctx.beginPath();
+    if (document.querySelector('input[name="trigger"]:checked').value == '+' && document.getElementById("slew").value != 0) {
+        ctx.moveTo(0, analogY+document.getElementById("slew").value/4);
+        ctx.setLineDash([4, 10]);
+        ctx.lineTo(1000, analogY+document.getElementById("slew").value/4);
+    }
+    if (document.querySelector('input[name="trigger"]:checked').value == '-' && document.getElementById("slew").value != 0) {
+        ctx.moveTo(0, analogY-document.getElementById("slew").value/4);
+        ctx.setLineDash([4, 10]);
+        ctx.lineTo(1000, analogY-document.getElementById("slew").value/4);
+    }
+    ctx.stroke();
+    ctx.closePath();
+    ctx.strokeStyle = '#000000';
+    ctx.setLineDash([])
+
+    if (lines.length < 10) {
+        document.getElementById("command").innerHTML += " no trigger";
+    } else {
+        ctx.beginPath();
+        ctx.moveTo(0, 255);
+        for (var i = 0; i < 1000 && i < lines.length; i++) {
+            var words = lines[i].split(/ /);
+            ctx.lineTo(i, 255-parseInt(words[0])/4);
+        }
+        ctx.moveTo(1000, 255);
+        ctx.stroke();
+        ctx.closePath();
+        for (var b = 0; b < 8; b++) {
+            ctx.beginPath();
+            ctx.moveTo(0, 290+b*30);
+            var lastBit = false;
+            for (i = 0; i < 1000 && i < lines.length; i++) {
+                words = lines[i].split(/ /);
+                var bit = (parseInt(words[1]) & (1 << b)) != 0;
+                if (bit == lastBit) {
+                    ctx.lineTo(i, 290+b*30 - (bit?20:0));
+                } else {
+                    ctx.lineTo(i, 290+b*30 - (lastBit?20:0));
+                    ctx.lineTo(i, 290+b*30 - (bit?20:0));
+                }
+                lastBit = bit;
+            }
+            if (lastBit) {
+                ctx.lineTo(i, 290+b*30 - (lastBit?20:0));
+                ctx.lineTo(i, 290+b*30 - (false?20:0));
+            } else {
+                ctx.lineTo(i, 290+b*30 - (false?20:0));
+            }
+            ctx.moveTo(1000, 290+b*30);
+            ctx.stroke();
+            ctx.closePath();
+            ctx.fillText("b"+b, 1008, 285+b*30);
+        }
+        document.getElementById("command").innerHTML = " ";
+        delay=100;
+    }
+
+    setTimeout(Scope, delay);
+}
+
 // receive a string from the device
 async function Receive()
 {
     var str;
-    var delay;
     var result;
 
     if (usb) {
@@ -237,109 +341,8 @@ async function Receive()
     }
     if (! discard) {
         string += str.replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        if (string.match(/done/)) {
-            delay = 200;
-
-            if (! down) {
-                var lines = string.split(/\r?\n/);
-
-                ctx.clearRect(0, 0, 1044, 512);
-
-                ctx.fillText("3.3V", 1008, 8);
-                ctx.fillText("0V", 1008, 255);
-
-                for (var i = 0; i <= 10; i++) {
-                    if (Math.floor(i/5)*5 == i) {
-                        ctx.setLineDash([6, 10])
-                    } else {
-                        ctx.setLineDash([2, 10])
-                    }
-                    ctx.beginPath();
-                    ctx.moveTo(100*i, 0);
-                    ctx.lineTo(100*i, 255);
-                    ctx.stroke();
-                    ctx.closePath();
-                    ctx.setLineDash([])
-
-                    ctx.fillText("" + parseInt(document.getElementById("usec").value)*i/10 + "ms", i*100+2, 126);
-                }
-
-                ctx.strokeStyle = '#FF0000';
-                ctx.beginPath();
-                ctx.moveTo(1002, 0);
-                ctx.lineTo(1002, 255);
-                ctx.stroke();
-                ctx.closePath();
-                ctx.strokeStyle = '#000000';
-
-                ctx.setLineDash([10, 4])
-                ctx.strokeStyle = '#00FF00';
-                ctx.beginPath();
-                ctx.moveTo(0, analogY);
-                ctx.lineTo(1000, analogY);
-                ctx.stroke();
-                ctx.closePath();
-                ctx.beginPath();
-                if (document.querySelector('input[name="trigger"]:checked').value == '+' && document.getElementById("slew").value != 0) {
-                    ctx.moveTo(0, analogY+document.getElementById("slew").value/4);
-                    ctx.setLineDash([4, 10]);
-                    ctx.lineTo(1000, analogY+document.getElementById("slew").value/4);
-                }
-                if (document.querySelector('input[name="trigger"]:checked').value == '-' && document.getElementById("slew").value != 0) {
-                    ctx.moveTo(0, analogY-document.getElementById("slew").value/4);
-                    ctx.setLineDash([4, 10]);
-                    ctx.lineTo(1000, analogY-document.getElementById("slew").value/4);
-                }
-                ctx.stroke();
-                ctx.closePath();
-                ctx.strokeStyle = '#000000';
-                ctx.setLineDash([])
-
-                if (lines.length < 10) {
-                    document.getElementById("command").innerHTML += " no trigger";
-                } else {
-                    ctx.beginPath();
-                    ctx.moveTo(0, 255);
-                    for (var i = 0; i < 1000 && i < lines.length; i++) {
-                        var words = lines[i].split(/ /);
-                        ctx.lineTo(i, 255-parseInt(words[0])/4);
-                    }
-                    ctx.moveTo(1000, 255);
-                    ctx.stroke();
-                    ctx.closePath();
-                    for (var b = 0; b < 8; b++) {
-                        ctx.beginPath();
-                        ctx.moveTo(0, 290+b*30);
-                        var lastBit = false;
-                        for (i = 0; i < 1000 && i < lines.length; i++) {
-                            words = lines[i].split(/ /);
-                            var bit = (parseInt(words[1]) & (1 << b)) != 0;
-                            if (bit == lastBit) {
-                                ctx.lineTo(i, 290+b*30 - (bit?20:0));
-                            } else {
-                                ctx.lineTo(i, 290+b*30 - (lastBit?20:0));
-                                ctx.lineTo(i, 290+b*30 - (bit?20:0));
-                            }
-                            lastBit = bit;
-                        }
-                        if (lastBit) {
-                            ctx.lineTo(i, 290+b*30 - (lastBit?20:0));
-                            ctx.lineTo(i, 290+b*30 - (false?20:0));
-                        } else {
-                            ctx.lineTo(i, 290+b*30 - (false?20:0));
-                        }
-                        ctx.moveTo(1000, 290+b*30);
-                        ctx.stroke();
-                        ctx.closePath();
-
-                        ctx.fillText("b"+b, 1008, 285+b*30);
-                    }
-                    document.getElementById("command").innerHTML = " ";
-                    delay=100;
-                }
-            }
-
-            setTimeout(Scope, delay);
+        if (string.match(/done/) && ! down) {
+            Display()
         }
     }
     setTimeout(Receive, 2);
