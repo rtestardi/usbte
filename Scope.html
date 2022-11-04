@@ -167,6 +167,7 @@ var digital = false;
 
 var analogY = 255;
 
+var pause = false;
 var down = false;
 var drag = false;
 var dragX;
@@ -175,11 +176,11 @@ var dragT;
 
 function Pause()
 {
-    if (document.getElementById('pause').innerHTML == "pause") {
-        down = true;
+    if (! pause) {
+        pause = true;
         document.getElementById('pause').innerHTML = "resume";
     } else {
-        down = false;
+        pause = false;
         document.getElementById('pause').innerHTML = "pause";
     }
 }
@@ -360,7 +361,7 @@ async function Display()  // result is in string
 {
     var delay = 200;
 
-    if (! down) {
+    if (! down && ! pause) {
         var lines = string.split(/\r?\n/);
 
         ctx.clearRect(0, 0, 2044, 512);
