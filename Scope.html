@@ -29,7 +29,7 @@ body,html { margin: 0px; }
 
 <div id="config">
 Select:
-<button type='button' onclick="if (navigator.appVersion.indexOf('Win') != -1) { Comm(); } else { Usb(); }">Config</button>
+<button type='button' onclick="if (navigator.appVersion.indexOf('Win') != -1) { Comm(); } else { Usb(); }">Connect</button>
 </div>
 
 sample usec:
@@ -55,7 +55,7 @@ trigger:
 
 --
 
-<button onclick="analogV = 0; analogY = 255;">zero</button>
+<button onclick="analogY = 255;">zero</button>
 
 --
 
@@ -165,8 +165,7 @@ var string;
 
 var digital = false;
 
-var analogV = 0;  // 511;
-var analogY = 255;  // 128;
+var analogY = 255;
 
 var down = false;
 var drag = false;
@@ -229,7 +228,6 @@ function Body()
         drag = false;
         if (e.timeStamp - dragT < 500 && e.offsetY < 256) {
             analogY = e.offsetY;
-            analogV = Math.floor((255-analogY)*1024/256);
         } else if (dragX - e.offsetX == 0 && dragY - e.offsetY == 0) {
             document.getElementById("status").innerHTML = "";
         }
@@ -346,7 +344,7 @@ async function Scope()
         number2 = document.getElementById("trigger").value + "0x" + bits.toString(16);
         number3 = "0x" + mask.toString(16);
     } else {
-        number2 = document.getElementById("trigger").value + analogV;
+        number2 = document.getElementById("trigger").value + Math.floor((255-analogY)*1024/256);;
         number3 = document.getElementById("slew").value;
     }
 
@@ -382,7 +380,7 @@ async function Display()  // result is in string
             ctx.stroke();
             ctx.setLineDash([])
 
-            ctx.fillText("" + parseInt(document.getElementById("usec").value)*i/10 + "ms", i*200+2, 126);
+            ctx.fillText("" + parseInt(document.getElementById("usec").value)*i/10 + "ms", i*200+2, 276);
         }
 
         if (! digital) {
