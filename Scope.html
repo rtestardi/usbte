@@ -19,7 +19,7 @@ html,button,input,select { font: 36px Arial, Helvetica, sans-serif; padding: 15p
 @media(min-width:80em){ html,button,input { font: 24px Arial, Helvetica, sans-serif; padding: 10px; margin: 10px 0px 10px 0px; } }
 @supports(-webkit-touch-callout:none) { button,input { -webkit-appearance: none; border-radius: 2px; } }
 body,html { margin: 0px; }
-#canvas { outline: red 1px solid; padding: 3px; }
+#canvas { outline: red 1px solid; padding: 4px; }
     </style>
 </head>
 
@@ -56,6 +56,7 @@ trigger:
 --
 
 <button onclick="analogV = 0; analogY = 255;">zero</button>
+
 --
 
 slew %:
@@ -67,6 +68,10 @@ slew %:
 <option value="307">30</option>
 <option value="409">40</option>
 </select>
+
+--
+
+<button onclick="for (var b = 0; b < 6; b++) { document.getElementById('b'+b).selectedIndex = 0; }">clear</button>
 
 --
 
@@ -150,8 +155,12 @@ var enc = new TextEncoder();
 var dec = new TextDecoder();
 var canvas;
 var ctx;
+
 var discard;
+var discarded;
 var string;
+
+var digital = false;
 
 var analogV = 0;  // 511;
 var analogY = 255;  // 128;
@@ -216,10 +225,12 @@ async function Usb()
         discard = 1;
         setTimeout(Receive, 2);
 
+        Send(String.fromCharCode(3));
         Send("echo off\n");
         Send("prompt off\n");
 
-        setTimeout(Scope, 500);
+        discarded = false;
+        setTimeout(Discard, 200);
     } catch(err) {
         document.getElementById("results").innerHTML = err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
     }
@@ -245,10 +256,12 @@ async function Comm()
             discard = 1;
             setTimeout(Receive, 2);
 
+            Send(String.fromCharCode(3));
             Send("echo off\n");
             Send("prompt off\n");
 
-            setTimeout(Scope, 500);
+            discarded = false;
+            setTimeout(Discard, 200);
         } catch(err) {
             document.getElementById("results").innerHTML = err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
         }
@@ -262,12 +275,22 @@ async function Comm()
     }
 }
 
+async function Discard()
+{
+    if (discarded) {
+        discarded = false;
+        setTimeout(Discard, 200);
+    } else {
+        setTimeout(Scope, 200);
+    }
+}
+
 async function Scope()
 {
     discard = 0;
     string = "";
 
-    var digital = false;
+    digital = false;
     var number1 = document.getElementById("usec").value;
     var number2;
     var number3;
@@ -332,26 +355,29 @@ async function Display()  // result is in string
             ctx.fillText("" + parseInt(document.getElementById("usec").value)*i/10 + "ms", i*200+2, 126);
         }
 
-        ctx.setLineDash([10, 4])
-        ctx.strokeStyle = '#00FF00';
-        ctx.beginPath();
-        ctx.moveTo(0, analogY);
-        ctx.lineTo(2000, analogY);
-        ctx.stroke();
-        ctx.beginPath();
-        if (document.getElementById("trigger").value == '+' && document.getElementById("slew").value != 0) {
-            ctx.moveTo(0, analogY+document.getElementById("slew").value/4);
-            ctx.setLineDash([4, 10]);
-            ctx.lineTo(2000, analogY+document.getElementById("slew").value/4);
+        if (! digital) {
+            ctx.setLineDash([10, 4])
+            ctx.strokeStyle = '#00FF00';
+            ctx.beginPath();
+            ctx.moveTo(0, analogY);
+            ctx.lineTo(2000, analogY);
+            ctx.stroke();
+
+            ctx.beginPath();
+            if (document.getElementById("trigger").value == '+' && document.getElementById("slew").value != 0) {
+                ctx.moveTo(0, analogY+document.getElementById("slew").value/4);
+                ctx.setLineDash([4, 10]);
+                ctx.lineTo(2000, analogY+document.getElementById("slew").value/4);
+            }
+            if (document.getElementById("trigger").value == '-' && document.getElementById("slew").value != 0) {
+                ctx.moveTo(0, analogY-document.getElementById("slew").value/4);
+                ctx.setLineDash([4, 10]);
+                ctx.lineTo(2000, analogY-document.getElementById("slew").value/4);
+            }
+            ctx.stroke();
+            ctx.strokeStyle = '#000000';
+            ctx.setLineDash([])
         }
-        if (document.getElementById("trigger").value == '-' && document.getElementById("slew").value != 0) {
-            ctx.moveTo(0, analogY-document.getElementById("slew").value/4);
-            ctx.setLineDash([4, 10]);
-            ctx.lineTo(2000, analogY-document.getElementById("slew").value/4);
-        }
-        ctx.stroke();
-        ctx.strokeStyle = '#000000';
-        ctx.setLineDash([])
 
         if (lines.length < 10) {
             document.getElementById("command").innerHTML += " no trigger";
@@ -364,6 +390,11 @@ async function Display()  // result is in string
             var lastBit = [];
             for (var b = 0; b < 6; b++) {
                 paths[b] = new Path2D();  // digital
+                if (document.getElementById("b"+b).value != "") {
+                    // XXX -- why doesn't this work???
+                    paths[b].strokeStyle = '#00FF00';
+                }
+
                 paths[b].moveTo(0, 305+b*30);
                 lastBit[b] = false;
             }
@@ -427,6 +458,8 @@ async function Receive()
         if (string.match(/done/)) {
             Display()
         }
+    } else {
+        discarded = true;
     }
     setTimeout(Receive, 2);
 }
