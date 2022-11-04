@@ -191,9 +191,16 @@ function Body()
         if (down) {
             drag = true;
             var dx = Math.abs(dragX - e.offsetX);
-            var dy = Math.abs(dragY - e.offsetY);
-            document.getElementById("status").innerHTML = "" + dx/2*parseInt(document.getElementById("usec").value) + " usec; " +
-                                                               (dy*parseInt(document.getElementById("volts").value)/256).toFixed(2) + " volts";
+            var dy = Math.abs(dragY - Math.min(e.offsetY, 255));
+            var status = "position: " + dragX/2*parseInt(document.getElementById("usec").value) + " usec";
+            if (dragY < 256) {
+                status +=  ", " + (dy*parseInt(document.getElementById("volts").value)/256).toFixed(2) + " volts"
+            }
+            status += "; delta: " + dx/2*parseInt(document.getElementById("usec").value) + " usec";
+            if (dragY < 256) {
+                status += ", " + (dy*parseInt(document.getElementById("volts").value)/256).toFixed(2) + " volts";
+            }
+            document.getElementById("status").innerHTML = status;
         }
     })
     canvas.addEventListener('mouseup', function(e) {
@@ -432,7 +439,7 @@ async function Display()  // result is in string
                     ctx.strokeStyle = '#000000';
                 }
 
-                ctx.fillText("b"+b, 2008, 305-5+b*30);
+                ctx.fillText("b"+b, 2008, 305-2+b*30);
             }
 
             document.getElementById("command").innerHTML = " ";
