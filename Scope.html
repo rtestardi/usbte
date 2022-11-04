@@ -206,7 +206,7 @@ function Body()
     canvas.addEventListener('mouseup', function(e) {
         down = false;
         drag = false;
-        if (e.timeStamp - dragT < 500 && e.offsetY <= 255) {
+        if (e.timeStamp - dragT < 500 && e.offsetY < 256) {
             analogY = e.offsetY;
             analogV = Math.floor((255-analogY)*1024/256);
         }
@@ -371,12 +371,12 @@ async function Display()  // result is in string
             ctx.stroke();
 
             ctx.beginPath();
-            if (document.getElementById("trigger").value == '+' && document.getElementById("slew").value != 0) {
+            if (document.getElementById("trigger").value == '+' && document.getElementById("slew").value != 0 && analogY+document.getElementById("slew").value/4 < 256) {
                 ctx.moveTo(0, analogY+document.getElementById("slew").value/4);
                 ctx.setLineDash([4, 10]);
                 ctx.lineTo(2000, analogY+document.getElementById("slew").value/4);
             }
-            if (document.getElementById("trigger").value == '-' && document.getElementById("slew").value != 0) {
+            if (document.getElementById("trigger").value == '-' && document.getElementById("slew").value != 0 && analogY-document.getElementById("slew").value/4 >= 0) {
                 ctx.moveTo(0, analogY-document.getElementById("slew").value/4);
                 ctx.setLineDash([4, 10]);
                 ctx.lineTo(2000, analogY-document.getElementById("slew").value/4);
