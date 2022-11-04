@@ -133,7 +133,10 @@ volts:
 
 <canvas id="canvas" width="2044" height="456"></canvas>
 
+<button id="pause" onclick="Pause();">pause</button>
 <pre id='status'></pre>
+
+
 <pre id='command'></pre>
 <pre id='results'></pre>
 
@@ -171,6 +174,32 @@ var dragX;
 var dragY;
 var dragT;
 
+function Pause()
+{
+    if (document.getElementById('pause').innerHTML == "pause") {
+        down = true;
+        document.getElementById('pause').innerHTML = "resume";
+    } else {
+        down = false;
+        document.getElementById('pause').innerHTML = "pause";
+    }
+}
+
+function Status(dx, dy)
+{
+    var status = "position: " + dragX/2*parseInt(document.getElementById("usec").value) + " usec";
+    if (dragY < 256) {
+        status +=  ", " + (dragY*parseInt(document.getElementById("volts").value)/256).toFixed(2) + " volts"
+    }
+    if (dx || dy) {
+        status += "; delta: " + dx/2*parseInt(document.getElementById("usec").value) + " usec";
+        if (dragY < 256) {
+            status += ", " + (dy*parseInt(document.getElementById("volts").value)/256).toFixed(2) + " volts";
+        }
+    }
+    return status;
+}
+
 // the user loaded the webpage; set up keyboard listeners
 function Body()
 {
@@ -185,22 +214,14 @@ function Body()
         var canvas = document.getElementById('canvas');
         var ctx = canvas.getContext('2d');
         ctx.strokeRect(dragX-2, dragY-2, 4, 4);
-        document.getElementById("status").innerHTML = "";
+        document.getElementById("status").innerHTML = Status(0, 0);
     })
     canvas.addEventListener('mousemove', function(e) {
         if (down) {
             drag = true;
             var dx = Math.abs(dragX - e.offsetX);
             var dy = Math.abs(dragY - Math.min(e.offsetY, 255));
-            var status = "position: " + dragX/2*parseInt(document.getElementById("usec").value) + " usec";
-            if (dragY < 256) {
-                status +=  ", " + (dy*parseInt(document.getElementById("volts").value)/256).toFixed(2) + " volts"
-            }
-            status += "; delta: " + dx/2*parseInt(document.getElementById("usec").value) + " usec";
-            if (dragY < 256) {
-                status += ", " + (dy*parseInt(document.getElementById("volts").value)/256).toFixed(2) + " volts";
-            }
-            document.getElementById("status").innerHTML = status;
+            document.getElementById("status").innerHTML = Status(dx, dy);
         }
     })
     canvas.addEventListener('mouseup', function(e) {
