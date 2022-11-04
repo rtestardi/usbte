@@ -230,6 +230,8 @@ function Body()
         if (e.timeStamp - dragT < 500 && e.offsetY < 256) {
             analogY = e.offsetY;
             analogV = Math.floor((255-analogY)*1024/256);
+        } else if (dragX - e.offsetX == 0 && dragY - e.offsetY == 0) {
+            document.getElementById("status").innerHTML = "";
         }
     })
 }
