@@ -15,7 +15,7 @@ a { text-decoration: none; }
 #copyright { font-size:65%; padding: 0px; }
 * { overflow-wrap: anywhere; word-wrap: anywhere; }
 button { overflow-wrap: normal; word-wrap: normal; }
-html,button,input { font: 36px Arial, Helvetica, sans-serif; padding: 15px 10px 15px 10px; margin: 15px 0px 15px 0px; }
+html,button,input,select { font: 36px Arial, Helvetica, sans-serif; padding: 15px 10px 15px 10px; margin: 15px 0px 15px 0px; }
 @media(min-width:80em){ html,button,input { font: 24px Arial, Helvetica, sans-serif; padding: 10px; margin: 10px 0px 10px 0px; } }
 @supports(-webkit-touch-callout:none) { button,input { -webkit-appearance: none; border-radius: 2px; } }
 body,html { margin: 0px; }
@@ -29,8 +29,7 @@ body,html { margin: 0px; }
 
 <div id="config">
 Select:
-<button type='button' onclick="Comm();">Windows</button>
-<button type='button' onclick="Usb();">Linux</button>
+<button type='button' onclick="if (navigator.appVersion.indexOf('Win') != -1) { Comm(); } else { Usb(); }">Config</button>
 </div>
 
 sample usec:
@@ -46,11 +45,17 @@ sample usec:
 
 --
 
-<input type="radio" name="trigger" value="+">rise</input>
-<input type="radio" name="trigger" value="-">fall</input>
-<input type="radio" name="trigger" value="">level</input>
-<input type="radio" name="trigger" value="~" checked>auto</input>
+trigger:
+<select id="trigger">
+<option selected value="~">auto</option>
+<option value="">level</option>
+<option value="+">rise</option>
+<option value="-">fall</option>
+</select>
 
+--
+
+<button onclick="analogV = 0; analogY = 255;">zero</button>
 --
 
 slew %:
@@ -61,6 +66,50 @@ slew %:
 <option value="204">20</option>
 <option value="307">30</option>
 <option value="409">40</option>
+</select>
+
+--
+
+b0:
+<select id="b0">
+<option selected value="">-</option>
+<option value="0">0</option>
+<option value="1">1</option>
+</select>
+
+b1:
+<select id="b1">
+<option selected value="">-</option>
+<option value="0">0</option>
+<option value="1">1</option>
+</select>
+
+b2:
+<select id="b2">
+<option selected value="">-</option>
+<option value="0">0</option>
+<option value="1">1</option>
+</select>
+
+b3:
+<select id="b3">
+<option selected value="">-</option>
+<option value="0">0</option>
+<option value="1">1</option>
+</select>
+
+b4:
+<select id="b4">
+<option selected value="">-</option>
+<option value="0">0</option>
+<option value="1">1</option>
+</select>
+
+b5:
+<select id="b5">
+<option selected value="">-</option>
+<option value="0">0</option>
+<option value="1">1</option>
 </select>
 
 --
@@ -217,8 +266,41 @@ async function Scope()
 {
     discard = 0;
     string = "";
-    var command = "scope " + document.getElementById("usec").value + " " + document.querySelector('input[name="trigger"]:checked').value + analogV + " " +
-                  document.getElementById("slew").value + " " + document.getElementById("delay").value;
+
+    var digital = false;
+    var number1 = document.getElementById("usec").value;
+    var number2;
+    var number3;
+    var number4;
+
+    for (var b = 0; b < 6; b++) {
+        if (document.getElementById("b"+b).value != "") {
+            digital = true;
+        }
+    }
+
+    if (digital) {
+        var mask = 0;
+        var bits = 0;
+        for (var b = 0; b < 6; b++) {
+            if (document.getElementById("b"+b).value != "") {
+                mask |= 1<<b;
+            }
+            if (document.getElementById("b"+b).value == "1") {
+                bits |= 1<<b;
+            }
+        }
+        number2 = document.getElementById("trigger").value + "0x" + bits.toString(16);
+        number3 = "0x" + mask.toString(16);
+    } else {
+        number2 = document.getElementById("trigger").value + analogV;
+        number3 = document.getElementById("slew").value;
+    }
+
+    number4 = document.getElementById("delay").value;
+
+    var command = "scope " + number1 + " " + number2 + " " + number3 + " " + number4;
+
     document.getElementById("command").innerHTML = command;
     Send(command + "\n");
 }
@@ -257,12 +339,12 @@ async function Display()  // result is in string
         ctx.lineTo(2000, analogY);
         ctx.stroke();
         ctx.beginPath();
-        if (document.querySelector('input[name="trigger"]:checked').value == '+' && document.getElementById("slew").value != 0) {
+        if (document.getElementById("trigger").value == '+' && document.getElementById("slew").value != 0) {
             ctx.moveTo(0, analogY+document.getElementById("slew").value/4);
             ctx.setLineDash([4, 10]);
             ctx.lineTo(2000, analogY+document.getElementById("slew").value/4);
         }
-        if (document.querySelector('input[name="trigger"]:checked').value == '-' && document.getElementById("slew").value != 0) {
+        if (document.getElementById("trigger").value == '-' && document.getElementById("slew").value != 0) {
             ctx.moveTo(0, analogY-document.getElementById("slew").value/4);
             ctx.setLineDash([4, 10]);
             ctx.lineTo(2000, analogY-document.getElementById("slew").value/4);
