@@ -206,6 +206,7 @@ function Body()
 {
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
+
     canvas.addEventListener('mousedown', function(e) {
         down = true;
         drag = false;
@@ -217,6 +218,7 @@ function Body()
         ctx.strokeRect(dragX-2, dragY-2, 4, 4);
         document.getElementById("status").innerHTML = Status(0, 0);
     })
+
     canvas.addEventListener('mousemove', function(e) {
         if (down) {
             drag = true;
@@ -225,6 +227,7 @@ function Body()
             document.getElementById("status").innerHTML = Status(dx, dy);
         }
     })
+
     canvas.addEventListener('mouseup', function(e) {
         down = false;
         drag = false;
@@ -426,6 +429,7 @@ async function Display()  // result is in string
             }
 
             for (var i = 0; i < 1000 && i < lines.length; i++) {
+                // XXX -- if we find "done", reset to 0 and keep going
                 var words = lines[i].split(/ /);
 
                 var adc = parseInt(words[0])
@@ -488,7 +492,8 @@ async function Receive()
     }
     if (! discard) {
         string += str.replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        if (string.match(/done/)) {
+        if (string.match(/done\r\n$/)) {
+            // XXX -- we should only match done at end of buffer!
             Display()
         }
     } else {
