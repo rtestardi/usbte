@@ -195,7 +195,7 @@ function Status(dx, dy)
     if (dx || dy) {
         status += "; delta: " + dx/2*parseInt(document.getElementById("usec").value) + " usec";
         if (dx/2*parseInt(document.getElementById("usec").value)) {
-            status += ", " + Math.round(1/(dx/2*parseInt(document.getElementById("usec").value))*100000)/100 + " kHz";
+            status += ", " + (1/(dx/2*parseInt(document.getElementById("usec").value))*1000).toFixed(2) + " kHz";
         }
         if (dragY < 256) {
             status += ", " + (dy*parseInt(document.getElementById("volts").value)/256).toFixed(2) + " volts";
