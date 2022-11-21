@@ -71,7 +71,7 @@ slew %:
 
 --
 
-<button onclick="for (var b = 0; b < 6; b++) { document.getElementById('b'+b).selectedIndex = 0; }">clear</button>
+<button onclick="for (var b = 0; b < 8; b++) { document.getElementById('b'+b).selectedIndex = 0; }">clear</button>
 
 --
 
@@ -117,6 +117,20 @@ b5:
 <option value="1">1</option>
 </select>
 
+b6:
+<select id="b6">
+<option selected value="">-</option>
+<option value="0">0</option>
+<option value="1">1</option>
+</select>
+
+b7:
+<select id="b7">
+<option selected value="">-</option>
+<option value="0">0</option>
+<option value="1">1</option>
+</select>
+
 --
 
 delay usec:
@@ -131,10 +145,11 @@ volts:
 
 <br>
 
-<canvas id="canvas" width="2044" height="456"></canvas>
+<canvas id="canvas" width="2044" height="516"></canvas>
 
 <br>
 <button id="pause" onclick="Pause();">pause</button>
+<button id="single" onclick="Single();">single</button>
 <pre id='status'></pre>
 
 
@@ -169,6 +184,7 @@ var digital = false;
 var analogY = 255;
 
 var pause = false;
+var single = false;
 var down = false;
 var drag = false;
 var dragX;
@@ -183,6 +199,18 @@ function Pause()
     } else {
         pause = false;
         document.getElementById('pause').innerHTML = "pause";
+    }
+}
+
+function Single()
+{
+    if (! single) {
+        single = true;
+        document.getElementById('single').innerHTML = "normal";
+    } else {
+        single = false;
+        document.getElementById('single').innerHTML = "single";
+        setTimeout(Scope, 200);
     }
 }
 
@@ -332,7 +360,7 @@ async function Scope()
     var number3;
     var number4;
 
-    for (var b = 0; b < 6; b++) {
+    for (var b = 0; b < 8; b++) {
         if (document.getElementById("b"+b).value != "") {
             digital = true;
         }
@@ -341,7 +369,7 @@ async function Scope()
     if (digital) {
         var mask = 0;
         var bits = 0;
-        for (var b = 0; b < 6; b++) {
+        for (var b = 0; b < 8; b++) {
             if (document.getElementById("b"+b).value != "") {
                 mask |= 1<<b;
             }
@@ -424,7 +452,7 @@ async function Display()  // result is in string
 
             var paths = [];
             var lastBit = [];
-            for (var b = 0; b < 6; b++) {
+            for (var b = 0; b < 8; b++) {
                 paths[b] = new Path2D();  // digital
 
                 paths[b].moveTo(0, 305+b*30);
@@ -438,7 +466,7 @@ async function Display()  // result is in string
                 var adc = parseInt(words[0])
                 path.lineTo(i*2, 255-adc/4);
 
-                for (b = 0; b < 6; b++) {
+                for (b = 0; b < 8; b++) {
                     var bit = (parseInt(words[1]) & (1 << b)) != 0;
                     if (bit == lastBit[b]) {
                         paths[b].lineTo(i*2, 305+b*30 - (bit?20:0));
@@ -453,7 +481,7 @@ async function Display()  // result is in string
             path.moveTo(2000, 255);
             ctx.stroke(path);
 
-            for (b = 0; b < 6; b++) {
+            for (b = 0; b < 8; b++) {
                 if (lastBit[b]) {
                     paths[b].lineTo(i*2, 305+b*30 - (lastBit[b]?20:0));
                     paths[b].lineTo(i*2, 305+b*30 - (false?20:0));
@@ -473,6 +501,11 @@ async function Display()  // result is in string
             }
 
             document.getElementById("command").innerHTML = " ";
+
+            if (single) {
+                return;
+            }
+
             delay=100;
         }
     }
