@@ -15,6 +15,7 @@ a { text-decoration: none; }
 #copyright { font-size:65%; padding: 0px; }
 * { overflow-wrap: anywhere; word-wrap: anywhere; }
 button { overflow-wrap: normal; word-wrap: normal; }
+td { padding-right: 25px; }
 html,button,input,select { font: 36px Arial, Helvetica, sans-serif; padding: 15px 10px 15px 10px; margin: 15px 0px 15px 0px; }
 @media(min-width:80em){ html,button,input { font: 24px Arial, Helvetica, sans-serif; padding: 10px; margin: 10px 0px 10px 0px; } }
 @supports(-webkit-touch-callout:none) { button,input { -webkit-appearance: none; border-radius: 2px; } }
@@ -32,7 +33,54 @@ Select:
 <button type='button' onclick="if (navigator.appVersion.indexOf('Win') != -1) { Comm(); } else { Usb(); }">Connect</button>
 </div>
 
+<table>
+<tr>
+<td>
 sec/div:
+</td>
+<td>
+trigger:
+</td>
+<td>
+</td>
+<td>
+slew %:
+</td>
+<td>
+</td>
+<td>
+b0:
+</td>
+<td>
+b1:
+</td>
+<td>
+b2:
+</td>
+<td>
+b3:
+</td>
+<td>
+b4:
+</td>
+<td>
+b5:
+</td>
+<td>
+b6:
+</td>
+<td>
+b7:
+</td>
+<td>
+delay usec:
+</td>
+<td>
+volts:
+</td>
+</tr>
+<tr>
+<td>
 <select id="usec">
 <option value="-10">0.5u</option>
 <option value="-5">1u</option>
@@ -52,24 +100,19 @@ sec/div:
 <option value="10000">50m</option>
 <option value="20000">100m</option>
 </select>
-
---
-
-trigger:
+</td>
+<td>
 <select id="trigger">
 <option selected value="~">auto</option>
 <option value="">level</option>
 <option value="+">rise</option>
 <option value="-">fall</option>
 </select>
-
---
-
+</td>
+<td>
 <button onclick="analogY = 255;">zero</button>
-
---
-
-slew %:
+</td>
+<td>
 <select id="slew">
 <option value="0">0</option>
 <option selected value="51">5</option>
@@ -78,82 +121,76 @@ slew %:
 <option value="307">30</option>
 <option value="409">40</option>
 </select>
-
---
-
+</td>
+<td>
 <button onclick="for (var b = 0; b < 8; b++) { document.getElementById('b'+b).selectedIndex = 0; }">clear</button>
-
---
-
-b0:
+</td>
+<td>
 <select id="b0">
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
-
-b1:
+</td>
+<td>
 <select id="b1">
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
-
-b2:
+</td>
+<td>
 <select id="b2">
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
-
-b3:
+</td>
+<td>
 <select id="b3">
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
-
-b4:
+</td>
+<td>
 <select id="b4">
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
-
-b5:
+</td>
+<td>
 <select id="b5">
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
-
-b6:
+</td>
+<td>
 <select id="b6">
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
-
-b7:
+</td>
+<td>
 <select id="b7">
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
-
---
-
-delay usec:
+</td>
+<td>
 <input type="text" id="delay" value="0" size="2"></input>
-
---
-
-volts:
+</td>
+<td>
 <select id="volts">
 <option value="3.3">3.3</option>
 </select>
-
-<br>
+</td>
+</tr>
+</table>
 
 <canvas id="canvas" width="2044" height="516"></canvas>
 
