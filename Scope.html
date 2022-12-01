@@ -310,7 +310,7 @@ async function Comm()
     if ('serial' in navigator) {
         try {
             comm = await navigator.serial.requestPort({ filters: [filter] });
-            await comm.open({ baudRate: 115200, bufferSize: 64 });
+            await comm.open({ baudRate: 115200, bufferSize: 256 });
             reader = comm.readable.getReader();
             writer = comm.writable.getWriter();
 
