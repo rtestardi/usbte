@@ -36,6 +36,7 @@ sec/div:
 <select id="usec">
 <option value="-10">0.5u</option>
 <option value="-5">1u</option>
+<option value="-2">2.5u</option>
 <option value="1">5u</option>
 <option value="2">10u</option>
 <option value="5">25u</option>
@@ -223,19 +224,71 @@ function Single()
     }
 }
 
+function usec(frac, scale)
+{
+    var usecv = parseInt(document.getElementById("usec").value);  // this is per-division
+    if (usecv < 0) {
+        usecv = -5/usecv;
+    } else {
+        usecv *= 5;
+    }
+    usecv = usecv * 10 * frac;
+    var usecs;
+    if (scale && usecv >= 1000) {
+        usecs = "" + (usecv/1000).toFixed(1) + "ms";
+    } else {
+        usecs = "" + (usecv).toFixed(1) + "us";
+    }
+    return usecs;
+}
+
+function freq(frac, scale)
+{
+    var usecv = parseInt(document.getElementById("usec").value);  // this is per-division
+    if (usecv < 0) {
+        usecv = -5/usecv;
+    } else {
+        usecv *= 5;
+    }
+    usecv = usecv * 10 * frac;
+    var freqv = 1000000/usecv;
+    var freqs;
+    if (scale && freqv >= 1000000) {
+        freqs = "" + (freqv/1000000).toFixed(1) + "MHz";
+    } else if (scale && freqv >= 1000) {
+        freqs = "" + (freqv/1000).toFixed(1) + "kHz";
+    } else {
+        freqs = "" + (freqv).toFixed(1) + "Hz";
+    }
+    return freqs;
+}
+
+function volt(frac, scale)
+{
+    var voltv = parseInt(document.getElementById("volts").value);  // XXX -- this is full scale, why?
+    voltv = voltv * frac;
+    var volts;
+    if (scale && voltv < 0.001) {
+        volts = "" + (voltv*1000).toFixed(1) + "mV";
+    } else {
+        volts = "" + (voltv).toFixed(1) + "V";
+    }
+    return volts;
+}
+
 function Status(dx, dy)
 {
-    var status = "position: " + dragX/2*parseInt(document.getElementById("usec").value) + " usec";
+    var status = "position: " + usec(dragX/2000, true);
     if (dragY < 256) {
-        status +=  ", " + (dragY*parseInt(document.getElementById("volts").value)/256).toFixed(2) + " volts"
+        status +=  ", " + volt(dragY/256, true);
     }
     if (dx || dy) {
-        status += "; delta: " + dx/2*parseInt(document.getElementById("usec").value) + " usec";
-        if (dx/2*parseInt(document.getElementById("usec").value)) {
-            status += ", " + (1/(dx/2*parseInt(document.getElementById("usec").value))*1000).toFixed(2) + " kHz";
+        status += "; delta: " + usec(dx/2000, true);
+        if (dx) {
+            status += ", " + freq(dx/2000, true);
         }
         if (dragY < 256) {
-            status += ", " + (dy*parseInt(document.getElementById("volts").value)/256).toFixed(2) + " volts";
+            status += ", " + volt(dy/256, true);
         }
     }
     return status;
@@ -423,7 +476,7 @@ async function Display()  // result is in string
             ctx.stroke();
             ctx.setLineDash([])
 
-            ctx.fillText("" + parseInt(document.getElementById("usec").value)*i/10 + "ms", i*200+2, 276);
+            ctx.fillText("" + usec(i/10, true), i*200+2, 276);  // parseInt(document.getElementById("usec").value)*i/10 + "ms"
         }
 
         if (! digital) {
