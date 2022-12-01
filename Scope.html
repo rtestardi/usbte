@@ -516,7 +516,7 @@ async function Receive()
     var result;
 
     if (usb) {
-        result = await usb.transferIn(2, 64);
+        result = await usb.transferIn(2, 256);
         str = dec.decode(result.data.buffer);
     } else {
         result = await reader.read();
