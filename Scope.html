@@ -32,15 +32,22 @@ Select:
 <button type='button' onclick="if (navigator.appVersion.indexOf('Win') != -1) { Comm(); } else { Usb(); }">Connect</button>
 </div>
 
-sample usec:
+sec/div:
 <select id="usec">
-<option>1</option>
-<option>3</option>
-<option selected>10</option>
-<option>30</option>
-<option>100</option>
-<option>300</option>
-<option>1000</option>
+<option value="1">5u</option>
+<option value="2">10u</option>
+<option value="5">25u</option>
+<option value="10" selected>50u</option>
+<option value="20">100u</option>
+<option value="50">250u</option>
+<option value="100">500u</option>
+<option value="200">1m</option>
+<option value="500">2.5m</option>
+<option value="1000">5m</option>
+<option value="2000">10m</option>
+<option value="5000">25m</option>
+<option value="10000">50m</option>
+<option value="20000">100m</option>
 </select>
 
 --
