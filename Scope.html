@@ -102,7 +102,7 @@ volts:
 </select>
 </td>
 <td>
-<select id="trigger">
+<select id="trigger" onchange='Send("\0x0003");'>
 <option selected value="~">auto</option>
 <option value="">level</option>
 <option value="+">rise</option>
@@ -363,6 +363,7 @@ function Body()
         drag = false;
         if (e.timeStamp - dragT < 500 && e.offsetY < 256) {
             analogY = e.offsetY;
+            Send("\0x0003");
         } else if (dragX - e.offsetX == 0 && dragY - e.offsetY == 0) {
             document.getElementById("status").innerHTML = "";
         }
