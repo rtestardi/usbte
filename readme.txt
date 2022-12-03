@@ -16,8 +16,8 @@ port.
 Or click "USB" to connect to your cdc/acm serial port USB device thru webusb/winusb and communicate with its bulk
 endpoints directly.
 
-  * When using webusb/winusb your cdc/acm serial port USB device must not be claimed by usbser or you will get an
-    access denied error.
+  * On Windows, your USB device must not be claimed by usbser.sys or you will get an access denied error.
+  * On Windows, you must manually update "Universal Serial Bus devices" -> "WinUsb Device" driver to your device.
   * You may need to edit the default endpoint numbers.
 
 Then enter commands in the command line!
