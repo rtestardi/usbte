@@ -389,9 +389,9 @@ async function Usb()
         discard = 1;
         setTimeout(Receive, 1);
 
-        Send(String.fromCharCode(3));
-        Send("echo off\n");
-        Send("prompt off\n");
+        Send(String.fromCharCode(3));  // Ctrl-C
+        Send("echo off\n");  // XXX -- figure out how to undo?
+        Send("prompt off\n");  // XXX -- figure out how to undo?
 
         discarded = false;
         setTimeout(Discard, 200);
@@ -421,6 +421,8 @@ async function Comm()
             setTimeout(Receive, 1);
 
             Send(String.fromCharCode(3));  // Ctrl-C
+            Send("echo off\n");  // XXX -- figure out how to undo?
+            Send("prompt off\n");  // XXX -- figure out how to undo?
 
             discarded = false;
             setTimeout(Discard, 200);
