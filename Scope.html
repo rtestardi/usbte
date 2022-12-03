@@ -102,7 +102,7 @@ volts:
 </select>
 </td>
 <td>
-<select id="trigger" onchange='Send("\0x0003");'>
+<select id="trigger" onchange='Send(String.fromCharCode(3));'>
 <option selected value="~">auto</option>
 <option value="">level</option>
 <option value="+">rise</option>
@@ -363,7 +363,7 @@ function Body()
         drag = false;
         if (e.timeStamp - dragT < 500 && e.offsetY < 256) {
             analogY = e.offsetY;
-            Send("\0x0003");
+            Send(String.fromCharCode(3));  // Ctrl-C
         } else if (dragX - e.offsetX == 0 && dragY - e.offsetY == 0) {
             document.getElementById("status").innerHTML = "";
         }
@@ -420,9 +420,7 @@ async function Comm()
             discard = 1;
             setTimeout(Receive, 1);
 
-            Send(String.fromCharCode(3));
-            Send("echo off\n");
-            Send("prompt off\n");
+            Send(String.fromCharCode(3));  // Ctrl-C
 
             discarded = false;
             setTimeout(Discard, 200);
