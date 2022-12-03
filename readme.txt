@@ -24,5 +24,5 @@ Then enter commands in the command line!
 
 Ctrl-C and Ctrl-D flow thru the command line when in focus.
 
-Try it here: https://rtestardi.github.io/usbte/usbte.html
-or here: https://rtestardi.github.io/usbte/Scope.html
+Try the terminal emulator here: https://rtestardi.github.io/usbte/usbte.html
+or the flea-scope gui here: https://rtestardi.github.io/usbte/Scope.html
