@@ -70,7 +70,7 @@ b6:
 b7:
 </td>
 <td>
-delay usec:
+delay sec:
 </td>
 <td>
 volts:
@@ -78,7 +78,7 @@ volts:
 </tr>
 <tr>
 <td>
-<select id="usec">
+<select id="qusec">
 <option value="-10">0.5u</option>
 <option value="-5">1u</option>
 <option value="-2">2.5u</option>
@@ -250,7 +250,7 @@ function Single()
 
 function usec(frac, scale)
 {
-    var usecv = parseInt(document.getElementById("usec").value);  // this is per-division
+    var usecv = parseInt(document.getElementById("qusec").value);  // this is per-division
     if (usecv < 0) {
         usecv = -5/usecv;
     } else {
@@ -268,7 +268,7 @@ function usec(frac, scale)
 
 function freq(frac, scale)
 {
-    var usecv = parseInt(document.getElementById("usec").value);  // this is per-division
+    var usecv = parseInt(document.getElementById("qusec").value);  // this is per-division
     if (usecv < 0) {
         usecv = -5/usecv;
     } else {
@@ -442,7 +442,7 @@ async function Scope()
     string = "";
 
     digital = false;
-    var number1 = document.getElementById("usec").value;
+    var number1 = document.getElementById("qusec").value;
     var number2;
     var number3;
     var number4;
@@ -472,6 +472,14 @@ async function Scope()
     }
 
     number4 = document.getElementById("delay").value;
+    if (number4.match(/u$/)) {
+        number4 = number4.replace(/u$/,"");
+    } else if (number4.match(/m$/)) {
+        number4 = number4.replace(/u$/,"");
+        number4 = number4 + "000";
+    } else {
+        number4 = number4 + "000000";
+    }
 
     var command = "scope " + number1 + " " + number2 + " " + number3 + " " + number4;
 
@@ -501,7 +509,7 @@ async function Display()  // result is in string
             ctx.stroke();
             ctx.setLineDash([])
 
-            ctx.fillText("" + usec(i/10, true), i*200+2, 276);  // parseInt(document.getElementById("usec").value)*i/10 + "ms"
+            ctx.fillText("" + usec(i/10, true), i*200+2, 276);
         }
 
         if (! digital) {
