@@ -44,9 +44,6 @@ trigger:
 <td>
 </td>
 <td>
-slew %:
-</td>
-<td>
 </td>
 <td>
 b0:
@@ -111,16 +108,6 @@ volts:
 </td>
 <td>
 <button onclick="analogY = 255;">zero</button>
-</td>
-<td>
-<select id="slew">
-<option value="0">0</option>
-<option selected value="51">5</option>
-<option value="102">10</option>
-<option value="204">20</option>
-<option value="307">30</option>
-<option value="409">40</option>
-</select>
 </td>
 <td>
 <button onclick="for (var b = 0; b < 8; b++) { document.getElementById('b'+b).selectedIndex = 0; }">clear</button>
@@ -481,7 +468,7 @@ async function Scope()
         number3 = "0x" + mask.toString(16);
     } else {
         number2 = document.getElementById("trigger").value + Math.floor((255-analogY)*1024/256);;
-        number3 = document.getElementById("slew").value;
+        number3 = 0;
     }
 
     number4 = document.getElementById("delay").value;
@@ -526,16 +513,6 @@ async function Display()  // result is in string
             ctx.stroke();
 
             ctx.beginPath();
-            if (document.getElementById("trigger").value == '+' && document.getElementById("slew").value != 0 && analogY+document.getElementById("slew").value/4 < 256) {
-                ctx.moveTo(0, analogY+document.getElementById("slew").value/4);
-                ctx.setLineDash([4, 10]);
-                ctx.lineTo(2000, analogY+document.getElementById("slew").value/4);
-            }
-            if (document.getElementById("trigger").value == '-' && document.getElementById("slew").value != 0 && analogY-document.getElementById("slew").value/4 >= 0) {
-                ctx.moveTo(0, analogY-document.getElementById("slew").value/4);
-                ctx.setLineDash([4, 10]);
-                ctx.lineTo(2000, analogY-document.getElementById("slew").value/4);
-            }
             ctx.stroke();
             ctx.strokeStyle = '#000000';
             ctx.setLineDash([])
