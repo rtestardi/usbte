@@ -332,6 +332,7 @@ function Body()
         dragT = e.timeStamp;
         var canvas = document.getElementById('canvas');
         var ctx = canvas.getContext('2d');
+
         ctx.strokeRect(dragX-2, dragY-2, 4, 4);
         document.getElementById("status").innerHTML = Status(0, 0);
     })
@@ -492,6 +493,8 @@ async function Display()  // result is in string
     if (! down && ! pause) {
         var lines = string.split(/\r?\n/);
 
+        ctx.font = `12px Verdana`;
+
         ctx.clearRect(0, 0, 2044, 512);
 
         ctx.fillText("3.3V", 2008, 8);
@@ -509,7 +512,7 @@ async function Display()  // result is in string
             ctx.stroke();
             ctx.setLineDash([])
 
-            ctx.fillText("" + usec(i/10, true), i*200+2, 276);
+            ctx.fillText("" + usec(i/10, true).replace(/[.]0/,""), i*200, 276);
         }
 
         if (! digital) {
