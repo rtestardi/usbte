@@ -510,6 +510,11 @@ async function Display()  // result is in string
             ctx.moveTo(200*i, 0);
             ctx.lineTo(200*i, 255);
             ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(200*i, 305-20);
+            ctx.lineTo(200*i, 305+7*30);
+            ctx.stroke();
             ctx.setLineDash([])
 
             ctx.fillText("" + usec(i/10, true).replace(/[.]0/,""), i*200, 276);
@@ -552,8 +557,9 @@ async function Display()  // result is in string
                 var adc = parseInt(words[0])
                 path.lineTo(i*2, 255-adc/4);
 
+                var byte = parseInt(words[1]);
                 for (b = 0; b < 8; b++) {
-                    var bit = (parseInt(words[1]) & (1 << b)) != 0;
+                    var bit = (byte & (1 << b)) != 0;
                     if (bit == lastBit[b]) {
                         paths[b].lineTo(i*2, 305+b*30 - (bit?20:0));
                     } else {
