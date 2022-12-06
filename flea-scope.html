@@ -536,9 +536,11 @@ async function Display()  // result is in string
             ctx.setLineDash([])
         }
 
-        if (lines.length < 10) {
+        if (lines.length < 100) {
             document.getElementById("command").innerHTML += " no trigger";
         } else {
+            var sx, sy, sh;
+
             var path;
             path = new Path2D();  // analog
             path.moveTo(0, 255);
@@ -546,27 +548,33 @@ async function Display()  // result is in string
             var paths = [];
             var lastBit = [];
             for (var b = 0; b < 8; b++) {
-                paths[b] = new Path2D();  // digital
+                sy = 305+b*30;
 
-                paths[b].moveTo(0, 305+b*30);
+                paths[b] = new Path2D();  // digital
+                paths[b].moveTo(0, sy);
                 lastBit[b] = false;
             }
+
+            sh = 20;
 
             for (var i = 0; i < 1000 && i < lines.length; i++) {
                 // XXX -- if we find "done", reset to 0 and keep going
                 var words = lines[i].split(/ /);
-
                 var adc = parseInt(words[0])
-                path.lineTo(i*2, 255-adc/4);
-
                 var byte = parseInt(words[1]);
+
+                sx = i*2;
+                path.lineTo(sx, 255-adc/4);
+
                 for (b = 0; b < 8; b++) {
+                    sy = 305+b*30;
+
                     var bit = (byte & (1 << b)) != 0;
                     if (bit == lastBit[b]) {
-                        paths[b].lineTo(i*2, 305+b*30 - (bit?20:0));
+                        paths[b].lineTo(sx, sy - (bit?sh:0));
                     } else {
-                        paths[b].lineTo(i*2, 305+b*30 - (lastBit[b]?20:0));
-                        paths[b].lineTo(i*2, 305+b*30 - (bit?20:0));
+                        paths[b].lineTo(sx, sy - (lastBit[b]?sh:0));
+                        paths[b].lineTo(sx, sy - (bit?sh:0));
                     }
                     lastBit[b] = bit;
                 }
@@ -575,12 +583,15 @@ async function Display()  // result is in string
             path.moveTo(2000, 255);
             ctx.stroke(path);
 
+            sx = i*2;
             for (b = 0; b < 8; b++) {
-                if (lastBit[b]) {
-                    paths[b].lineTo(i*2, 305+b*30 - (lastBit[b]?20:0));
-                    paths[b].lineTo(i*2, 305+b*30 - (false?20:0));
+                sy = 305+b*30;
+
+                if (false == lastBit[b]) {
+                    paths[b].lineTo(sx, sy - (false?sh:0));
                 } else {
-                    paths[b].lineTo(i*2, 305+b*30 - (false?20:0));
+                    paths[b].lineTo(sx, sy - (lastBit[b]?sh:0));
+                    paths[b].lineTo(sx, sy - (false?sh:0));
                 }
 
                 if (document.getElementById("b"+b).value != "") {
@@ -591,7 +602,7 @@ async function Display()  // result is in string
                     ctx.strokeStyle = '#000000';
                 }
 
-                ctx.fillText("b"+b, 2008, 305-2+b*30);
+                ctx.fillText("b"+b, 2008, sy-2);
             }
 
             document.getElementById("command").innerHTML = " ";
