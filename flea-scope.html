@@ -497,8 +497,8 @@ async function Display()  // result is in string
 
         ctx.clearRect(0, 0, 2044, 512);
 
-        ctx.fillText("3.3V", 2008, 8);
-        ctx.fillText("0V", 2008, 255);
+        ctx.fillText("3.3V", 2008, 10);
+        ctx.fillText("0V", 2008, 246);
 
         for (var i = 0; i <= 10; i++) {
             if (Math.floor(i/5)*5 == i) {
@@ -517,7 +517,7 @@ async function Display()  // result is in string
             ctx.stroke();
             ctx.setLineDash([])
 
-            ctx.fillText("" + usec(i/10, true).replace(/[.]0/,""), i*200, 276);
+            ctx.fillText("" + usec(i/10, true).replace(/[.]0/,""), (i*200)-(i==10?34:0), 276);
         }
 
         if (! digital) {
