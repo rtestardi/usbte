@@ -517,7 +517,9 @@ async function Display()  // result is in string
             ctx.stroke();
             ctx.setLineDash([])
 
-            ctx.fillText("" + usec(i/10, true).replace(/[.]0/,""), (i*200)-(i==10?34:0), 276);
+            var t = "" + usec(i/10, true).replace(/[.]0/,"");
+            var w = (i==10)?(ctx.measureText(t).width):(0);
+            ctx.fillText(t, (i*200)-w, 276);
         }
 
         if (! digital) {
