@@ -184,6 +184,14 @@ volts:
 <br>
 <button id="pause" onclick="Pause();">pause</button>
 <button id="single" onclick="Single();">single</button>
+
+<input type="text" id="hz" onchange="Wave();" value="0" size="2"></input>
+<select id="wave" onchange="Wave();">
+<option selected value="0">sine</option>
+<option value="1">square</option>
+<option value="2">triangle</option>
+<option value="3">ekg</option>
+</select>
 <pre id='status'></pre>
 
 
@@ -212,6 +220,7 @@ var ctx;
 var discard;
 var discarded;
 var string;
+var pending = "";
 
 var digital = false;
 
@@ -246,6 +255,13 @@ function Single()
         document.getElementById('single').innerHTML = "single";
         setTimeout(Scope, 200);
     }
+}
+
+function Wave()
+{
+    var hz = parseInt(document.getElementById("hz").value);
+    var pattern = document.getElementById("wave").value;
+    pending = "wave " + hz + " " + pattern;
 }
 
 function usec(frac, scale)
@@ -483,6 +499,10 @@ async function Scope()
     }
 
     var command = "scope " + number1 + " " + number2 + " " + number3 + " " + number4;
+    if (pending != "") {
+        command = pending;
+        pending = "";
+    }
 
     document.getElementById("command").innerHTML = command;
     Send(command + "\n");
