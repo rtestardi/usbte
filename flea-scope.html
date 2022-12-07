@@ -75,7 +75,16 @@ delay sec:
 <td>
 volts:
 </td>
+<td>
+</td>
+<td>
+freq:
+</td>
+<td>
+wave:
+</td>
 </tr>
+
 <tr>
 <td>
 <select id="qusec">
@@ -176,15 +185,10 @@ volts:
 <option value="3.3">3.3</option>
 </select>
 </td>
-</tr>
-</table>
-
-<canvas id="canvas" width="2044" height="516"></canvas>
-
-<br>
+<td>
 <button id="pause" onclick="Pause();">pause</button>
-<button id="single" onclick="Single();">single</button>
-
+</td>
+<td>
 <select id="hz" onchange="Wave();">
 <option value="1">40kHz</option>
 <option value="2">20kHz</option>
@@ -201,15 +205,23 @@ volts:
 <option value="10000">4Hz</option>
 <option value="20000">2Hz</option>
 </select>
+</td>
+<td>
 <select id="wave" onchange="Wave();">
 <option selected value="0">sine</option>
 <option value="1">square</option>
 <option value="2">triangle</option>
 <option value="3">ekg</option>
 </select>
+</td>
+</tr>
+</table>
+
+<canvas id="canvas" width="2044" height="516"></canvas>
+
+<br>
+
 <pre id='status'></pre>
-
-
 <pre id='command'></pre>
 <pre id='results'></pre>
 
@@ -242,7 +254,6 @@ var digital = false;
 var analogY = 255;
 
 var pause = false;
-var single = false;
 var down = false;
 var drag = false;
 var dragX;
@@ -257,18 +268,6 @@ function Pause()
     } else {
         pause = false;
         document.getElementById('pause').innerHTML = "pause";
-    }
-}
-
-function Single()
-{
-    if (! single) {
-        single = true;
-        document.getElementById('single').innerHTML = "normal";
-    } else {
-        single = false;
-        document.getElementById('single').innerHTML = "single";
-        setTimeout(Scope, 200);
     }
 }
 
@@ -411,7 +410,7 @@ async function Usb()
         Send(String.fromCharCode(3));  // Ctrl-C
         Send("echo off\n");  // XXX -- figure out how to undo?
         Send("prompt off\n");  // XXX -- figure out how to undo?
-        Send("wave 0\n");
+        Wave();
 
         discarded = false;
         setTimeout(Discard, 200);
@@ -443,7 +442,7 @@ async function Comm()
             Send(String.fromCharCode(3));  // Ctrl-C
             Send("echo off\n");  // XXX -- figure out how to undo?
             Send("prompt off\n");  // XXX -- figure out how to undo?
-            Send("wave 0\n");
+            Wave();
 
             discarded = false;
             setTimeout(Discard, 200);
@@ -643,10 +642,6 @@ async function Display()  // result is in string
             }
 
             document.getElementById("command").innerHTML = " ";
-
-            if (single) {
-                return;
-            }
         }
     }
 
