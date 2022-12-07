@@ -396,6 +396,7 @@ async function Usb()
         Send(String.fromCharCode(3));  // Ctrl-C
         Send("echo off\n");  // XXX -- figure out how to undo?
         Send("prompt off\n");  // XXX -- figure out how to undo?
+        Send("wave 0\n");
 
         discarded = false;
         setTimeout(Discard, 200);
@@ -427,6 +428,7 @@ async function Comm()
             Send(String.fromCharCode(3));  // Ctrl-C
             Send("echo off\n");  // XXX -- figure out how to undo?
             Send("prompt off\n");  // XXX -- figure out how to undo?
+            Send("wave 0\n");
 
             discarded = false;
             setTimeout(Discard, 200);
@@ -515,7 +517,7 @@ async function Display()  // result is in string
 
         ctx.font = `12px Verdana`;
 
-        ctx.clearRect(0, 0, 2044, 512);
+        ctx.clearRect(0, 0, 2044, 516);
 
         ctx.fillText("3.3V", 2008, 10);
         ctx.fillText("0V", 2008, 246);
