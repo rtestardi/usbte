@@ -44,8 +44,6 @@ trigger:
 <td>
 </td>
 <td>
-</td>
-<td>
 b0:
 </td>
 <td>
@@ -70,6 +68,8 @@ b6:
 b7:
 </td>
 <td>
+</td>
+<td>
 delay sec:
 </td>
 <td>
@@ -78,10 +78,10 @@ volts:
 <td>
 </td>
 <td>
-freq:
+freq out:
 </td>
 <td>
-wave:
+wave out:
 </td>
 </tr>
 
@@ -117,9 +117,6 @@ wave:
 </td>
 <td>
 <button onclick="analogY = 255;">zero</button>
-</td>
-<td>
-<button onclick="for (var b = 0; b < 8; b++) { document.getElementById('b'+b).selectedIndex = 0; }">clear</button>
 </td>
 <td>
 <select id="b0">
@@ -176,6 +173,9 @@ wave:
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
+</td>
+<td>
+<button onclick="for (var b = 0; b < 8; b++) { document.getElementById('b'+b).selectedIndex = 0; }">clear</button>
 </td>
 <td>
 <input type="text" id="delay" value="0" size="2"></input>
