@@ -88,9 +88,9 @@ wave out:
 <tr>
 <td>
 <select id="qusec">
-<option value="-10">0.5u</option>
-<option value="-5">1u</option>
-<option value="-2">2.5u</option>
+<option value="-10">0.5u*</option>
+<option value="-5">1u*</option>
+<option value="-2">2.5u*</option>
 <option value="1">5u</option>
 <option value="2">10u</option>
 <option value="5">25u</option>
@@ -204,6 +204,7 @@ wave out:
 <option value="4000">10Hz</option>
 <option value="10000">4Hz</option>
 <option value="20000">2Hz</option>
+<option value="0">off</option>
 </select>
 </td>
 <td>
@@ -508,8 +509,7 @@ async function Scope()
     if (number4.match(/u$/)) {
         number4 = number4.replace(/u$/,"");
     } else if (number4.match(/m$/)) {
-        number4 = number4.replace(/m$/,"");
-        number4 = number4 + "000";
+        number4 = number4.replace(/m$/,"000");
     } else {
         number4 = number4 + "000000";
     }
