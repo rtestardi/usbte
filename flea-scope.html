@@ -79,10 +79,10 @@ volts:
 <td>
 </td>
 <td>
-freq out:
+wave out:
 </td>
 <td>
-wave out:
+freq out:
 </td>
 </tr>
 
@@ -190,6 +190,14 @@ wave out:
 <button id="pause" onclick="Pause();">pause</button>
 </td>
 <td>
+<select id="wave" onchange="Wave();">
+<option selected value="0">sine</option>
+<option value="1">square</option>
+<option value="2">triangle</option>
+<option value="3">ekg</option>
+</select>
+</td>
+<td>
 <select id="hz" onchange="Wave();">
 <option value="1">40kHz</option>
 <option value="2">20kHz</option>
@@ -206,14 +214,6 @@ wave out:
 <option value="10000">4Hz</option>
 <option value="20000">2Hz</option>
 <option value="0">off</option>
-</select>
-</td>
-<td>
-<select id="wave" onchange="Wave();">
-<option selected value="0">sine</option>
-<option value="1">square</option>
-<option value="2">triangle</option>
-<option value="3">ekg</option>
 </select>
 </td>
 </tr>
@@ -601,7 +601,7 @@ async function Display()  // result is in string
                 var byte = parseInt(words[1]);
 
                 sx = i*2;
-                path.lineTo(sx, 255-adc/4);
+                path.lineTo(sx, 255-Math.floor(adc/4));
 
                 for (b = 0; b < 8; b++) {
                     sy = 305+b*30;
