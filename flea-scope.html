@@ -536,10 +536,10 @@ async function Display()  // result is in string
 
         ctx.font = `12px Verdana`;
 
-        ctx.clearRect(0, 0, 2044, 516);
+        ctx.clearRect(0, 0, width+44, 516);
 
-        ctx.fillText("3.3V", 2008, 10);
-        ctx.fillText("0V", 2008, 246);
+        ctx.fillText("3.3V", width+8, 10);
+        ctx.fillText("0V", width+8, 246);
 
         for (var i = 0; i <= 10; i++) {
             if (Math.floor(i/5)*5 == i) {
@@ -548,13 +548,13 @@ async function Display()  // result is in string
                 ctx.setLineDash([2, 10])
             }
             ctx.beginPath();
-            ctx.moveTo(200*i, 0);
-            ctx.lineTo(200*i, 255);
+            ctx.moveTo(width/10*i, 0);
+            ctx.lineTo(width/10*i, 255);
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.moveTo(200*i, 305-20);
-            ctx.lineTo(200*i, 305+7*30);
+            ctx.moveTo(width/10*i, 305-20);
+            ctx.lineTo(width/10*i, 305+7*30);
             ctx.stroke();
             ctx.setLineDash([])
 
@@ -643,7 +643,7 @@ async function Display()  // result is in string
                     ctx.strokeStyle = '#000000';
                 }
 
-                ctx.fillText("b"+b, 2008, sy-2);
+                ctx.fillText("b"+b, width+8, sy-2);
             }
 
             document.getElementById("command").innerHTML = " ";
