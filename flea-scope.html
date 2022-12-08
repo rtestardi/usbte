@@ -82,7 +82,7 @@ volts:
 wave out:
 </td>
 <td>
-freq out:
+hertz out:
 </td>
 </tr>
 
@@ -179,7 +179,7 @@ freq out:
 <button onclick="for (var b = 0; b < 8; b++) { document.getElementById('b'+b).selectedIndex = 0; }">clear</button>
 </td>
 <td>
-<input type="text" id="delay" value="0" size="2"></input>
+<input type="text" id="delay" value="0u" size="2"></input>
 </td>
 <td>
 <select id="volts">
@@ -191,30 +191,14 @@ freq out:
 </td>
 <td>
 <select id="wave" onchange="Wave();">
-<option selected value="0">sine</option>
-<option value="1">square</option>
-<option value="2">triangle</option>
-<option value="3">ekg</option>
+<option value="1">ekg</option>
+<option selected value="2">sine</option>
+<option value="3">square</option>
+<option value="4">triangle</option>
 </select>
 </td>
 <td>
-<select id="hz" onchange="Wave();">
-<option value="1">40kHz</option>
-<option value="2">20kHz</option>
-<option value="4">10kHz</option>
-<option value="10">4kHz</option>
-<option value="20">2kHz</option>
-<option value="40" selected>1kHz</option>
-<option value="100">400Hz</option>
-<option value="200">200Hz</option>
-<option value="400">100Hz</option>
-<option value="1000">40Hz</option>
-<option value="2000">20Hz</option>
-<option value="4000">10Hz</option>
-<option value="10000">4Hz</option>
-<option value="20000">2Hz</option>
-<option value="0">off</option>
-</select>
+<input type="text" id="hz" onchange="Wave();" value="1k" size="2"></input>
 </td>
 </tr>
 </table>
@@ -279,9 +263,15 @@ function Pause()
 
 function Wave()
 {
-    var hz = parseInt(document.getElementById("hz").value);
-    var pattern = document.getElementById("wave").value;
-    pending = "wave " + hz + " " + pattern;
+    var number1 = document.getElementById("wave").value;
+    var number2 = document.getElementById("hz").value;
+    if (number2.match(/k$/)) {
+        number2 = number2.replace(/k$/,"000");
+    } else if (number2.match(/m$/)) {
+        number2 = number2.replace(/m$/,"000000");
+    }
+
+    pending = "wave " + number1 + " " + number2;
 }
 
 function usec(frac, scale)
@@ -560,7 +550,7 @@ async function Display()  // result is in string
 
             var t = "" + usec(i/10, true).replace(/[.]0/,"");
             var w = (i==10)?(ctx.measureText(t).width):(0);
-            ctx.fillText(t, (i*200)-w, 274);
+            ctx.fillText(t, (width/10*i)-w, 274);
         }
 
         if (! digital) {
