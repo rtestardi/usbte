@@ -265,9 +265,9 @@ function Wave()
 {
     var number1 = document.getElementById("wave").value;
     var number2 = document.getElementById("hz").value;
-    if (number2.match(/k$/)) {
+    if (number2.toLowerCase().match(/k$/)) {
         number2 = number2.replace(/k$/,"000");
-    } else if (number2.match(/m$/)) {
+    } else if (number2.toLowerCase().match(/m$/)) {
         number2 = number2.replace(/m$/,"000000");
     }
 
@@ -501,9 +501,9 @@ async function Scope()
     }
 
     number4 = document.getElementById("delay").value;
-    if (number4.match(/u$/)) {
+    if (number4.toLowerCase().match(/u$/)) {
         number4 = number4.replace(/u$/,"");
-    } else if (number4.match(/m$/)) {
+    } else if (number4.toLowerCase().match(/m$/)) {
         number4 = number4.replace(/m$/,"000");
     } else {
         number4 = number4 + "000000";
