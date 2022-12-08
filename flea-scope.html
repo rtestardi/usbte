@@ -15,7 +15,7 @@ a { text-decoration: none; }
 #copyright { font-size:65%; padding: 0px; }
 * { overflow-wrap: anywhere; word-wrap: anywhere; }
 button { overflow-wrap: normal; word-wrap: normal; }
-td { text-align: center; padding-right: 25px; }
+td { text-align: center; padding-right: 15px; }
 html,button,input,select { font: 36px Arial, Helvetica, sans-serif; padding: 15px 10px 15px 10px; margin: 15px 0px 15px 0px; }
 @media(min-width:80em){ html,button,input { font: 24px Arial, Helvetica, sans-serif; padding: 10px; margin: 10px 0px 10px 0px; } }
 @supports(-webkit-touch-callout:none) { button,input { -webkit-appearance: none; border-radius: 2px; } }
@@ -219,7 +219,7 @@ freq out:
 </tr>
 </table>
 
-<canvas id="canvas" width="2044" height="516"></canvas>
+<canvas id="canvas" width="1844" height="516"></canvas>
 
 <br>
 
@@ -254,6 +254,10 @@ var pending = "";
 var digital = false;
 
 var analogY = 255;
+
+var samples = 900;
+var width = 1800;
+var height = 256;
 
 var pause = false;
 var down = false;
@@ -334,17 +338,17 @@ function volt(frac, scale)
 
 function Status(dx, dy)
 {
-    var status = "position: " + usec(dragX/2000, true);
-    if (dragY < 256) {
-        status +=  ", " + volt(dragY/256, true);
+    var status = "position: " + usec(dragX/width, true);
+    if (dragY < height) {
+        status +=  ", " + volt(dragY/height, true);
     }
     if (dx || dy) {
-        status += "; delta: " + usec(dx/2000, true);
+        status += "; delta: " + usec(dx/width, true);
         if (dx) {
-            status += ", " + freq(dx/2000, true);
+            status += ", " + freq(dx/width, true);
         }
-        if (dragY < 256) {
-            status += ", " + volt(dy/256, true);
+        if (dragY < height) {
+            status += ", " + volt(dy/height, true);
         }
     }
     return status;
@@ -381,7 +385,7 @@ function Body()
     canvas.addEventListener('mouseup', function(e) {
         down = false;
         drag = false;
-        if (e.timeStamp - dragT < 500 && e.offsetY < 256) {
+        if (e.timeStamp - dragT < 500 && e.offsetY < height) {
             analogY = e.offsetY;
             Send(String.fromCharCode(3));  // Ctrl-C
         } else if (dragX - e.offsetX == 0 && dragY - e.offsetY == 0) {
@@ -502,7 +506,7 @@ async function Scope()
         number2 = document.getElementById("trigger").value + "0x" + bits.toString(16);
         number3 = "0x" + mask.toString(16);
     } else {
-        number2 = document.getElementById("trigger").value + Math.floor((255-analogY)*1024/256);;
+        number2 = document.getElementById("trigger").value + Math.floor((255-analogY)*1024/height);;
         number3 = 0;
     }
 
@@ -564,7 +568,7 @@ async function Display()  // result is in string
             ctx.strokeStyle = '#00BF00';
             ctx.beginPath();
             ctx.moveTo(0, analogY);
-            ctx.lineTo(2000, analogY);
+            ctx.lineTo(width, analogY);
             ctx.stroke();
 
             ctx.beginPath();
@@ -594,7 +598,7 @@ async function Display()  // result is in string
 
             sh = 20;
 
-            for (var i = 0; i < 1000 && i < lines.length; i++) {
+            for (var i = 0; i < samples && i < lines.length; i++) {
                 // XXX -- if we find "done", reset to 0 and keep going
                 var words = lines[i].split(/ /);
                 var adc = parseInt(words[0])
@@ -617,7 +621,7 @@ async function Display()  // result is in string
                 }
             }
 
-            path.moveTo(2000, 255);
+            path.moveTo(width, 255);
             ctx.stroke(path);
 
             sx = i*2;
