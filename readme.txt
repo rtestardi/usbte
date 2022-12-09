@@ -25,4 +25,4 @@ Then enter commands in the command line!
 Ctrl-C and Ctrl-D flow thru the command line when in focus.
 
 Try the USB Terminal Emulator here: https://rtestardi.github.io/usbte/usbte.html
-or the USB PIC32MK0512GPK064/PIC32MX250F128B Flea-Scope gui here: https://rtestardi.github.io/usbte/flea-scope.html
+or the USB PIC32MK0512GPK064/PIC32MX250F128B Flea-Scope™ gui here: https://rtestardi.github.io/usbte/flea-scope.html
