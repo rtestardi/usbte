@@ -331,7 +331,7 @@ function Status(dx, dy)
 {
     var status = "position: " + usec(dragX/width, true);
     if (dragY < height) {
-        status +=  ", " + volt(dragY/height, true);
+        status +=  ", " + volt((height-dragY-1)/height, true);
     }
     if (dx || dy) {
         status += "; delta: " + usec(dx/width, true);
