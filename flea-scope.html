@@ -191,10 +191,10 @@ hertz out:
 </td>
 <td>
 <select id="wave" onchange="Wave();">
-<option value="1">ekg</option>
-<option selected value="2">sine</option>
-<option value="3">square</option>
-<option value="4">triangle</option>
+<option>ekg</option>
+<option selected>sine</option>
+<option>square</option>
+<option>triangle</option>
 </select>
 </td>
 <td>
@@ -263,15 +263,15 @@ function Pause()
 
 function Wave()
 {
-    var number1 = document.getElementById("wave").value;
-    var number2 = document.getElementById("hz").value;
-    if (number2.toLowerCase().match(/k$/)) {
-        number2 = number2.replace(/k$/,"000");
-    } else if (number2.toLowerCase().match(/m$/)) {
-        number2 = number2.replace(/m$/,"000000");
+    var pattern = document.getElementById("wave").value;
+    var hz = document.getElementById("hz").value;
+    if (hz.toLowerCase().match(/k$/)) {
+        hz = hz.replace(/k$/,"000");
+    } else if (hz.toLowerCase().match(/m$/)) {
+        hz = hz.replace(/m$/,"000000");
     }
 
-    pending = "wave " + number1 + " " + number2;
+    pending = "wave " + pattern + " " + hz;
     Send(String.fromCharCode(3));  // Ctrl-C
 }
 
