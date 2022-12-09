@@ -272,6 +272,7 @@ function Wave()
     }
 
     pending = "wave " + number1 + " " + number2;
+    Send(String.fromCharCode(3));  // Ctrl-C
 }
 
 function usec(frac, scale)
