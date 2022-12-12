@@ -69,6 +69,9 @@ b6:
 b7:
 </td>
 <td>
+b8:
+</td>
+<td>
 </td>
 <td>
 delay sec:
@@ -176,7 +179,14 @@ hertz out:
 </select>
 </td>
 <td>
-<button onclick="for (var b = 0; b < 8; b++) { document.getElementById('b'+b).selectedIndex = 0; }">clear</button>
+<select id="b8">
+<option selected value="">-</option>
+<option value="0">0</option>
+<option value="1">1</option>
+</select>
+</td>
+<td>
+<button onclick="for (var b = 0; b < bits; b++) { document.getElementById('b'+b).selectedIndex = 0; }">clear</button>
 </td>
 <td>
 <input type="text" id="delay" value="0u" size="2"></input>
@@ -203,7 +213,7 @@ hertz out:
 </tr>
 </table>
 
-<canvas id="canvas" width="1844" height="516"></canvas>
+<canvas id="canvas" width="1844" height="546"></canvas>
 
 <br>
 
@@ -242,6 +252,7 @@ var analogY = 255;
 var samples = 900;
 var width = 1800;
 var height = 256;
+var bits = 9;
 
 var pause = false;
 var down = false;
@@ -477,7 +488,7 @@ async function Scope()
     var number3;
     var number4;
 
-    for (var b = 0; b < 8; b++) {
+    for (var b = 0; b < bits; b++) {
         if (document.getElementById("b"+b).value != "") {
             digital = true;
         }
@@ -486,7 +497,7 @@ async function Scope()
     if (digital) {
         var mask = 0;
         var bits = 0;
-        for (var b = 0; b < 8; b++) {
+        for (var b = 0; b < bits; b++) {
             if (document.getElementById("b"+b).value != "") {
                 mask |= 1<<b;
             }
@@ -527,7 +538,7 @@ async function Display()  // result is in string
 
         ctx.font = `12px Verdana`;
 
-        ctx.clearRect(0, 0, width+44, 516);
+        ctx.clearRect(0, 0, width+44, 546);
 
         ctx.fillText("3.3V", width+8, 10);
         ctx.fillText("0V", width+8, 246);
@@ -579,7 +590,7 @@ async function Display()  // result is in string
 
             var paths = [];
             var lastBit = [];
-            for (var b = 0; b < 8; b++) {
+            for (var b = 0; b < bits; b++) {
                 sy = 305+b*30;
 
                 paths[b] = new Path2D();  // digital
@@ -598,7 +609,7 @@ async function Display()  // result is in string
                 sx = i*2;
                 path.lineTo(sx, 255-Math.floor(adc/4));
 
-                for (b = 0; b < 8; b++) {
+                for (b = 0; b < bits; b++) {
                     sy = 305+b*30;
 
                     var bit = (byte & (1 << b)) != 0;
@@ -616,7 +627,7 @@ async function Display()  // result is in string
             ctx.stroke(path);
 
             sx = i*2;
-            for (b = 0; b < 8; b++) {
+            for (b = 0; b < bits; b++) {
                 sy = 305+b*30;
 
                 if (false == lastBit[b]) {
