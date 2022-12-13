@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<!-- USBTE -->
+<!-- See: https://wicg.github.io/webusb/ -->
+<!-- See: https://wicg.github.io/serial/ -->
+
+<head>
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+<title>USBTE</title>
+    <style>
+pre { white-space: pre-wrap; word-wrap: break-word; }
+a { text-decoration: none; }
+#results { line-height: 1.2; }
+#command { width: 96%; font-size:120%; }
+#copyright { font-size:65%; padding: 0px; }
+* { overflow-wrap: anywhere; word-wrap: anywhere; }
+button { overflow-wrap: normal; word-wrap: normal; }
+html,button,input { font: 36px Arial, Helvetica, sans-serif; padding: 15px 10px 15px 10px; margin: 15px 0px 15px 0px; }
+@media(min-width:80em){ html,button,input { font: 24px Arial, Helvetica, sans-serif; padding: 10px; margin: 10px 0px 10px 0px; } }
+@supports(-webkit-touch-callout:none) { button,input { -webkit-appearance: none; border-radius: 2px; } }
+body,html { margin: 0px; }
+    </style>
+</head>
+
+<body onload='Body()'>
+
+<h1>Web USB Terminal Emulator</h1>
+
+<!-- For bulk endpoint access, CpuStick vendorId/productId 0x0403/0xa660 with cdc/acm class/subclass 02/02 is replaced with FF/00 -->
+
+Optional filter to
+VID: <input id='vendorId' name='vendorId' size='4'/>
+PID: <input id='productId' name='productId' size='4'/>
+
+<p>
+Select:
+<button type='button' onclick="Comm();">COM</button>
+
+or
+<!-- bulk endpoint from device -->
+epin: <input id='epin' name='epin' size='1' value='2'/>
+<!-- bulk endpoint to device -->
+epout: <input id='epout' name='epout' size='1' value='3'/>
+and:
+<button type='button' onclick="Usb();">USB</button>
+
+<pre id='results'></pre>
+
+<input id='command' name='command' disabled='true' autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false'/>
+<br>
+<button type='button' onclick='Enter();'>Enter</button>
+<button type='button' onclick='Send("\0x0003");'>Ctrl-C</button>
+<button type='button' onclick='Send("\0x0004");'>Ctrl-D</button>
+<button type='button' onclick='Paste();'>Paste</button>
+<button type='button' onclick='Clear();'>Clear</button>
+
+<p id='copyright'>
+<a href=https://github.com/rtestardi/usbte target=_blank>github.com/rtestardi/usbte</a>
+&nbsp;&nbsp;&nbsp;
+<a href=https://github.com/rtestardi/StickOS target=_blank>github.com/rtestardi/StickOS</a>
+&nbsp;&nbsp;&nbsp;
+<a href=https://rtestardi.github.io/StickOS target=_blank>rtestardi.github.io/StickOS</a>
+
+<script>
+'use strict';
+
+var comm;
+var reader;
+var writer;
+var usb;
+var enc = new TextEncoder();
+var dec = new TextDecoder();
+var lines = [];
+var cursor = 0;
+var first = false;
+
+// the user loaded the webpage; set up keyboard listeners
+function Body()
+{
+    document.body.addEventListener("keydown", function(event) {
+        if ((event.keyCode === 67 || event.keyCode === 68) && event.ctrlKey && document.activeElement === document.getElementById("command")) {
+            // ctrl-c or ctrl-d in command line -- flow thru to device
+            event.preventDefault();
+            event.stopPropagation();
+            Send(String.fromCharCode(event.keyCode - 64));
+        }
+        if (event.keyCode === 13) {
+            // enter -- run the command line
+            event.preventDefault();
+            Enter();
+        }
+        if (event.keyCode === 40) {
+            // down arrow -- recall a newer command line
+            event.preventDefault();
+            UpDown(false);
+        }
+        if (event.keyCode === 38) {
+            // up arrow -- recall an older command line
+            event.preventDefault();
+            UpDown(true);
+        }
+    })
+}
+
+// the user wants to connect to a USB device's bulk endpoints directly
+async function Usb()
+{
+    var filter = {};
+    if (document.getElementById("vendorId").value != "") {
+        filter["vendorId"] = document.getElementById("vendorId").value;
+        if (document.getElementById("productId").value != "") {
+            filter["productId"] = document.getElementById("productId").value;
+        }
+    }
+
+    try {
+        usb = await navigator.usb.requestDevice({ filters: [filter] });
+        await usb.open();
+        await usb.selectConfiguration(1);
+        await usb.claimInterface(1);
+        setTimeout(Receive, 100);
+        document.getElementById("command").disabled = false;
+        document.getElementById("command").focus();
+    } catch(err) {
+        document.getElementById("results").innerHTML += err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
+    }
+}
+
+// the user wants to connect to an emulated COM port
+async function Comm()
+{
+    var filter = {};
+    if (document.getElementById("vendorId").value != "") {
+        filter["usbVendorId"] = document.getElementById("vendorId").value;
+        if (document.getElementById("productId").value != "") {
+            filter["usbProductId"] = document.getElementById("productId").value;
+        }
+    }
+
+    if ('serial' in navigator) {
+        try {
+            comm = await navigator.serial.requestPort("usbVendorId" in filter ? { filters: [filter] } : {});
+            await comm.open({ baudRate: 115200, bufferSize: 64 });
+            reader = comm.readable.getReader();
+            writer = comm.writable.getWriter();
+            setTimeout(Receive, 100);
+            document.getElementById("command").disabled = false;
+            document.getElementById("command").focus();
+        } catch(err) {
+            document.getElementById("results").innerHTML += err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
+        }
+    } else {
+        document.getElementById("results").innerHTML +=
+`The Web serial API needs to be enabled in your browser thru:
+   - <a href=edge://flags/#enable-experimental-web-platform-features>edge://flags/#enable-experimental-web-platform-features</a>
+   - <a href=chrome://flags/#enable-experimental-web-platform-features>chrome://flags/#enable-experimental-web-platform-features</a>
+   - <a href=opera://flags/#enable-experimental-web-platform-features>opera://flags/#enable-experimental-web-platform-features</a>
+`;
+    }
+}
+
+// receive a string from the device
+async function Receive()
+{
+    var result;
+    var str;
+    if (usb) {
+        result = await usb.transferIn(document.getElementById("epin").value, 64);
+        str = dec.decode(result.data.buffer);
+    } else {
+        result = await reader.read();
+        str = dec.decode(result.value);
+    }
+    if (str.match(/\033[[]2J/)) {
+        // clear screen on cls  XXX -- misses fragmented escape
+        Clear();
+    } else {
+        document.getElementById("results").innerHTML += str.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'');
+    }
+    document.getElementById("command").scrollIntoView();
+    setTimeout(Receive, 10);
+}
+
+// send a string to the device
+async function Send(str)
+{
+    if (usb) {
+        await usb.transferOut(document.getElementById("epout").value, enc.encode(str).buffer);
+    } else {
+        await writer.write(enc.encode(str).buffer);
+    }
+    document.getElementById("command").value = "";
+    document.getElementById("command").focus();
+}
+
+// the user clicked the Enter button; run the user command line
+async function Enter()
+{
+    var str = document.getElementById("command").value;
+    if (str.length && (! lines.length || str != lines[lines.length-1])) {
+        lines.push(str);
+    }
+    Send(str + "\r");
+    first = true;
+}
+
+// the user typed up-arrow or down-arrow to recall an older or newer command line
+function UpDown(up)
+{
+    if (first && up) {
+        // an initial up-arrow recalls the last hyperlink from the results history
+        cursor = 0;
+    }
+    if (lines.length) {
+        // recall the requested hyperlink from the results history to the equation line
+        if (up) {
+            // older
+            cursor = (cursor+lines.length-1)%lines.length;
+        } else {
+            // newer
+            cursor = (cursor+1)%lines.length;
+        }
+        document.getElementById("command").value = lines[cursor];
+        first = false;
+    }
+}
+
+// the user clicked the Paste button; paste the clipboard into the command line
+async function Paste()
+{
+    var text = await navigator.clipboard.readText();
+    Send(text + "\r");
+}
+
+// the user clicked the Clear button; clear the command, results, and history list
+async function Clear()
+{
+    document.getElementById("results").innerHTML = "";
+    document.getElementById("command").value = "";
+    document.getElementById("command").focus();
+    //lines = [];
+}
+
+</script>
+</body>
+</html>
