@@ -496,16 +496,16 @@ async function Scope()
 
     if (digital) {
         var mask = 0;
-        var bits = 0;
+        var sel = 0;
         for (var b = 0; b < bits; b++) {
             if (document.getElementById("b"+b).value != "") {
                 mask |= 1<<b;
             }
             if (document.getElementById("b"+b).value == "1") {
-                bits |= 1<<b;
+                sel |= 1<<b;
             }
         }
-        number2 = document.getElementById("trigger").value + "0x" + bits.toString(16);
+        number2 = document.getElementById("trigger").value + "0x" + sel.toString(16);
         number3 = "0x" + mask.toString(16);
     } else {
         number2 = document.getElementById("trigger").value + Math.floor((255-analogY)*1024/height);;
