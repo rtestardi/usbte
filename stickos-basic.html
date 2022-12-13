@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
-<!-- USBTE -->
+<!-- StickOS® BASIC -->
 <!-- See: https://wicg.github.io/webusb/ -->
 <!-- See: https://wicg.github.io/serial/ -->
 
 <head>
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
-<title>USBTE</title>
+<title>StickOS® BASIC</title>
     <style>
 pre { white-space: pre-wrap; word-wrap: break-word; }
 a { text-decoration: none; }
@@ -24,25 +24,12 @@ body,html { margin: 0px; }
 
 <body onload='Body()'>
 
-<h1>Web USB Terminal Emulator</h1>
+<h1>StickOS® BASIC</h1>
 
-<!-- For bulk endpoint access, CpuStick vendorId/productId 0x0403/0xa660 with cdc/acm class/subclass 02/02 is replaced with FF/00 -->
-
-Optional filter to
-VID: <input id='vendorId' name='vendorId' size='4'/>
-PID: <input id='productId' name='productId' size='4'/>
-
-<p>
+<div id="config">
 Select:
-<button type='button' onclick="Comm();">COM</button>
-
-or
-<!-- bulk endpoint from device -->
-epin: <input id='epin' name='epin' size='1' value='2'/>
-<!-- bulk endpoint to device -->
-epout: <input id='epout' name='epout' size='1' value='3'/>
-and:
-<button type='button' onclick="Usb();">USB</button>
+<button type='button' onclick="if (navigator.appVersion.indexOf('Win') != -1) { Comm(); } else { Usb(); }">Connect</button>
+</div>
 
 <pre id='results'></pre>
 
@@ -106,18 +93,15 @@ function Body()
 async function Usb()
 {
     var filter = {};
-    if (document.getElementById("vendorId").value != "") {
-        filter["vendorId"] = document.getElementById("vendorId").value;
-        if (document.getElementById("productId").value != "") {
-            filter["productId"] = document.getElementById("productId").value;
-        }
-    }
+    filter["vendorId"] = 0x0403;
+    filter["productId"] = 0xA660;
 
     try {
         usb = await navigator.usb.requestDevice({ filters: [filter] });
         await usb.open();
         await usb.selectConfiguration(1);
         await usb.claimInterface(1);
+        Send("\r");
         setTimeout(Receive, 100);
         document.getElementById("command").disabled = false;
         document.getElementById("command").focus();
@@ -130,12 +114,8 @@ async function Usb()
 async function Comm()
 {
     var filter = {};
-    if (document.getElementById("vendorId").value != "") {
-        filter["usbVendorId"] = document.getElementById("vendorId").value;
-        if (document.getElementById("productId").value != "") {
-            filter["usbProductId"] = document.getElementById("productId").value;
-        }
-    }
+    filter["usbVendorId"] = 0x0403;
+    filter["usbProductId"] = 0xA660;
 
     if ('serial' in navigator) {
         try {
@@ -143,6 +123,7 @@ async function Comm()
             await comm.open({ baudRate: 115200, bufferSize: 64 });
             reader = comm.readable.getReader();
             writer = comm.writable.getWriter();
+            Send("\r");
             setTimeout(Receive, 100);
             document.getElementById("command").disabled = false;
             document.getElementById("command").focus();
