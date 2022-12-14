@@ -43,8 +43,6 @@ secs/div:
 trigger:
 </td>
 <td>
-</td>
-<td>
 b0:
 </td>
 <td>
@@ -217,9 +215,18 @@ hertz out:
 
 <br>
 
+<table WIDTH="100%">
+<tr>
+<td WIDTH="10%">
+<button id="measure" onclick="document.getElementById('measure').style.color = measure?'black':'red'; if (measure) { document.getElementById('status').innerHTML = ''; }; measure = ! measure;">measure</button>
+</td>
+<td WIDTH="60%">
 <pre id='status'></pre>
+</td>
+<td>
 <pre id='command'></pre>
-<pre id='results'></pre>
+</td WIDTH="20%">
+</table>
 
 <p id='copyright'>
 <a href=https://github.com/rtestardi/usbte target=_blank>github.com/rtestardi/usbte</a>
@@ -248,6 +255,7 @@ var pending = "";
 var digital = false;
 
 var analogY = 255;
+var measure = false;
 
 var samples = 909;
 var width = 1818;
@@ -256,10 +264,9 @@ var bits = 9;
 
 var pause = false;
 var down = false;
-var drag = false;
-var dragX;
-var dragY;
-var dragT;
+var oldX, newX;
+var oldY, newY;
+var oldT, newT;
 
 function Pause()
 {
@@ -338,18 +345,23 @@ function volt(frac, scale)
     return volts;
 }
 
-function Status(dx, dy)
+function Status()
 {
-    var status = "position: " + usec(dragX/width, true);
-    if (dragY < height) {
-        status +=  ", " + volt((height-dragY-1)/height, true);
+    var dx = Math.abs(oldX - newX);
+    var dy = Math.abs(oldY - newY);
+    if (oldY > 255 || newY > 255) {
+        dy = 0;
+    }
+    var status = "position: " + usec(newX/width, true);
+    if (newY < height) {
+        status +=  ", " + volt((height-newY-1)/height, true);
     }
     if (dx || dy) {
         status += "; delta: " + usec(dx/width, true);
         if (dx) {
             status += ", " + freq(dx/width, true);
         }
-        if (dragY < height) {
+        if (newY < height) {
             status += ", " + volt(dy/height, true);
         }
     }
@@ -364,35 +376,29 @@ function Body()
 
     canvas.addEventListener('mousedown', function(e) {
         down = true;
-        drag = false;
-        dragX = e.offsetX;
-        dragY = e.offsetY;
-        dragT = e.timeStamp;
-        var canvas = document.getElementById('canvas');
-        var ctx = canvas.getContext('2d');
-
-        ctx.strokeRect(dragX-2, dragY-2, 4, 4);
-        document.getElementById("status").innerHTML = Status(0, 0);
+        if (! measure) {
+            analogY = e.offsetY;
+        } else {
+            newX = oldX = e.offsetX;
+            newY = oldY = e.offsetY;
+            newT = oldT = e.timeStamp;
+        }
     })
 
     canvas.addEventListener('mousemove', function(e) {
         if (down) {
-            drag = true;
-            var dx = Math.abs(dragX - e.offsetX);
-            var dy = Math.abs(dragY - Math.min(e.offsetY, 255));
-            document.getElementById("status").innerHTML = Status(dx, dy);
+            newX = e.offsetX;
+            newY = e.offsetY;
+            newT = e.timeStamp;
+            document.getElementById("status").innerHTML = Status();
         }
     })
 
     canvas.addEventListener('mouseup', function(e) {
         down = false;
-        drag = false;
-        if (e.timeStamp - dragT < 500 && e.offsetY < height) {
-            analogY = e.offsetY;
-            Send(String.fromCharCode(3));  // Ctrl-C
-        } else if (dragX - e.offsetX == 0 && dragY - e.offsetY == 0) {
-            document.getElementById("status").innerHTML = "";
-        }
+        measure = false;
+        document.getElementById('measure').style.color = 'black';
+        document.getElementById("status").innerHTML = Status();
     })
 }
 
@@ -403,27 +409,35 @@ async function Usb()
     filter["vendorId"] = 0x0403;
     filter["productId"] = 0xA660;
 
-    try {
-        usb = await navigator.usb.requestDevice({ filters: [filter] });
-        await usb.open();
-        await usb.selectConfiguration(1);
-        await usb.claimInterface(1);
+    if ('usb' in navigator) {
+        try {
+            usb = await navigator.usb.requestDevice({ filters: [filter] });
+            await usb.open();
+            await usb.selectConfiguration(1);
+            await usb.claimInterface(1);
 
-        document.getElementById("results").innerHTML = "";
-        document.getElementById("config").hidden = true;
+            document.getElementById("config").hidden = true;
 
-        discard = 1;
-        setTimeout(Receive, 1);
+            discard = 1;
+            setTimeout(Receive, 1);
 
-        Send(String.fromCharCode(3));  // Ctrl-C
-        Send("echo off\n");  // XXX -- figure out how to undo?
-        Send("prompt off\n");  // XXX -- figure out how to undo?
-        Wave();
+            Send(String.fromCharCode(3));  // Ctrl-C
+            Send("echo off\n");  // XXX -- figure out how to undo?
+            Send("prompt off\n");  // XXX -- figure out how to undo?
+            Wave();
 
-        discarded = false;
-        setTimeout(Discard, 200);
-    } catch(err) {
-        document.getElementById("results").innerHTML = err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
+            discarded = false;
+            setTimeout(Discard, 200);
+        } catch(err) {
+            document.getElementById("status").innerHTML = err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
+        }
+    } else {
+        document.getElementById("status").innerHTML =
+`The usb API needs to be enabled in your browser thru:
+   - <a href=edge://flags/#enable-experimental-web-platform-features>edge://flags/#enable-experimental-web-platform-features</a>
+   - <a href=chrome://flags/#enable-experimental-web-platform-features>chrome://flags/#enable-experimental-web-platform-features</a>
+   - <a href=opera://flags/#enable-experimental-web-platform-features>opera://flags/#enable-experimental-web-platform-features</a>
+`;
     }
 }
 
@@ -441,7 +455,6 @@ async function Comm()
             reader = comm.readable.getReader();
             writer = comm.writable.getWriter();
 
-            document.getElementById("results").innerHTML = "";
             document.getElementById("config").hidden = true;
 
             discard = 1;
@@ -455,10 +468,10 @@ async function Comm()
             discarded = false;
             setTimeout(Discard, 200);
         } catch(err) {
-            document.getElementById("results").innerHTML = err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
+            document.getElementById("status").innerHTML = err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
         }
     } else {
-        document.getElementById("results").innerHTML =
+        document.getElementById("status").innerHTML =
 `The Web serial API needs to be enabled in your browser thru:
    - <a href=edge://flags/#enable-experimental-web-platform-features>edge://flags/#enable-experimental-web-platform-features</a>
    - <a href=chrome://flags/#enable-experimental-web-platform-features>chrome://flags/#enable-experimental-web-platform-features</a>
