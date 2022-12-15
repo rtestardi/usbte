@@ -294,7 +294,7 @@ function Wave()
     Send(String.fromCharCode(3));  // Ctrl-C
 }
 
-function usec(frac, scale)
+function usec(frac, scale, fixed)
 {
     var usecv = parseInt(document.getElementById("qusec").value);  // this is per-division
     if (usecv < 0) {
@@ -305,14 +305,14 @@ function usec(frac, scale)
     usecv = usecv * 10 * frac;
     var usecs;
     if (scale && usecv >= 1000) {
-        usecs = "" + (usecv/1000).toFixed(1) + "ms";
+        usecs = "" + (usecv/1000).toFixed(fixed) + "ms";
     } else {
-        usecs = "" + (usecv).toFixed(1) + "us";
+        usecs = "" + (usecv).toFixed(fixed) + "us";
     }
     return usecs;
 }
 
-function freq(frac, scale)
+function freq(frac, scale, fixed)
 {
     var usecv = parseInt(document.getElementById("qusec").value);  // this is per-division
     if (usecv < 0) {
@@ -324,24 +324,24 @@ function freq(frac, scale)
     var freqv = 1000000/usecv;
     var freqs;
     if (scale && freqv >= 1000000) {
-        freqs = "" + (freqv/1000000).toFixed(1) + "MHz";
+        freqs = "" + (freqv/1000000).toFixed(fixed) + "MHz";
     } else if (scale && freqv >= 1000) {
-        freqs = "" + (freqv/1000).toFixed(1) + "kHz";
+        freqs = "" + (freqv/1000).toFixed(fixed) + "kHz";
     } else {
-        freqs = "" + (freqv).toFixed(1) + "Hz";
+        freqs = "" + (freqv).toFixed(fixed) + "Hz";
     }
     return freqs;
 }
 
-function volt(frac, scale)
+function volt(frac, scale, fixed)
 {
-    var voltv = parseInt(document.getElementById("volts").value);  // XXX -- this is full scale, why?
+    var voltv = parseFloat(document.getElementById("volts").value);  // XXX -- this is full scale, why?
     voltv = voltv * frac;
     var volts;
     if (scale && voltv < 0.001) {
-        volts = "" + (voltv*1000).toFixed(1) + "mV";
+        volts = "" + (voltv*1000).toFixed(fixed) + "mV";
     } else {
-        volts = "" + (voltv).toFixed(1) + "V";
+        volts = "" + (voltv).toFixed(fixed) + "V";
     }
     return volts;
 }
@@ -353,17 +353,17 @@ function Status()
     if (oldY > 255 || newY > 255) {
         dy = 0;
     }
-    var status = "position: " + usec(newX/width, true);
+    var status = "position: " + usec(newX/width, true, 2);
     if (newY < height) {
-        status +=  ", " + volt((height-newY-1)/height, true);
+        status +=  ", " + volt((height-newY-1)/height, true, 2);
     }
     if (dx || dy) {
-        status += "; delta: " + usec(dx/width, true);
+        status += "; delta: " + usec(dx/width, true, 2);
         if (dx) {
-            status += ", " + freq(dx/width, true);
+            status += ", " + freq(dx/width, true, 2);
         }
         if (newY < height) {
-            status += ", " + volt(dy/height, true);
+            status += ", " + volt(dy/height, true, 2);
         }
     }
     return status;
@@ -375,14 +375,22 @@ function Measure(ctx)
     // XXX -- make sure number is visible
     // XXX -- change status text to red!
     // XXX -- also draw numbers on mousedown!
+    var x;
+    var y;
     if (oldX >= 0 && oldY >= 0 && (oldX != newX || oldY != newY)) {
+        x = oldX;
+        y = oldY;
         ctx.fillStyle = 'red';
-        ctx.fillText("2", oldX, oldY);
+        ctx.arc(x, y, 4, 0, 2*Math.PI, false);
+        ctx.fill();
         ctx.fillStyle = 'black';
     }
     if (newX >= 0 && newY >= 0) {
+        x = newX;
+        y = newY;
         ctx.fillStyle = 'red';
-        ctx.fillText("1", newX, newY);
+        ctx.arc(x, y, 4, 0, 2*Math.PI, false);
+        ctx.fill();
         ctx.fillStyle = 'black';
     }
 }
@@ -603,7 +611,7 @@ async function Display()  // result is in string
             ctx.stroke();
             ctx.setLineDash([])
 
-            var t = "" + usec(i/10, true).replace(/[.]0/,"");
+            var t = "" + usec(i/10, true, 1).replace(/[.]0/,"");
             var w = (i==10)?(ctx.measureText(t).width):(0);
             ctx.fillText(t, (width/10*i)-w, 274);
         }
