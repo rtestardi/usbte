@@ -398,14 +398,14 @@ function Body()
         } else {
             newX = oldX = e.offsetX;
             newY = oldY = e.offsetY;
+            var canvas = document.getElementById('canvas');
+            var ctx = canvas.getContext('2d');
+            Measure(ctx);
         }
-        var canvas = document.getElementById('canvas');
-        var ctx = canvas.getContext('2d');
-        Measure(ctx);
     })
 
     canvas.addEventListener('mousemove', function(e) {
-        if (down) {
+        if (down && measure) {
             newX = e.offsetX;
             newY = e.offsetY;
             document.getElementById("status").innerHTML = Status();
@@ -416,13 +416,15 @@ function Body()
     })
 
     canvas.addEventListener('mouseup', function(e) {
+        if (down && measure) {
+            document.getElementById('measure').style.color = 'black';
+            document.getElementById("status").innerHTML = Status();
+            var canvas = document.getElementById('canvas');
+            var ctx = canvas.getContext('2d');
+            Measure(ctx);
+            measure = false;
+        }
         down = false;
-        measure = false;
-        document.getElementById('measure').style.color = 'black';
-        document.getElementById("status").innerHTML = Status();
-        var canvas = document.getElementById('canvas');
-        var ctx = canvas.getContext('2d');
-        Measure(ctx);
     })
 }
 
