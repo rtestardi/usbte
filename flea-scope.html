@@ -11,7 +11,7 @@
     <style>
 pre { white-space: pre-wrap; word-wrap: break-word; }
 a { text-decoration: none; }
-#results { line-height: 1.2; }
+#status { color: red; }
 #copyright { font-size:65%; padding: 0px; }
 * { overflow-wrap: anywhere; word-wrap: anywhere; }
 button { overflow-wrap: normal; word-wrap: normal; }
@@ -221,7 +221,7 @@ hertz out:
 <button id="measure" onclick="document.getElementById('measure').style.color = measure?'black':'red'; if (measure) { document.getElementById('status').innerHTML = ''; newX = oldX = -1; }; measure = ! measure;">measure</button>
 </td>
 <td WIDTH="60%">
-<pre id='status'></pre>
+<pre id='status' color='red'></pre>
 </td>
 <td>
 <pre id='command'></pre>
@@ -367,6 +367,24 @@ function Status()
     return status;
 }
 
+function Measure(ctx)
+{
+    // XXX -- make sure number is centered over point
+    // XXX -- make sure number is visible
+    // XXX -- change status text to red!
+    // XXX -- also draw numbers on mousedown!
+    if (oldX >= 0 && oldY >= 0 && (oldX != newX || oldY != newY)) {
+        ctx.fillStyle = 'red';
+        ctx.fillText("2", oldX, oldY);
+        ctx.fillStyle = 'black';
+    }
+    if (newX >= 0 && newY >= 0) {
+        ctx.fillStyle = 'red';
+        ctx.fillText("1", newX, newY);
+        ctx.fillStyle = 'black';
+    }
+}
+
 // the user loaded the webpage; set up keyboard listeners
 function Body()
 {
@@ -381,6 +399,9 @@ function Body()
             newX = oldX = e.offsetX;
             newY = oldY = e.offsetY;
         }
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+        Measure(ctx);
     })
 
     canvas.addEventListener('mousemove', function(e) {
@@ -388,6 +409,9 @@ function Body()
             newX = e.offsetX;
             newY = e.offsetY;
             document.getElementById("status").innerHTML = Status();
+            var canvas = document.getElementById('canvas');
+            var ctx = canvas.getContext('2d');
+            Measure(ctx);
         }
     })
 
@@ -396,6 +420,9 @@ function Body()
         measure = false;
         document.getElementById('measure').style.color = 'black';
         document.getElementById("status").innerHTML = Status();
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+        Measure(ctx);
     })
 }
 
@@ -550,20 +577,7 @@ async function Display()  // result is in string
 
         ctx.clearRect(0, 0, width+44, 546);
 
-// XXX -- make sure number is centered over point
-// XXX -- make sure number is visible
-// XXX -- change status text to red!
-// XXX -- also draw numbers on mousedown!
-if (newX >= 0 && newX < width && newY >= 0 && newY <= 255) {
-    ctx.fillStyle = 'red';
-    ctx.fillText("2", newX, newY);
-    ctx.fillStyle = 'black';
-}
-if (oldX >= 0 && oldX < width && oldY >= 0 && oldY <= 255) {
-    ctx.fillStyle = 'red';
-    ctx.fillText("1", oldX, oldY);
-    ctx.fillStyle = 'black';
-}
+        Measure(ctx);
 
         ctx.fillText("3.3V", width+8, 10);
         ctx.fillText("0V", width+8, 246);
