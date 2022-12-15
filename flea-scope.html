@@ -218,7 +218,7 @@ hertz out:
 <table WIDTH="100%">
 <tr>
 <td WIDTH="10%">
-<button id="measure" onclick="document.getElementById('measure').style.color = measure?'black':'red'; if (measure) { document.getElementById('status').innerHTML = ''; }; measure = ! measure;">measure</button>
+<button id="measure" onclick="document.getElementById('measure').style.color = measure?'black':'red'; if (measure) { document.getElementById('status').innerHTML = ''; newX = newY = -1; }; measure = ! measure;">measure</button>
 </td>
 <td WIDTH="60%">
 <pre id='status'></pre>
@@ -266,7 +266,6 @@ var pause = false;
 var down = false;
 var oldX, newX;
 var oldY, newY;
-var oldT, newT;
 
 function Pause()
 {
@@ -381,7 +380,6 @@ function Body()
         } else {
             newX = oldX = e.offsetX;
             newY = oldY = e.offsetY;
-            newT = oldT = e.timeStamp;
         }
     })
 
@@ -389,7 +387,6 @@ function Body()
         if (down) {
             newX = e.offsetX;
             newY = e.offsetY;
-            newT = e.timeStamp;
             document.getElementById("status").innerHTML = Status();
         }
     })
@@ -552,6 +549,20 @@ async function Display()  // result is in string
         ctx.font = `12px Verdana`;
 
         ctx.clearRect(0, 0, width+44, 546);
+
+// XXX -- make sure number is centered over point
+// XXX -- make sure number is visible
+// XXX -- change status text to red!
+if (newX >= 0 && newX < width && newY >= 0 && newY <= 255) {
+    ctx.fillStyle = 'red';
+    ctx.fillText("2", newX, newY);
+    ctx.fillStyle = 'black';
+}
+if (oldX >= 0 && oldX < width && oldY >= 0 && oldY <= 255) {
+    ctx.fillStyle = 'red';
+    ctx.fillText("1", oldX, oldY);
+    ctx.fillStyle = 'black';
+}
 
         ctx.fillText("3.3V", width+8, 10);
         ctx.fillText("0V", width+8, 246);
