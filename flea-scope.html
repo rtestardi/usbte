@@ -220,7 +220,7 @@ hertz out:
 <table WIDTH="100%">
 <tr>
 <td WIDTH="10%">
-<button id="measure" onclick="document.getElementById('measure').style.color = measure?'black':'red'; if (measure) { document.getElementById('status').innerHTML = ''; newX = oldX = -1; }; measure = ! measure;">measure</button>
+<button id="measure" onclick="OnMeasure();">measure</button>
 </td>
 <td WIDTH="60%">
 <pre id='status' color='red'></pre>
@@ -257,7 +257,7 @@ var pending = "";
 var digital = false;
 
 var analogY = 255;
-var measure = false;
+var measure = 0;
 
 var samples = 909;
 var width = 1818;
@@ -348,8 +348,9 @@ function volt(frac, scale, fixed)
 
 function Status()
 {
-    var dx = Math.abs(oldX - newX);
-    var dy = Math.abs(oldY - newY);
+    if (newX == -1) {
+        return "";
+    }
     if (oldY > 255 || newY > 255) {
         dy = 0;
     }
@@ -357,6 +358,11 @@ function Status()
     if (newY < height) {
         status +=  ", " + volt((height-newY-1)/height, true, 2);
     }
+    if (oldX == -1) {
+        return status;
+    }
+    var dx = Math.abs(oldX - newX);
+    var dy = Math.abs(oldY - newY);
     if (dx || dy) {
         status += "; delta: " + usec(dx/width, true, 2);
         if (dx) {
@@ -395,6 +401,19 @@ function Measure(ctx)
     }
 }
 
+function OnMeasure()
+{
+    if (measure) {
+        document.getElementById('measure').style.color = 'black';
+        document.getElementById('status').innerHTML = '';
+        newX = oldX = -1;
+        measure = 0;
+    } else {
+        document.getElementById('measure').style.color = 'red';
+        measure = 2;
+    }
+}
+
 // the user loaded the webpage; set up keyboard listeners
 function Body()
 {
@@ -406,34 +425,24 @@ function Body()
         if (! measure) {
             analogY = e.offsetY;
         } else {
-            newX = oldX = e.offsetX;
-            newY = oldY = e.offsetY;
-            var canvas = document.getElementById('canvas');
-            var ctx = canvas.getContext('2d');
-            Measure(ctx);
-        }
-    })
-
-    canvas.addEventListener('mousemove', function(e) {
-        if (down && measure) {
-            newX = e.offsetX;
-            newY = e.offsetY;
+            if (measure == 1) {
+                oldX = newX;
+                oldY = newY;
+                newX = e.offsetX;
+                newY = e.offsetY;
+                document.getElementById('measure').style.color = 'black';
+                document.getElementById('status').innerHTML = '';
+                measure = 0;
+            } else {
+                newX = e.offsetX;
+                newY = e.offsetY;
+                measure = 1;
+            }
             document.getElementById("status").innerHTML = Status();
-            var canvas = document.getElementById('canvas');
-            var ctx = canvas.getContext('2d');
-            Measure(ctx);
         }
     })
 
     canvas.addEventListener('mouseup', function(e) {
-        if (down && measure) {
-            document.getElementById('measure').style.color = 'black';
-            document.getElementById("status").innerHTML = Status();
-            var canvas = document.getElementById('canvas');
-            var ctx = canvas.getContext('2d');
-            Measure(ctx);
-            measure = false;
-        }
         down = false;
     })
 }
