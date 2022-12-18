@@ -220,7 +220,7 @@ hertz out:
 <table WIDTH="100%">
 <tr>
 <td WIDTH="10%">
-<button id="measure" onclick="OnMeasure();">measure</button>
+<button id="measure" onclick="Measure();">measure</button>
 </td>
 <td WIDTH="60%">
 <pre id='status' color='red'></pre>
@@ -346,43 +346,38 @@ function volt(frac, scale, fixed)
     return volts;
 }
 
-function Status()
+function ShowStatus()
 {
-    if (newX == -1) {
-        return "";
-    }
-    if (oldY > 255 || newY > 255) {
-        dy = 0;
-    }
-    var status = "position: " + usec(newX/width, true, 2);
-    if (newY < height) {
-        status +=  ", " + volt((height-newY-1)/height, true, 2);
-    }
-    if (oldX == -1) {
-        return status;
-    }
-    var dx = Math.abs(oldX - newX);
-    var dy = Math.abs(oldY - newY);
-    if (dx || dy) {
-        status += "; delta: " + usec(dx/width, true, 2);
-        if (dx) {
-            status += ", " + freq(dx/width, true, 2);
-        }
+    var status = "";
+    if (newX != -1) {
+        status = "position: " + usec(newX/width, true, 2);
         if (newY < height) {
-            status += ", " + volt(dy/height, true, 2);
+            status +=  ", " + volt((height-newY-1)/height, true, 2);
+        }
+        var dx = Math.abs(oldX - newX);
+        var dy = Math.abs(oldY - newY);
+        if (oldY > 255 || newY > 255) {
+            dy = 0;
+        }
+        if (oldX != -1 && (dx || dy)) {
+            status = "delta: " + usec(dx/width, true, 2);
+            if (dx) {
+                status += ", " + freq(dx/width, true, 2);
+            }
+            if (newY < height) {
+                status += ", " + volt(dy/height, true, 2);
+            }
         }
     }
-    return status;
+    document.getElementById("status").innerHTML = status;
 }
 
-function Measure(ctx)
+function ShowPoints(ctx)
 {
-    // XXX -- make sure number is centered over point
-    // XXX -- make sure number is visible
-    // XXX -- change status text to red!
     // XXX -- also draw numbers on mousedown!
     var x;
     var y;
+    ctx.beginPath();
     if (oldX >= 0 && oldY >= 0 && (oldX != newX || oldY != newY)) {
         x = oldX;
         y = oldY;
@@ -401,17 +396,17 @@ function Measure(ctx)
     }
 }
 
-function OnMeasure()
+function Measure()
 {
     if (measure) {
         document.getElementById('measure').style.color = 'black';
         document.getElementById('status').innerHTML = '';
-        newX = oldX = -1;
         measure = 0;
     } else {
         document.getElementById('measure').style.color = 'red';
         measure = 2;
     }
+    newX = oldX = -1;
 }
 
 // the user loaded the webpage; set up keyboard listeners
@@ -431,14 +426,14 @@ function Body()
                 newX = e.offsetX;
                 newY = e.offsetY;
                 document.getElementById('measure').style.color = 'black';
-                document.getElementById('status').innerHTML = '';
                 measure = 0;
             } else {
                 newX = e.offsetX;
                 newY = e.offsetY;
                 measure = 1;
             }
-            document.getElementById("status").innerHTML = Status();
+            ShowStatus();
+            ShowPoints(ctx);
         }
     })
 
@@ -598,7 +593,7 @@ async function Display()  // result is in string
 
         ctx.clearRect(0, 0, width+44, 546);
 
-        Measure(ctx);
+        ShowPoints(ctx);
 
         ctx.fillText("3.3V", width+8, 10);
         ctx.fillText("0V", width+8, 246);
