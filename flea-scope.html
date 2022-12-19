@@ -43,8 +43,6 @@ secs/div:
 trigger:
 </td>
 <td>
-</td>
-<td>
 b0:
 </td>
 <td>
@@ -118,9 +116,6 @@ hertz out:
 <option value="+">rise</option>
 <option value="-">fall</option>
 </select>
-</td>
-<td>
-<button onclick="analogY = 255;">zero</button>
 </td>
 <td>
 <select id="b0">
@@ -256,7 +251,7 @@ var pending = "";
 
 var digital = false;
 
-var analogY = 255;
+var analogY = 255;  // XXX -- change the sense of this!
 var measure = 0;
 
 const MSPS = 18;  // approximate target
@@ -437,7 +432,7 @@ function Body()
     canvas.addEventListener('mousedown', function(e) {
         down = true;
         if (! measure) {
-            analogY = e.offsetY;
+            analogY = Math.min(e.offsetY, 255);
             Send(String.fromCharCode(3));  // Ctrl-C
         } else {
             if (measure == 1) {
