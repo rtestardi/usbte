@@ -259,7 +259,7 @@ var digital = false;
 var analogY = 255;
 var measure = 0;
 
-const MSPS = 18;
+const MSPS = 20;
 const SAMPLES = 1000*MSPS/20;
 
 var width = SAMPLES*2;
@@ -415,6 +415,8 @@ function Body()
 {
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
+    canvas.setAttribute("width", width+44);
+    canvas.setAttribute("height", height+30*bits+20);
 
     canvas.addEventListener('mousedown', function(e) {
         down = true;
