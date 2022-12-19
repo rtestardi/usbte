@@ -91,7 +91,7 @@ hertz out:
 
 <tr>
 <td>
-<select id="qusec">
+<select id="qusec" onchange="ScaleCanvas();">
 <option value="-10">0.5u*</option>
 <option value="-5">1u*</option>
 <option value="-2">2.5u*</option>
@@ -261,6 +261,7 @@ var measure = 0;
 
 const MSPS = 18;
 const SAMPLES = 1000*MSPS/20;
+const EXTRA = 100;
 
 var width = SAMPLES*2;
 var height = 256;
@@ -270,6 +271,20 @@ var pause = false;
 var down = false;
 var oldX, newX;
 var oldY, newY;
+
+function ScaleCanvas()
+{
+    # account for clock rounding inaccuracies at 18 Msps
+    var usecv = parseInt(document.getElementById("qusec").value);  // this is per-division
+    if (usecv < 0) {
+        usecv = 1;
+    }
+    var pr = Math.floor(120*usecv*5/MSPS + 0.5);
+    var msps = 120*5/pr;
+    width = Math.floor(2000*msps*usecv/20);
+    canvas.setAttribute("width", width+44);
+    canvas.setAttribute("height", height+30*bits+20);
+}
 
 function Pause()
 {
@@ -415,8 +430,7 @@ function Body()
 {
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
-    canvas.setAttribute("width", width+44);
-    canvas.setAttribute("height", height+30*bits+20);
+    ScaleCanvas();
 
     canvas.addEventListener('mousedown', function(e) {
         down = true;
@@ -659,7 +673,7 @@ async function Display()  // result is in string
 
             sh = 20;
 
-            for (var i = 0; i < SAMPLES && i < lines.length; i++) {
+            for (var i = 0; i < width/2 && i < lines.length; i++) {
                 // XXX -- if we find "done", reset to 0 and keep going
                 var words = lines[i].split(/ /);
                 var adc = parseInt(words[0])
