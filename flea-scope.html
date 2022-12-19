@@ -374,7 +374,6 @@ function ShowStatus()
 
 function ShowPoints(ctx)
 {
-    // XXX -- also draw numbers on mousedown!
     var x;
     var y;
     ctx.beginPath();
@@ -419,6 +418,7 @@ function Body()
         down = true;
         if (! measure) {
             analogY = e.offsetY;
+            Send(String.fromCharCode(3));  // Ctrl-C
         } else {
             if (measure == 1) {
                 oldX = newX;
