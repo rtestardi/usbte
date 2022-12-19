@@ -259,13 +259,13 @@ var digital = false;
 var analogY = 255;
 var measure = 0;
 
-const MSPS = 18;  // approximate
-const SAMPLES = 1000*MSPS/20;
-const EXTRA = 100;
+const MSPS = 18;  // approximate target
+const SAMPLES = 1000*MSPS/20;  // approximate
+const EXTRA = 100;  // more extra than we might need for actual display
 
 var msps;  // actual based on mcu timer pr
 
-var width = SAMPLES*2;
+var width = SAMPLES*2;  // actual display width after ScaleCanvas()
 var height = 256;
 var bits = 9;
 
