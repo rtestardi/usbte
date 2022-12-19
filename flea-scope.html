@@ -259,8 +259,10 @@ var digital = false;
 var analogY = 255;
 var measure = 0;
 
-var samples = 900;
-var width = 1800;
+const MSPS = 18;
+const SAMPLES = 1000*MSPS/20;
+
+var width = SAMPLES*2;
 var height = 256;
 var bits = 9;
 
@@ -655,7 +657,7 @@ async function Display()  // result is in string
 
             sh = 20;
 
-            for (var i = 0; i < samples && i < lines.length; i++) {
+            for (var i = 0; i < SAMPLES && i < lines.length; i++) {
                 // XXX -- if we find "done", reset to 0 and keep going
                 var words = lines[i].split(/ /);
                 var adc = parseInt(words[0])
