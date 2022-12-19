@@ -259,9 +259,11 @@ var digital = false;
 var analogY = 255;
 var measure = 0;
 
-const MSPS = 18;
+const MSPS = 18;  // approximate
 const SAMPLES = 1000*MSPS/20;
 const EXTRA = 100;
+
+var msps;  // actual based on mcu timer pr
 
 var width = SAMPLES*2;
 var height = 256;
@@ -274,13 +276,13 @@ var oldY, newY;
 
 function ScaleCanvas()
 {
-    # account for clock rounding inaccuracies at 18 Msps
+    // account for clock rounding inaccuracies at 18 Msps
     var usecv = parseInt(document.getElementById("qusec").value);  // this is per-division
     if (usecv < 0) {
         usecv = 1;
     }
     var pr = Math.floor(120*usecv*5/MSPS + 0.5);
-    var msps = 120*5/pr;
+    msps = 120*5/pr;
     width = Math.floor(2000*msps*usecv/20);
     canvas.setAttribute("width", width+44);
     canvas.setAttribute("height", height+30*bits+20);
@@ -591,6 +593,7 @@ async function Scope()
     } else {
         number4 = number4 + "000000";
     }
+    number4 = Math.floor(number4 * msps);  // convert from us to samples
 
     var command = "scope " + number1 + " " + number2 + " " + number3 + " " + number4;
     if (pending != "") {
