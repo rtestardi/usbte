@@ -148,7 +148,7 @@ async function Receive()
     var result;
     var str;
     if (usb) {
-        result = await usb.transferIn(document.getElementById("epin").value, 64);
+        result = await usb.transferIn(2, 64);
         str = dec.decode(result.data.buffer);
     } else {
         result = await reader.read();
@@ -168,7 +168,7 @@ async function Receive()
 async function Send(str)
 {
     if (usb) {
-        await usb.transferOut(document.getElementById("epout").value, enc.encode(str).buffer);
+        await usb.transferOut(3, enc.encode(str).buffer);
     } else {
         await writer.write(enc.encode(str).buffer);
     }
