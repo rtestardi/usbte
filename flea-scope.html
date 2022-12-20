@@ -460,13 +460,14 @@ function Body()
 // the user wants to connect to a USB device's bulk endpoints directly
 async function Usb()
 {
-    var filter = {};
-    filter["vendorId"] = 0x0403;
-    filter["productId"] = 0xA660;
+    var filter = [
+        { vendorId: 0x2341, productId: 0xA660 },
+        { vendorId: 0x0403, productId: 0xA660 },
+    ];
 
     if ('usb' in navigator) {
         try {
-            usb = await navigator.usb.requestDevice({ /*filters: [filter]*/ });
+            usb = await navigator.usb.requestDevice({ filters: filter });
             await usb.open();
             await usb.selectConfiguration(1);
             await usb.claimInterface(1);
@@ -499,13 +500,14 @@ async function Usb()
 // the user wants to connect to an emulated COM port
 async function Comm()
 {
-    var filter = {};
-    filter["usbVendorId"] = 0x0403;
-    filter["usbProductId"] = 0xA660;
+    var filter = [
+        { usbVendorId: 0x2341, usbProductId: 0xA660 },
+        { usbVendorId: 0x0403, usbProductId: 0xA660 },
+    ];
 
     if ('serial' in navigator) {
         try {
-            comm = await navigator.serial.requestPort({ /*filters: [filter]*/ });
+            comm = await navigator.serial.requestPort({ filters: filter });
             await comm.open({ baudRate: 115200, bufferSize: 1024 });
             reader = comm.readable.getReader();
             writer = comm.writable.getWriter();
