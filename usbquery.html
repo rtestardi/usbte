@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<!-- USBTE -->
+<!-- See: https://wicg.github.io/webusb/ -->
+<!-- See: https://wicg.github.io/serial/ -->
+
+<head>
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+<title>USBQUERY</title>
+    <style>
+pre { white-space: pre-wrap; word-wrap: break-word; }
+a { text-decoration: none; }
+#results { line-height: 1.2; }
+#command { width: 96%; font-size:120%; }
+#copyright { font-size:65%; padding: 0px; }
+* { overflow-wrap: anywhere; word-wrap: anywhere; }
+button { overflow-wrap: normal; word-wrap: normal; }
+html,button,input { font: 36px Arial, Helvetica, sans-serif; padding: 15px 10px 15px 10px; margin: 15px 0px 15px 0px; }
+@media(min-width:80em){ html,button,input { font: 24px Arial, Helvetica, sans-serif; padding: 10px; margin: 10px 0px 10px 0px; } }
+@supports(-webkit-touch-callout:none) { button,input { -webkit-appearance: none; border-radius: 2px; } }
+body,html { margin: 0px; }
+    </style>
+</head>
+
+<body>
+
+<h1>Web USB Query</h1>
+
+<!-- For bulk endpoint access, CpuStick vendorId/productId 0x0403/0xa660 with cdc/acm class/subclass 02/02 is replaced with FF/00 -->
+
+Optional filter to
+VID: <input id='vendorId' name='vendorId' size='4'/>
+PID: <input id='productId' name='productId' size='4'/>
+
+<p>
+Select:
+<!-- bulk endpoint from device -->
+epin: <input id='epin' name='epin' size='1' value='2'/>
+<!-- bulk endpoint to device -->
+epout: <input id='epout' name='epout' size='1' value='3'/>
+and:
+<button type='button' onclick="Usb();">USB</button>
+
+<pre id='results'></pre>
+
+<script>
+'use strict';
+
+var usb;
+var enc = new TextEncoder();
+var dec = new TextDecoder();
+
+function Log(s)
+{
+    document.getElementById("results").innerHTML += s;
+}
+
+async function QueryOne(usb, number, name, index)
+{
+    var result = await usb.controlTransferIn({
+                         requestType: 'standard',
+                         recipient: 'device',
+                         request: 0x06,  // get descriptor
+                         value: (number<<8)|index,
+                         index: 0x0}, 255);
+    Log(name+"("+index+")\n");
+    for (var i = 0; i < result.data.byteLength; i++) {
+        Log("0x"+result.data.getUint8(i).toString(16)+" ");
+    }
+    Log("\n");
+    return result.status == "ok";
+}
+
+async function QueryAll(usb, number, name, limit)
+{
+    for (var index = 0; index < limit; index++) {
+        if (! await QueryOne(usb, number, name, index)) {
+            break;
+        }
+    }
+}
+
+// the user wants to connect to a USB device's bulk endpoints directly
+async function Usb()
+{
+    var filter = {};
+    if (document.getElementById("vendorId").value != "") {
+        filter["vendorId"] = document.getElementById("vendorId").value;
+        if (document.getElementById("productId").value != "") {
+            filter["productId"] = document.getElementById("productId").value;
+        }
+    }
+
+    try {
+        usb = await navigator.usb.requestDevice({ filters: [filter] });
+        await usb.open();
+        await usb.selectConfiguration(1);
+        await usb.claimInterface(1);
+
+        await QueryOne(usb, 0x1, "DEVICE DESCRIPTOR:", 0);
+        await QueryAll(usb, 0x2, "CONFIGURATION DESCRIPTOR:", 4);
+        await QueryAll(usb, 0x3, "STRING DESCRIPTOR:", 16);
+        await QueryOne(usb, 0x6, "DEVICE_QUALIFIER DESCRIPTOR:", 0);
+        await QueryOne(usb, 0xf, "BOS DESCRIPTOR:", 0);
+        await QueryOne(usb, 0x10, "DEVICE_CAPABILITY DESCRIPTOR:", 0);
+
+    } catch(err) {
+        document.getElementById("results").innerHTML += err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
+    }
+}
+
+</script>
+</body>
+</html>
