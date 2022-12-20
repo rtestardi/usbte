@@ -461,7 +461,7 @@ function Body()
 async function Usb()
 {
     var filter = {};
-    filter["vendorId"] = 0x0403;
+    //filter["vendorId"] = 0x0403;
     filter["productId"] = 0xA660;
 
     if ('usb' in navigator) {
@@ -500,7 +500,7 @@ async function Usb()
 async function Comm()
 {
     var filter = {};
-    filter["usbVendorId"] = 0x0403;
+    //filter["usbVendorId"] = 0x0403;
     filter["usbProductId"] = 0xA660;
 
     if ('serial' in navigator) {
