@@ -316,8 +316,8 @@ function Wave()
         hz = hz.replace(/m$/,"000000");
     }
 
-    pending = "wave " + pattern + " " + hz;
     Send(String.fromCharCode(3));  // Ctrl-C
+    pending = "wave " + pattern + " " + hz;
 }
 
 function usec(frac, scale, fixed)
@@ -444,9 +444,9 @@ function Body()
     canvas.addEventListener('mousedown', function(e) {
         down = true;
         if (! measure) {
+            Send(String.fromCharCode(3));  // Ctrl-C
             analogY = Math.min(e.offsetY, 255);
             Display();
-            Send(String.fromCharCode(3));  // Ctrl-C
         } else {
             if (measure == 1) {
                 oldX = newX;
@@ -556,27 +556,41 @@ async function Discard()
         discarded = false;
         setTimeout(Discard, 200);
     } else {
-        setTimeout(Scope, 200);
+        setTimeout(Scope, 1);
     }
 }
 
-async function Wait()
+async function Next()
 {
-    if (single) {
-        single = false;
-        setTimeout(Scope, 1);
-    } else if (down || pause) {
-        Display();
-        setTimeout(Wait, 100);
+    if (pending != "") {
+        SendCommand(pending + "\n");
+        pending = "";
     } else {
-        setTimeout(Scope, 1);
+        if (single) {
+            single = false;
+            setTimeout(Scope, 1);
+        } else if (down || pause) {
+            Display();
+            setTimeout(Next, 100);
+        } else {
+            setTimeout(Scope, 1);
+        }
     }
 }
 
-async function Waiting()
+async function WarnCommand()
 {
     document.getElementById('command').style.color = 'red';
     document.getElementById("command").innerHTML += " [waiting]";
+}
+
+async function SendCommand(command)
+{
+    waiting = setTimeout(WarnCommand, 1000);
+    document.getElementById('command').style.color = 'black';
+    document.getElementById("command").innerHTML = command;
+
+    Send(command + "\n");
 }
 
 async function Scope()
@@ -624,19 +638,9 @@ async function Scope()
     }
     number4 = Math.floor(number4 * msps);  // convert from us to samples
 
-    var command;
-    if (pending != "") {
-        command = pending;
-        pending = "";
-    } else {
-        command = "scope " + number1 + " " + number2 + " " + number3 + " " + number4;
-    }
+    var command = "scope " + number1 + " " + number2 + " " + number3 + " " + number4;
 
-    waiting = setTimeout(Waiting, 1000);
-    document.getElementById('command').style.color = 'black';
-    document.getElementById("command").innerHTML = command;
-
-    Send(command + "\n");
+    SendCommand(command);
 }
 
 async function Display()
@@ -778,11 +782,7 @@ async function Receive()
             clearTimeout(waiting);
             document.getElementById("command").innerHTML = " ";  // N.B. need space to avoid jitter!
             Display();
-            if (down || pause) {
-                setTimeout(Wait, 100);
-            } else {
-                setTimeout(Scope, 1);
-            }
+            setTimeout(Next, 1);
         }
     } else {
         discarded = true;
