@@ -445,6 +445,7 @@ function Body()
         down = true;
         if (! measure) {
             analogY = Math.min(e.offsetY, 255);
+            Display();
             Send(String.fromCharCode(3));  // Ctrl-C
         } else {
             if (measure == 1) {
@@ -574,6 +575,7 @@ async function Wait()
 
 async function Waiting()
 {
+    document.getElementById('command').style.color = 'red';
     document.getElementById("command").innerHTML += " [waiting]";
 }
 
@@ -631,6 +633,7 @@ async function Scope()
     }
 
     waiting = setTimeout(Waiting, 1000);
+    document.getElementById('command').style.color = 'black';
     document.getElementById("command").innerHTML = command;
 
     Send(command + "\n");
