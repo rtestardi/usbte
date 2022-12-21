@@ -567,7 +567,7 @@ async function Wait()
         setTimeout(Scope, 1);
     } else if (down || pause) {
         Display();
-        setTimeout(Wait, 10);
+        setTimeout(Wait, 100);
     } else {
         setTimeout(Scope, 1);
     }
@@ -779,7 +779,7 @@ async function Receive()
             document.getElementById("command").innerHTML = " ";  // N.B. need space to avoid jitter!
             Display();
             if (down || pause) {
-                setTimeout(Wait, 10);
+                setTimeout(Wait, 100);
             } else {
                 setTimeout(Scope, 1);
             }
