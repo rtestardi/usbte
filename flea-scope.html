@@ -289,11 +289,15 @@ function Pause()
     if (! pause) {
         pause = true;
         document.getElementById('pause').innerHTML = "resume";
+        document.getElementById('pause').style.color = 'red';
         document.getElementById('single').disabled = false;
+        document.getElementById('single').style.color = 'red';
     } else {
         pause = false;
         document.getElementById('pause').innerHTML = "pause";
+        document.getElementById('pause').style.color = 'black';
         document.getElementById('single').disabled = true;
+        document.getElementById('single').style.color = 'black';
     }
 }
 
@@ -769,7 +773,7 @@ async function Receive()
         if (string.match(/done\r\n$/)) {
             // we have scope results!
             clearTimeout(waiting);
-            document.getElementById("command").innerHTML = "";
+            //document.getElementById("command").innerHTML = "";
             Display();
             if (down || pause) {
                 setTimeout(Wait, 10);
