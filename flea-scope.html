@@ -773,7 +773,7 @@ async function Receive()
         if (string.match(/done\r\n$/)) {
             // we have scope results!
             clearTimeout(waiting);
-            //document.getElementById("command").innerHTML = "";
+            document.getElementById("command").innerHTML = " ";  // N.B. need space to avoid jitter!
             Display();
             if (down || pause) {
                 setTimeout(Wait, 10);
