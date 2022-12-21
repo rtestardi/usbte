@@ -625,7 +625,7 @@ async function Scope()
         command = "scope " + number1 + " " + number2 + " " + number3 + " " + number4;
     }
 
-    waiting = setTimeout(Waiting, 200);
+    waiting = setTimeout(Waiting, 1000);
 
     document.getElementById("command").innerHTML = command;
     Send(command + "\n");
