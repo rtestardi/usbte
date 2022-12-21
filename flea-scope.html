@@ -561,6 +561,7 @@ async function Wait()
         single = false;
         setTimeout(Scope, 1);
     } else if (down || pause) {
+        Display();
         setTimeout(Wait, 10);
     } else {
         setTimeout(Scope, 1);
@@ -626,16 +627,14 @@ async function Scope()
     }
 
     waiting = setTimeout(Waiting, 1000);
-
     document.getElementById("command").innerHTML = command;
+
     Send(command + "\n");
 }
 
-async function Display()  // result is in string
+async function Display()
 {
-    clearTimeout(waiting);
-    document.getElementById("command").innerHTML = " ";
-
+    // result is in string
     var lines = string.split(/\r?\n/);
 
     ctx.font = `12px Verdana`;
@@ -750,12 +749,6 @@ async function Display()  // result is in string
             ctx.fillText("b"+b, width+8, sy-2);
         }
     }
-
-    if (down || pause) {
-        setTimeout(Wait, 10);
-    } else {
-        setTimeout(Scope, 1);
-    }
 }
 
 // receive a string from the device
@@ -774,8 +767,15 @@ async function Receive()
     if (! discard) {
         string += str.replace(/</g,'&lt;').replace(/>/g,'&gt;');
         if (string.match(/done\r\n$/)) {
-            // XXX -- we should only match done at end of buffer!
-            Display()
+            // we have scope results!
+            clearTimeout(waiting);
+            document.getElementById("command").innerHTML = "";
+            Display();
+            if (down || pause) {
+                setTimeout(Wait, 10);
+            } else {
+                setTimeout(Scope, 1);
+            }
         }
     } else {
         discarded = true;
