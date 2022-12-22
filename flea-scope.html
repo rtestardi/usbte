@@ -679,7 +679,7 @@ async function Display()
         ctx.setLineDash([])
 
         var t = "" + usec(i/10, true, 1).replace(/[.]0/,"");
-        var w = (i==10)?(ctx.measureText(t).width):(0);
+        var w = (i==10)?(ctx.measureText(t).width):((i)?(ctx.measureText(t).width/2):0);
         ctx.fillText(t, (width/10*i)-w, 274);
     }
 
