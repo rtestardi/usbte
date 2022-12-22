@@ -1,12 +1,13 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <!-- FLEA-SCOPE -->
 <!-- See: https://wicg.github.io/webusb/ -->
 <!-- See: https://wicg.github.io/serial/ -->
 
 <head>
-<meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
 <title>FLEA-SCOPE™</title>
     <style>
 pre { white-space: pre-wrap; word-wrap: break-word; }
@@ -37,51 +38,51 @@ Select:
 <table>
 <tr>
 <td>
-secs/div:
+<label for="qusec">secs/div:</label>
 </td>
 <td>
-trigger:
+<label for="trigger">trigger:</label>
 </td>
 <td>
-b0:
+<label for="b0">b0:</label>
 </td>
 <td>
-b1:
+<label for="b1">b1:</label>
 </td>
 <td>
-b2:
+<label for="b2">b2:</label>
 </td>
 <td>
-b3:
+<label for="b3">b3:</label>
 </td>
 <td>
-b4:
+<label for="b4">b4:</label>
 </td>
 <td>
-b5:
+<label for="b5">b5:</label>
 </td>
 <td>
-b6:
+<label for="b6">b6:</label>
 </td>
 <td>
-b7:
+<label for="b7">b7:</label>
 </td>
 <td>
-b8:
+<label for="b8">b8:</label>
 </td>
 <td>
 </td>
 <td>
-delay sec:
+<label for="delay">delay sec:</label>
 </td>
 <td>
-volts:
+<label for="volts">volts:</label>
 </td>
 <td>
-wave out:
+<label for="wave">wave out:</label>
 </td>
 <td>
-hertz out:
+<label for="hz">hertz out:</label>
 </td>
 </tr>
 
@@ -179,7 +180,7 @@ hertz out:
 </select>
 </td>
 <td>
-<button onclick="for (var b = 0; b < bits; b++) { document.getElementById('b'+b).selectedIndex = 0; }">clear</button>
+<button type="button" onclick="for (var b = 0; b < bits; b++) { document.getElementById('b'+b).selectedIndex = 0; }">clear</button>
 </td>
 <td>
 <input type="text" id="delay" value="0u" size="2"></input>
@@ -210,9 +211,9 @@ hertz out:
 <table WIDTH="1800px">
 <tr>
 <td WIDTH="20%">
-<button id="pause" onclick="Pause();">pause</button>
-<button id="single" onclick="Single();" disabled=true>single</button>
-<button id="measure" onclick="Measure();">measure</button>
+<button type="button" id="pause" onclick="Pause();">pause</button>
+<button type="button" id="single" onclick="Single();" disabled=true>single</button>
+<button type="button" id="measure" onclick="Measure();">measure</button>
 </td>
 <td WIDTH="50%">
 <pre id='status' color='red'></pre>
