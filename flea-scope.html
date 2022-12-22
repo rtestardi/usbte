@@ -468,11 +468,11 @@ function Body()
             ShowStatus();
             ShowPoints(ctx);
         }
-    })
+    });
 
     canvas.addEventListener('mouseup', function(e) {
         down = false;
-    })
+    });
 }
 
 // the user wants to connect to a USB device's bulk endpoints directly
@@ -618,7 +618,7 @@ async function Scope()
     if (digital) {
         var mask = 0;
         var sel = 0;
-        for (var b = 0; b < bits; b++) {
+        for (b = 0; b < bits; b++) {
             if (document.getElementById("b"+b).value != "") {
                 mask |= 1<<b;
             }
@@ -629,7 +629,7 @@ async function Scope()
         number2 = document.getElementById("trigger").value + "0x" + sel.toString(16);
         number3 = "0x" + mask.toString(16);
     } else {
-        number2 = document.getElementById("trigger").value + Math.floor((255-analogY)*1024/height);;
+        number2 = document.getElementById("trigger").value + Math.floor((255-analogY)*1024/height);
         number3 = 0;
     }
 
@@ -664,9 +664,9 @@ async function Display()
 
     for (var i = 0; i <= 10; i++) {
         if (Math.floor(i/5)*5 == i) {
-            ctx.setLineDash([6, 10])
+            ctx.setLineDash([6, 10]);
         } else {
-            ctx.setLineDash([2, 10])
+            ctx.setLineDash([2, 10]);
         }
         ctx.beginPath();
         ctx.moveTo(width/10*i, 0);
@@ -677,7 +677,7 @@ async function Display()
         ctx.moveTo(width/10*i, 305-20);
         ctx.lineTo(width/10*i, 305+7*30);
         ctx.stroke();
-        ctx.setLineDash([])
+        ctx.setLineDash([]);
 
         var t = "" + usec(i/10, true, 1).replace(/[.]0/,"");
         var w = (i==10)?(ctx.measureText(t).width):((i)?(ctx.measureText(t).width/2):0);
@@ -685,7 +685,7 @@ async function Display()
     }
 
     if (! digital) {
-        ctx.setLineDash([10, 4])
+        ctx.setLineDash([10, 4]);
         ctx.strokeStyle = '#00BF00';
         ctx.beginPath();
         ctx.moveTo(0, analogY);
@@ -695,7 +695,7 @@ async function Display()
         ctx.beginPath();
         ctx.stroke();
         ctx.strokeStyle = '#000000';
-        ctx.setLineDash([])
+        ctx.setLineDash([]);
     }
 
     if (lines.length >= 100) {
@@ -717,10 +717,10 @@ async function Display()
 
         sh = 20;
 
-        for (var i = 0; i < width/2 && i < lines.length; i++) {
+        for (i = 0; i < width/2 && i < lines.length; i++) {
             // XXX -- if we find "done", reset to 0 and keep going
             var words = lines[i].split(/ /);
-            var adc = parseInt(words[0])
+            var adc = parseInt(words[0]);
             var byte = parseInt(words[1]);
 
             sx = i*2;
