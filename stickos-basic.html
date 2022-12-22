@@ -122,7 +122,7 @@ async function Comm()
 
     if ('serial' in navigator) {
         try {
-            comm = await navigator.serial.requestPort("usbVendorId" in filter ? { filters: filter } : {});
+            comm = await navigator.serial.requestPort({ filters: filter });
             await comm.open({ baudRate: 115200, bufferSize: 64 });
             reader = comm.readable.getReader();
             writer = comm.writable.getWriter();
