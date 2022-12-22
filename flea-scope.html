@@ -251,9 +251,13 @@ var digital = false;
 var analogY = 255;  // XXX -- change the sense of this!
 var measure = 0;
 
-const MSPS = 18;  // approximate target
-const SAMPLES = 1000*MSPS/20;  // approximate
-const EXTRA = 100;  // more extra than we might need for actual display
+const MSPS = 18;  // approximate target sample rate
+const SAMPLES = 1000*MSPS/20;  // approximate width of display canvas
+const EXTRA = 100;  // extra samples in case web page wants to fine-scale
+const INTERLEAVE = 5;  // we interleave results from 5 adcs
+
+const bus_frequency = 120000000;
+const bus_mhz = bus_frequency/1000000;
 
 var msps;  // actual based on mcu timer pr
 
@@ -277,8 +281,8 @@ function ScaleCanvas()
     if (usecv < 0) {
         usecv = 1;
     }
-    var pr = Math.floor(120*usecv*5/MSPS + 0.5);
-    msps = 120*5/pr;
+    var pr = Math.floor(bus_mhz*usecv*INTERLEAVE/MSPS + 0.5);
+    msps = bus_mhz*INTERLEAVE/pr;
     width = Math.floor(2000*msps*usecv/20);
     canvas.setAttribute("width", width+44);
     canvas.setAttribute("height", height+30*bits+20);
