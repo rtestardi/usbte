@@ -36,8 +36,8 @@ Select:
 <input id='command' name='command' disabled='true' autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false'/>
 <br>
 <button type='button' onclick='Enter();'>Enter</button>
-<button type='button' onclick='Send("\0x0003");'>Ctrl-C</button>
-<button type='button' onclick='Send("\0x0004");'>Ctrl-D</button>
+<button type='button' onclick='Send(String.fromCharCode(3));'>Ctrl-C</button>
+<button type='button' onclick='Send(String.fromCharCode(4));'>Ctrl-D</button>
 <button type='button' onclick='Paste();'>Paste</button>
 <button type='button' onclick='Clear();'>Clear</button>
 
