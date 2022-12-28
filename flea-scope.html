@@ -16,7 +16,7 @@ a { text-decoration: none; }
 #copyright { font-size:65%; padding: 0px; }
 * { overflow-wrap: anywhere; word-wrap: anywhere; }
 button { overflow-wrap: normal; word-wrap: normal; }
-td { text-align: center; padding: 0px 15px 0px 0px; }
+td { text-align: center; padding: 0px 15px 0px 0px; white-space: nowrap; }
 html,button,input,select { font: 36px Arial, Helvetica, sans-serif; padding: 15px 10px 15px 10px; margin: 10px 0px 10px 0px; }
 @media(min-width:80em){ html,button,input { font: 24px Arial, Helvetica, sans-serif; padding: 10px 10px 10px 10px; margin: 10px 0px 10px 0px; } }
 @supports(-webkit-touch-callout:none) { button,input { -webkit-appearance: none; border-radius: 2px; } }
@@ -210,12 +210,12 @@ Select:
 
 <table WIDTH="1800px">
 <tr>
-<td WIDTH="20%">
+<td WIDTH="30%">
 <button type="button" id="pause" onclick="Pause();">pause</button>
 <button type="button" id="single" onclick="Single();" disabled=true>single</button>
 <button type="button" id="measure" onclick="Measure();">measure</button>
 </td>
-<td WIDTH="50%">
+<td WIDTH="40%">
 <pre id='status' color='red'></pre>
 </td>
 <td>
