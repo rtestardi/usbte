@@ -215,8 +215,11 @@ Select:
 <button type="button" id="single" onclick="Single();" disabled=true>single</button>
 <button type="button" id="measure" onclick="Measure();">measure</button>
 </td>
-<td WIDTH="40%">
+<td WIDTH="30%">
 <pre id='status' color='red'></pre>
+</td>
+<td WIDTH="10%">
+<pre id='voltage'></pre>
 </td>
 <td>
 <pre id='command'></pre>
@@ -717,6 +720,10 @@ async function Display()
 
         sh = 20;
 
+        var adcmin = 1024;
+        var adcmax = -1;
+        var adcsum = 0;
+
         for (i = 0; i < width/2 && i < lines.length; i++) {
             // XXX -- if we find "done", reset to 0 and keep going
             var words = lines[i].split(/ /);
@@ -725,6 +732,13 @@ async function Display()
 
             sx = i*2;
             path.lineTo(sx, 255-Math.floor(adc/4));
+            if (adc < adcmin) {
+                adcmin = adc;
+            }
+            if (adc > adcmax) {
+                adcmax = adc;
+            }
+            adcsum += adc;
 
             for (b = 0; b < bits; b++) {
                 sy = 305+b*30;
@@ -738,6 +752,12 @@ async function Display()
                 }
                 lastBit[b] = bit;
             }
+        }
+
+        if (adcmax-adcmin < 1024/5) {
+            document.getElementById("voltage").innerHTML = volt(adcsum/i/1024, true, 2);
+        } else {
+            document.getElementById("voltage").innerHTML = " ";
         }
 
         path.moveTo(width, 255);
