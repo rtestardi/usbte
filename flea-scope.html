@@ -187,8 +187,10 @@ Select:
 </td>
 <td>
 <select id="volts">
-<option selected value="0">3.3+</option>
-<option value="1">16-+</option>
+<option selected value="3.3">3.3+</option>
+<option value="8">4-/+</option>
+<option value="16">8-/+</option>
+<option value="32">16-/+</option>
 </select>
 </td>
 <td>
@@ -370,7 +372,7 @@ function freq(frac, scale, fixed)
 
 function volt(frac, scale, fixed)
 {
-    var voltv = parseFloat(document.getElementById("volts").value);  // XXX -- this is full scale, why?
+    var voltv = parseFloat(document.getElementById("volts").value);
     voltv = voltv * frac;
     var volts;
     if (scale && voltv < 0.001) {
@@ -648,7 +650,7 @@ async function Scope()
     }
     number4 = Math.floor(number4 * msps);  // convert from us to samples
 
-    number5 = document.getElementById("volts").value;
+    number5 = parseFloat(document.getElementById("volts").value) == 3.3 ? 0 : 1;
 
     var command = "scope " + number1 + " " + number2 + " " + number3 + " " + number4 + " " + number5;
 
@@ -666,13 +668,15 @@ async function Display()
 
     ShowPoints(ctx);
 
-    if (document.getElementById("volts").value == 0) {
+    var v = parseFloat(document.getElementById("volts").value);
+
+    if (v == 3.3) {
         ctx.fillText("3.3V", width+8, 10);
         ctx.fillText("0V", width+8, 256);
     } else {
-        ctx.fillText("+16V", width+8, 10);
+        ctx.fillText("+" + v/2 + "V", width+8, 10);
         ctx.fillText("0V", width+8, 128);
-        ctx.fillText("-16V", width+8, 256);
+        ctx.fillText("-" + v/2 + "V", width+8, 256);
     }
 
     for (var i = 0; i <= 10; i++) {
@@ -710,7 +714,7 @@ async function Display()
     ctx.beginPath();
     ctx.strokeStyle = '#000000';
     ctx.setLineDash([5, 5]);
-    if (document.getElementById("volts").value != 0) {
+    if (parseFloat(document.getElementById("volts").value) != 3.3) {
         ctx.moveTo(0, height/2);
         ctx.lineTo(width, height/2);
     } else {
@@ -745,11 +749,24 @@ async function Display()
         var adcmax = -1;
         var adcsum = 0;
 
+        var v = parseFloat(document.getElementById("volts").value);
+
         for (i = 0; i < width/2 && i < lines.length; i++) {
             // XXX -- if we find "done", reset to 0 and keep going
             var words = lines[i].split(/ /);
             var adc = parseInt(words[0]);
             var byte = parseInt(words[1]);
+
+            if (v == 3.3) {
+                adc *= 1.1;
+            } else {
+                adc = (adc - 512)*(32/v) + 512;
+            }
+            if (adc < 0) {
+                adc = 0;
+            } else if (adc > 1023) {
+                adc = 1023;
+            }
 
             sx = i*2;
             path.lineTo(sx, 255-Math.floor(adc/4));
