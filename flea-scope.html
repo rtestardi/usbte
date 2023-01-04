@@ -186,7 +186,7 @@ Select:
 <input type="text" id="delay" value="0u" size="2"></input>
 </td>
 <td>
-<select id="volts">
+<select id="volts" onchange='Send(String.fromCharCode(3));'>
 <option selected value="3.3">3.3+</option>
 <option value="8">4-/+</option>
 <option value="16">8-/+</option>
@@ -255,7 +255,7 @@ var pending = "";
 
 var digital = false;
 
-var analogY = 255;  // XXX -- change the sense of this!
+var analogT = 0;  // 0..255
 var measure = 0;
 
 const MSPS = 18;  // approximate target sample rate
@@ -457,11 +457,13 @@ function Body()
     ctx = canvas.getContext('2d');
     ScaleCanvas();
 
+    var v = parseFloat(document.getElementById("volts").value);
+
     canvas.addEventListener('mousedown', function(e) {
         down = true;
         if (! measure) {
             Send(String.fromCharCode(3));  // Ctrl-C
-            analogY = Math.min(e.offsetY, 255);
+            analogT = Math.max(height-1-e.offsetY, 0);
             Display();
         } else {
             if (measure == 1) {
@@ -614,6 +616,8 @@ async function Scope()
     discard = 0;
     string = "";
 
+    var v = parseFloat(document.getElementById("volts").value)
+
     digital = false;
     var number1 = document.getElementById("qusec").value;
     var number2;
@@ -638,10 +642,16 @@ async function Scope()
                 sel |= 1<<b;
             }
         }
-        number2 = document.getElementById("trigger").value + "0x" + sel.toString(16);
+        number2 = document.getElementById("trigger").value;
+        number2 += "0x" + sel.toString(16);
         number3 = "0x" + mask.toString(16);
     } else {
-        number2 = document.getElementById("trigger").value + Math.floor((255-analogY)*1024/height);
+        number2 = document.getElementById("trigger").value;
+        if (v == 3.3) {
+            number2 += Math.floor(analogT/1.1*1024/height);
+        } else {
+            number2 += Math.floor(((analogT-height/2)/(32/v)+height/2)*1024/height);
+        }
         number3 = 0;
     }
 
@@ -655,7 +665,7 @@ async function Scope()
     }
     number4 = Math.floor(number4 * msps);  // convert from us to samples
 
-    number5 = parseFloat(document.getElementById("volts").value) == 3.3 ? 0 : 1;
+    number5 = v == 3.3 ? 0 : 1;
 
     var command = "scope " + number1 + " " + number2 + " " + number3 + " " + number4 + " " + number5;
 
@@ -710,8 +720,8 @@ async function Display()
         ctx.setLineDash([10, 4]);
         ctx.strokeStyle = '#00BF00';
         ctx.beginPath();
-        ctx.moveTo(0, analogY);
-        ctx.lineTo(width, analogY);
+        ctx.moveTo(0, height-analogT);
+        ctx.lineTo(width, height-analogT);
         ctx.stroke();
     }
 
