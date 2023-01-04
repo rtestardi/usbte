@@ -732,9 +732,15 @@ async function Display()
     ctx.strokeStyle = '#000000';
     ctx.setLineDash([5, 5]);
     if (parseFloat(document.getElementById("volts").value) != 3.3) {
+        ctx.moveTo(0, 0);
+        ctx.lineTo(width, 0);
         ctx.moveTo(0, (height-1)/2);
         ctx.lineTo(width, (height-1)/2);
+        ctx.moveTo(0, height-1);
+        ctx.lineTo(width, height-1);
     } else {
+        ctx.moveTo(0, 0);
+        ctx.lineTo(width, 0);
         ctx.moveTo(0, height-1);
         ctx.lineTo(width, height-1);
     }
