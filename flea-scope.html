@@ -666,8 +666,14 @@ async function Display()
 
     ShowPoints(ctx);
 
-    ctx.fillText("3.3V", width+8, 10);
-    ctx.fillText("0V", width+8, 246);
+    if (document.getElementById("volts").value == 0) {
+        ctx.fillText("3.3V", width+8, 10);
+        ctx.fillText("0V", width+8, 246);
+    } else {
+        ctx.fillText("+16V", width+8, 10);
+        ctx.fillText("0V", width+8, 123);
+        ctx.fillText("-16V", width+8, 246);
+    }
 
     for (var i = 0; i <= 10; i++) {
         if (Math.floor(i/5)*5 == i) {
@@ -698,12 +704,23 @@ async function Display()
         ctx.moveTo(0, analogY);
         ctx.lineTo(width, analogY);
         ctx.stroke();
-
-        ctx.beginPath();
-        ctx.stroke();
-        ctx.strokeStyle = '#000000';
-        ctx.setLineDash([]);
     }
+
+
+    ctx.beginPath();
+    ctx.strokeStyle = '#000000';
+    ctx.setLineDash([5, 5]);
+    if (document.getElementById("volts").value != 0) {
+        ctx.moveTo(0, height/2);
+        ctx.lineTo(width, height/2);
+    } else {
+        ctx.moveTo(0, height);
+        ctx.lineTo(width, height);
+    }
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+
 
     if (lines.length >= 100) {
         var sx, sy, sh;
