@@ -187,7 +187,8 @@ Select:
 </td>
 <td>
 <select id="volts">
-<option value="3.3">3.3</option>
+<option selected value="0">3.3</option>
+<option value="1">+-16</option>
 </select>
 </td>
 <td>
@@ -611,6 +612,7 @@ async function Scope()
     var number2;
     var number3;
     var number4;
+    var number5;
 
     for (var b = 0; b < bits; b++) {
         if (document.getElementById("b"+b).value != "") {
@@ -646,7 +648,9 @@ async function Scope()
     }
     number4 = Math.floor(number4 * msps);  // convert from us to samples
 
-    var command = "scope " + number1 + " " + number2 + " " + number3 + " " + number4;
+    number5 = document.getElementById("volts").value;
+
+    var command = "scope " + number1 + " " + number2 + " " + number3 + " " + number4 + " " + number5;
 
     SendCommand(command);
 }
