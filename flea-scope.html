@@ -281,6 +281,8 @@ var waiting;
 var oldX, newX;
 var oldY, newY;
 
+var calibration = { 3.3: 4, 8: 2, 16:2, 32:2 };
+
 function ScaleCanvas()
 {
     // account for clock rounding inaccuracies at 18 Msps
@@ -730,11 +732,11 @@ async function Display()
     ctx.strokeStyle = '#000000';
     ctx.setLineDash([5, 5]);
     if (parseFloat(document.getElementById("volts").value) != 3.3) {
-        ctx.moveTo(0, height/2);
-        ctx.lineTo(width, height/2);
+        ctx.moveTo(0, (height-1)/2);
+        ctx.lineTo(width, (height-1)/2);
     } else {
-        ctx.moveTo(0, height);
-        ctx.lineTo(width, height);
+        ctx.moveTo(0, height-1);
+        ctx.lineTo(width, height-1);
     }
     ctx.stroke();
 
@@ -769,7 +771,7 @@ async function Display()
         for (i = 0; i < width/2 && i < lines.length; i++) {
             // XXX -- if we find "done", reset to 0 and keep going
             var words = lines[i].split(/ /);
-            var adc = parseInt(words[0]);
+            var adc = parseInt(words[0]) - calibration[v];
             var byte = parseInt(words[1]);
 
             if (v == 3.3) {
@@ -807,8 +809,12 @@ async function Display()
             }
         }
 
-        if (adcmax-adcmin < 1024/5) {
-            document.getElementById("voltage").innerHTML = volt(adcsum/i/1024, true, 2);
+        if (adcmax-adcmin < 1024/10) {
+            if (v == 3.3) {
+                document.getElementById("voltage").innerHTML = volt(adcsum/i/1024, true, 2);
+            } else {
+                document.getElementById("voltage").innerHTML = volt((adcsum/i - 512)/1024, true, 2);
+            }
         } else {
             document.getElementById("voltage").innerHTML = " ";
         }
