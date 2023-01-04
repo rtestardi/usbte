@@ -281,7 +281,7 @@ var waiting;
 var oldX, newX;
 var oldY, newY;
 
-var calibration = { 3.3: 4, 8: 2, 16:2, 32:2 };
+var calibration = { 3.3:4, 8:2, 16:2, 32:2 };
 
 function ScaleCanvas()
 {
@@ -811,9 +811,9 @@ async function Display()
 
         if (adcmax-adcmin < 1024/10) {
             if (v == 3.3) {
-                document.getElementById("voltage").innerHTML = volt(adcsum/i/1024, true, 2);
+                document.getElementById("voltage").innerHTML = volt(adcsum/i/1024, false, 2);
             } else {
-                document.getElementById("voltage").innerHTML = volt((adcsum/i - 512)/1024, true, 2);
+                document.getElementById("voltage").innerHTML = volt((adcsum/i - 512)/1024, false, 2);
             }
         } else {
             document.getElementById("voltage").innerHTML = " ";
