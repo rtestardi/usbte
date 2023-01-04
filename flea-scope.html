@@ -375,7 +375,7 @@ function volt(frac, scale, fixed)
     var v = parseFloat(document.getElementById("volts").value);
     var voltv = v * frac;
     var volts;
-    if (scale && voltv < 0.002 && voltv > -0.002) {
+    if (scale && voltv < 0.01 && voltv > -0.01) {
         volts = "" + (voltv*1000).toFixed(fixed) + "mV";
     } else {
         volts = "" + (voltv).toFixed(fixed) + "V";
