@@ -372,10 +372,10 @@ function freq(frac, scale, fixed)
 
 function volt(frac, scale, fixed)
 {
-    var voltv = parseFloat(document.getElementById("volts").value);
-    voltv = voltv * frac;
+    var v = parseFloat(document.getElementById("volts").value);
+    var voltv = v * frac;
     var volts;
-    if (scale && voltv < 0.001) {
+    if (scale && voltv < 0.002 && voltv > -0.002) {
         volts = "" + (voltv*1000).toFixed(fixed) + "mV";
     } else {
         volts = "" + (voltv).toFixed(fixed) + "V";
@@ -385,11 +385,16 @@ function volt(frac, scale, fixed)
 
 function ShowStatus()
 {
+    var v = parseFloat(document.getElementById("volts").value);
     var status = "";
     if (newX != -1) {
         status = "position: " + usec(newX/width, true, 2);
         if (newY < height) {
-            status +=  ", " + volt((height-newY-1)/height, true, 2);
+            if (v == 3.3) {
+                status +=  ", " + volt((height-newY-1)/height, true, 2);
+            } else {
+                status +=  ", " + volt((height/2-newY-1)/height, true, 2);
+            }
         }
         var dx = Math.abs(oldX - newX);
         var dy = Math.abs(oldY - newY);
