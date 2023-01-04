@@ -668,11 +668,11 @@ async function Display()
 
     if (document.getElementById("volts").value == 0) {
         ctx.fillText("3.3V", width+8, 10);
-        ctx.fillText("0V", width+8, 246);
+        ctx.fillText("0V", width+8, 256);
     } else {
         ctx.fillText("+16V", width+8, 10);
-        ctx.fillText("0V", width+8, 123);
-        ctx.fillText("-16V", width+8, 246);
+        ctx.fillText("0V", width+8, 128);
+        ctx.fillText("-16V", width+8, 256);
     }
 
     for (var i = 0; i <= 10; i++) {
