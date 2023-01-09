@@ -627,7 +627,6 @@ async function Scope()
     var number2;
     var number3;
     var number4;
-    var number5;
 
     for (var b = 0; b < bits; b++) {
         if (document.getElementById("b"+b).value != "") {
@@ -652,7 +651,7 @@ async function Scope()
     } else {
         number2 = document.getElementById("trigger").value;
         if (v == 3.3) {
-            number2 += Math.floor(analogT/1.1*1024/height);
+            number2 += Math.floor(analogT/1.0*1024/height);
         } else {
             number2 += Math.floor(((analogT-height/2)/(32/v)+height/2)*1024/height);
         }
@@ -669,9 +668,7 @@ async function Scope()
     }
     number4 = Math.floor(number4 * msps);  // convert from us to samples
 
-    number5 = v == 3.3 ? 0 : 1;
-
-    var command = "scope " + number1 + " " + number2 + " " + number3 + " " + number4 + " " + number5;
+    var command = "scope " + number1 + " " + number2 + " " + number3 + " " + number4;
 
     SendCommand(command);
 }
@@ -783,7 +780,7 @@ async function Display()
             var byte = parseInt(words[1]);
 
             if (v == 3.3) {
-                adc *= 1.1;
+                adc *= 1.0;
             } else {
                 adc = (adc - 512)*(32/v) + 512;
             }
