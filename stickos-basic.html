@@ -104,6 +104,8 @@ async function Usb()
         await usb.selectConfiguration(1);
         await usb.claimInterface(1);
         Send("\r");
+        Send("echo on\r");
+        Send("prompt on\r");
         setTimeout(Receive, 100);
         document.getElementById("command").disabled = false;
         document.getElementById("command").focus();
@@ -127,6 +129,8 @@ async function Comm()
             reader = comm.readable.getReader();
             writer = comm.writable.getWriter();
             Send("\r");
+            Send("echo on\r");
+            Send("prompt on\r");
             setTimeout(Receive, 100);
             document.getElementById("command").disabled = false;
             document.getElementById("command").focus();
