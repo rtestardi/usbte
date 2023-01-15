@@ -224,6 +224,7 @@ Select:
 <table WIDTH="1800px">
 <tr>
 <td WIDTH="30%">
+<button type="button" id="zero" onclick="Zero();">zero</button>
 <button type="button" id="pause" onclick="Pause();">pause</button>
 <button type="button" id="single" onclick="Single();" disabled=true>single</button>
 <button type="button" id="measure" onclick="Measure();">measure</button>
@@ -293,6 +294,9 @@ var waiting;
 var oldX, newX;
 var oldY, newY;
 
+var adczero = 0;
+var adcrawcount = 0;
+var adcrawsum = 0;
 var calibration = { 1.8:0, 2.5:0, 3.3:0, 5:0, 16.5:0 };
 
 function ScaleCanvas()
@@ -307,6 +311,14 @@ function ScaleCanvas()
     width = Math.floor(2000*msps*usecv/20);
     canvas.setAttribute("width", width+44);
     canvas.setAttribute("height", height+30*bits+20);
+}
+
+function Zero()
+{
+    if (adcrawcount) {
+        adczero = adcrawsum/adcrawcount;
+        document.getElementById("status").innerHTML = "adczero = " + adczero.toFixed(2);
+    }
 }
 
 function Pause()
@@ -781,6 +793,8 @@ async function Display()
         var adcmin = 1024;
         var adcmax = -1;
         var adcsum = 0;
+        adcrawcount = 0;
+        adcrawsum = 0;
 
         for (i = 0; i < width/2 && i < lines.length; i++) {
             // XXX -- if we find "done", reset to 0 and keep going
@@ -788,7 +802,10 @@ async function Display()
             var adc = parseInt(words[0]) - calibration[v];
             var byte = parseInt(words[1]);
 
+            adcrawsum += adc;
+            adcrawcount++;
 
+            adc -= adczero;
 
             if (s == 0) {
                 adc *= 6.6/v;
