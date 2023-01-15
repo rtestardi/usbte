@@ -76,6 +76,9 @@ Select:
 <label for="delay">delay sec:</label>
 </td>
 <td>
+<label for="scale">scale:</label>
+</td>
+<td>
 <label for="volts">volts:</label>
 </td>
 <td>
@@ -186,11 +189,18 @@ Select:
 <input type="text" id="delay" value="0u" size="2"></input>
 </td>
 <td>
+<select id="scale" onchange='Send(String.fromCharCode(3));'>
+<option selected value="0">low+</option>
+<option value="1">high-+</option>
+</select>
+</td>
+<td>
 <select id="volts" onchange='Send(String.fromCharCode(3));'>
-<option selected value="3.3">3.3+</option>
-<option value="8">4-/+</option>
-<option value="16">8-/+</option>
-<option value="32">16-/+</option>
+<option value="1.8">1.8</option>
+<option value="2.5">2.5</option>
+<option selected value="3.3">3.3</option>
+<option value="5">5</option>
+<option value="16.5">16.5</option>
 </select>
 </td>
 <td>
@@ -283,7 +293,7 @@ var waiting;
 var oldX, newX;
 var oldY, newY;
 
-var calibration = { 3.3:4, 8:2, 16:2, 32:2 };
+var calibration = { 1.8:0, 2.5:0, 3.3:0, 5:0, 16.5:0 };
 
 function ScaleCanvas()
 {
@@ -377,7 +387,8 @@ function freq(frac, scale, fixed)
 function volt(frac, scale, fixed)
 {
     var v = parseFloat(document.getElementById("volts").value);
-    var voltv = v * frac;
+    var s = parseFloat(document.getElementById("scale").value);
+    var voltv = v*(s+1) * frac;
     var volts;
     if (scale && voltv < 0.01 && voltv > -0.01) {
         volts = "" + (voltv*1000).toFixed(fixed) + "mV";
@@ -389,12 +400,12 @@ function volt(frac, scale, fixed)
 
 function ShowStatus()
 {
-    var v = parseFloat(document.getElementById("volts").value);
+    var s = parseFloat(document.getElementById("scale").value);
     var status = "";
     if (newX != -1) {
         status = "position: " + usec(newX/width, true, 2);
         if (newY < height) {
-            if (v == 3.3) {
+            if (s == 0) {
                 status +=  ", " + volt((height-newY-1)/height, true, 2);
             } else {
                 status +=  ", " + volt((height/2-newY-1)/height, true, 2);
@@ -460,8 +471,6 @@ function Body()
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
     ScaleCanvas();
-
-    var v = parseFloat(document.getElementById("volts").value);
 
     canvas.addEventListener('mousedown', function(e) {
         down = true;
@@ -621,6 +630,7 @@ async function Scope()
     string = "";
 
     var v = parseFloat(document.getElementById("volts").value)
+    var s = parseFloat(document.getElementById("scale").value)
 
     digital = false;
     var number1 = document.getElementById("qusec").value;
@@ -650,10 +660,10 @@ async function Scope()
         number3 = "0x" + mask.toString(16);
     } else {
         number2 = document.getElementById("trigger").value;
-        if (v == 3.3) {
-            number2 += Math.floor(analogT/1.0*1024/height);
+        if (s == 0) {
+            number2 += Math.floor(analogT/(6.6/v)*1024/height);
         } else {
-            number2 += Math.floor(((analogT-height/2)/(32/v)+height/2)*1024/height);
+            number2 += Math.floor(((analogT-height/2)/(16.5/v)+height/2)*1024/height);
         }
         number3 = 0;
     }
@@ -685,14 +695,15 @@ async function Display()
     ShowPoints(ctx);
 
     var v = parseFloat(document.getElementById("volts").value);
+    var s = parseFloat(document.getElementById("scale").value);
 
-    if (v == 3.3) {
-        ctx.fillText("3.3V", width+8, 10);
+    if (s == 0) {
+        ctx.fillText(v + "V", width+8, 10);
         ctx.fillText("0V", width+8, 256);
     } else {
-        ctx.fillText("+" + v/2 + "V", width+8, 10);
+        ctx.fillText("+" + v + "V", width+8, 10);
         ctx.fillText("0V", width+8, 128);
-        ctx.fillText("-" + v/2 + "V", width+8, 256);
+        ctx.fillText("-" + v + "V", width+8, 256);
     }
 
     for (var i = 0; i <= 10; i++) {
@@ -730,7 +741,7 @@ async function Display()
     ctx.beginPath();
     ctx.strokeStyle = '#000000';
     ctx.setLineDash([5, 5]);
-    if (parseFloat(document.getElementById("volts").value) != 3.3) {
+    if (s == 1) {
         ctx.moveTo(0, 0);
         ctx.lineTo(width, 0);
         ctx.moveTo(0, (height-1)/2);
@@ -771,18 +782,18 @@ async function Display()
         var adcmax = -1;
         var adcsum = 0;
 
-        var v = parseFloat(document.getElementById("volts").value);
-
         for (i = 0; i < width/2 && i < lines.length; i++) {
             // XXX -- if we find "done", reset to 0 and keep going
             var words = lines[i].split(/ /);
             var adc = parseInt(words[0]) - calibration[v];
             var byte = parseInt(words[1]);
 
-            if (v == 3.3) {
-                adc *= 1.0;
+
+
+            if (s == 0) {
+                adc *= 6.6/v;
             } else {
-                adc = (adc - 512)*(32/v) + 512;
+                adc = (adc - 512)*(16.5/v) + 512;
             }
             if (adc < 0) {
                 adc = 0;
@@ -792,6 +803,7 @@ async function Display()
 
             sx = i*2;
             path.lineTo(sx, 255-Math.floor(adc/4));
+
             if (adc < adcmin) {
                 adcmin = adc;
             }
@@ -815,7 +827,7 @@ async function Display()
         }
 
         if (adcmax-adcmin < 1024/10) {
-            if (v == 3.3) {
+            if (s == 0) {
                 document.getElementById("voltage").innerHTML = volt(adcsum/i/1024, false, 2);
             } else {
                 document.getElementById("voltage").innerHTML = volt((adcsum/i - 512)/1024, false, 2);
