@@ -833,7 +833,7 @@ async function Display()
                 document.getElementById("voltage").innerHTML = volt((adcsum/i - 512)/1024, false, 2);
             }
         } else {
-            document.getElementById("voltage").innerHTML = " ";
+            document.getElementById("voltage").innerHTML = "" + volt(adcmin/1024, false, 2) + "..." + volt(adcmax/1024, false, 2);
         }
 
         path.moveTo(width, 255);
