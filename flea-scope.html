@@ -76,7 +76,7 @@ Select:
 <label for="delay">delay sec:</label>
 </td>
 <td>
-<label for="scale">scale:</label>
+<label for="probe">probe:</label>
 </td>
 <td>
 <label for="volts">volts:</label>
@@ -189,9 +189,9 @@ Select:
 <input type="text" id="delay" value="0u" size="2"></input>
 </td>
 <td>
-<select id="scale" onchange='Send(String.fromCharCode(3));'>
-<option selected value="0">low+</option>
-<option value="1">high-+</option>
+<select id="probe" onchange='Send(String.fromCharCode(3));'>
+<option selected value="1">x1</option>
+<option value="10">x10</option>
 </select>
 </td>
 <td>
@@ -401,7 +401,7 @@ function freq(frac, scale, fixed)
 function volt(frac, scale, fixed)
 {
     var v = parseFloat(document.getElementById("volts").value);
-    var s = parseFloat(document.getElementById("scale").value);
+    var s = 0;//parseFloat(document.getElementById("scale").value);
     var voltv = v*(s+1) * frac;
     var volts;
     if (scale && voltv < 0.01 && voltv > -0.01) {
@@ -414,7 +414,7 @@ function volt(frac, scale, fixed)
 
 function ShowStatus()
 {
-    var s = parseFloat(document.getElementById("scale").value);
+    var s = 0;//parseFloat(document.getElementById("scale").value);
     var status = "";
     if (newX != -1) {
         status = "position: " + usec(newX/width, true, 2);
@@ -644,7 +644,7 @@ async function Scope()
     string = "";
 
     var v = parseFloat(document.getElementById("volts").value)
-    var s = parseFloat(document.getElementById("scale").value)
+    var s = 0;//parseFloat(document.getElementById("scale").value)
 
     digital = false;
     var number1 = document.getElementById("qusec").value;
@@ -693,9 +693,7 @@ async function Scope()
     }
     number4 = Math.floor(number4 * msps);  // convert from us to samples
 
-    number5 = document.getElementById("scale").value;;
-
-    var command = "scope " + number1 + " " + number2 + " " + number3 + " " + number4 + " " + number5;
+    var command = "scope " + number1 + " " + number2 + " " + number3 + " " + number4;
 
     SendCommand(command);
 }
@@ -712,15 +710,16 @@ async function Display()
     ShowPoints(ctx);
 
     var v = parseFloat(document.getElementById("volts").value);
-    var s = parseFloat(document.getElementById("scale").value);
+    var s = 0;//parseFloat(document.getElementById("scale").value);
+    var p = parseFloat(document.getElementById("probe").value);
 
     if (s == 0) {
-        ctx.fillText(v + "V", width+8, 10);
+        ctx.fillText(v*p + "V", width+8, 10);
         ctx.fillText("0V", width+8, 256);
     } else {
-        ctx.fillText("+" + v + "V", width+8, 10);
+        ctx.fillText("+" + v*p + "V", width+8, 10);
         ctx.fillText("0V", width+8, 128);
-        ctx.fillText("-" + v + "V", width+8, 256);
+        ctx.fillText("-" + v*p + "V", width+8, 256);
     }
 
     for (var i = 0; i <= 10; i++) {
