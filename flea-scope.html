@@ -676,7 +676,7 @@ async function Scope()
     } else {
         number2 = document.getElementById("trigger").value;
         if (s == 0) {
-            number2 += Math.floor(analogT/(6.6/v)*1024/height);
+            number2 += Math.floor(analogT/(6.6/v)*1024/height) + Math.floor(adczero);
         } else {
             number2 += Math.floor(((analogT-height/2)/(16.5/v)+height/2)*1024/height);
         }
@@ -849,12 +849,12 @@ async function Display()
 
         if (adcmax-adcmin < 1024/10) {
             if (s == 0) {
-                document.getElementById("voltage").innerHTML = volt(adcsum/i/1024, false, 2);
+                document.getElementById("voltage").innerHTML = volt(adcsum/i/1024*p, false, 2);
             } else {
                 document.getElementById("voltage").innerHTML = volt((adcsum/i - 512)/1024, false, 2);
             }
         } else {
-            document.getElementById("voltage").innerHTML = "" + volt(adcmin/1024, false, 2) + "..." + volt(adcmax/1024, false, 2);
+            document.getElementById("voltage").innerHTML = "" + volt(adcmin/1024*p, false, 2) + "..." + volt(adcmax/1024*p, false, 2);
         }
 
         path.moveTo(width, 255);
