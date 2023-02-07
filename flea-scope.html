@@ -202,7 +202,7 @@ Select:
 <option value="2.5">2.5</option>
 <option selected value="3.3">3.3</option>
 <option value="5.0">5.0</option>
-<option value="16.5">16.5</option>
+<option value="6.6">6.6</option>
 </select>
 </td>
 <td>
@@ -299,7 +299,7 @@ var oldY, newY;
 var adczero = 0;
 var adcrawcount = 0;
 var adcrawsum = 0;
-var calibration = { 0.5:0, 1.0:0, 1.8:0, 2.5:0, 3.3:0, 5:0, 16.5:0 };
+var calibration = { 0.5:0, 1.0:0, 1.8:0, 2.5:0, 3.3:0, 5:0, 6.6:0 };
 
 function ScaleCanvas()
 {
@@ -401,8 +401,7 @@ function freq(frac, scale, fixed)
 function volt(frac, scale, fixed)
 {
     var v = parseFloat(document.getElementById("volts").value);
-    var s = 0;//parseFloat(document.getElementById("scale").value);
-    var voltv = v*(s+1) * frac;
+    var voltv = v*2 * frac;
     var volts;
     if (scale && voltv < 0.01 && voltv > -0.01) {
         volts = "" + (voltv*1000).toFixed(fixed) + "mV";
@@ -414,16 +413,11 @@ function volt(frac, scale, fixed)
 
 function ShowStatus()
 {
-    var s = 0;//parseFloat(document.getElementById("scale").value);
     var status = "";
     if (newX != -1) {
         status = "position: " + usec(newX/width, true, 2);
         if (newY < height) {
-            if (s == 0) {
-                status +=  ", " + volt((height-newY-1)/height, true, 2);
-            } else {
-                status +=  ", " + volt((height/2-newY-1)/height, true, 2);
-            }
+            status +=  ", " + volt((height/2-newY-1)/height, true, 2);
         }
         var dx = Math.abs(oldX - newX);
         var dy = Math.abs(oldY - newY);
@@ -644,7 +638,6 @@ async function Scope()
     string = "";
 
     var v = parseFloat(document.getElementById("volts").value)
-    var s = 0;//parseFloat(document.getElementById("scale").value)
 
     digital = false;
     var number1 = document.getElementById("qusec").value;
@@ -675,11 +668,7 @@ async function Scope()
         number3 = "0x" + mask.toString(16);
     } else {
         number2 = document.getElementById("trigger").value;
-        if (s == 0) {
-            number2 += Math.floor(analogT/(6.6/v)*1024/height) + Math.floor(adczero);
-        } else {
-            number2 += Math.floor(((analogT-height/2)/(16.5/v)+height/2)*1024/height);
-        }
+        number2 += Math.floor(((analogT-height/2)/(6.6/v)+height/2)*1024/height);
         number3 = 0;
     }
 
@@ -710,17 +699,11 @@ async function Display()
     ShowPoints(ctx);
 
     var v = parseFloat(document.getElementById("volts").value);
-    var s = 0;//parseFloat(document.getElementById("scale").value);
     var p = parseFloat(document.getElementById("probe").value);
 
-    if (s == 0) {
-        ctx.fillText(v*p + "V", width+8, 10);
-        ctx.fillText("0V", width+8, 256);
-    } else {
-        ctx.fillText("+" + v*p + "V", width+8, 10);
-        ctx.fillText("0V", width+8, 128);
-        ctx.fillText("-" + v*p + "V", width+8, 256);
-    }
+    ctx.fillText("+" + v*p + "V", width+8, 10);
+    ctx.fillText("0V", width+8, 128);
+    ctx.fillText("-" + v*p + "V", width+8, 256);
 
     for (var i = 0; i <= 10; i++) {
         if (Math.floor(i/5)*5 == i) {
@@ -757,19 +740,12 @@ async function Display()
     ctx.beginPath();
     ctx.strokeStyle = '#000000';
     ctx.setLineDash([5, 5]);
-    if (s == 1) {
-        ctx.moveTo(0, 0);
-        ctx.lineTo(width, 0);
-        ctx.moveTo(0, (height-1)/2);
-        ctx.lineTo(width, (height-1)/2);
-        ctx.moveTo(0, height-1);
-        ctx.lineTo(width, height-1);
-    } else {
-        ctx.moveTo(0, 0);
-        ctx.lineTo(width, 0);
-        ctx.moveTo(0, height-1);
-        ctx.lineTo(width, height-1);
-    }
+    ctx.moveTo(0, 0);
+    ctx.lineTo(width, 0);
+    ctx.moveTo(0, (height-1)/2);
+    ctx.lineTo(width, (height-1)/2);
+    ctx.moveTo(0, height-1);
+    ctx.lineTo(width, height-1);
     ctx.stroke();
 
     ctx.setLineDash([]);
@@ -806,16 +782,19 @@ async function Display()
             var adc = parseInt(words[0]);  // - calibration[v];
             var byte = parseInt(words[1]);
 
-            adcrawsum += adc;
+            adcrawsum += adc - 512;
             adcrawcount++;
 
             adc -= adczero;
 
-            if (s == 0) {
-                adc *= 6.6/v;
-            } else {
-                adc = (adc - 512)*(16.5/v) + 512;
+            adc = (adc - 512)*2*(6.6/v) + 512;
+            if (adc < adcmin) {
+                adcmin = adc;
             }
+            if (adc > adcmax) {
+                adcmax = adc;
+            }
+            adcsum += adc;
             if (adc < 0) {
                 adc = 0;
             } else if (adc > 1023) {
@@ -824,14 +803,6 @@ async function Display()
 
             sx = i*2;
             path.lineTo(sx, 255-Math.floor(adc/4));
-
-            if (adc < adcmin) {
-                adcmin = adc;
-            }
-            if (adc > adcmax) {
-                adcmax = adc;
-            }
-            adcsum += adc;
 
             for (b = 0; b < bits; b++) {
                 sy = 305+b*30;
@@ -848,11 +819,7 @@ async function Display()
         }
 
         if (adcmax-adcmin < 1024/10) {
-            if (s == 0) {
-                document.getElementById("voltage").innerHTML = volt(adcsum/i/1024*p, false, 2);
-            } else {
-                document.getElementById("voltage").innerHTML = volt((adcsum/i - 512)/1024, false, 2);
-            }
+            document.getElementById("voltage").innerHTML = volt((adcsum/i - 512)/1024, false, 2);
         } else {
             document.getElementById("voltage").innerHTML = "" + volt(adcmin/1024*p, false, 2) + "..." + volt(adcmax/1024*p, false, 2);
         }
