@@ -770,8 +770,8 @@ async function Display()
 
         sh = 20;
 
-        var adcmin = 1024;
-        var adcmax = -1;
+        var adcmin = 511;
+        var adcmax = -512;
         var adcsum = 0;
         adcrawcount = 0;
         adcrawsum = 0;
@@ -779,15 +779,13 @@ async function Display()
         for (i = 0; i < width/2 && i < lines.length; i++) {
             // XXX -- if we find "done", reset to 0 and keep going
             var words = lines[i].split(/ /);
-            var adc = parseInt(words[0]);  // - calibration[v];
+            var adc = parseInt(words[0]) - 512;  // -512 to 511
             var byte = parseInt(words[1]);
 
-            adcrawsum += adc - 512;
+            adcrawsum += adc;
             adcrawcount++;
 
             adc -= adczero;
-
-            adc = (adc - 512)*2*(6.6/v) + 512;
             if (adc < adcmin) {
                 adcmin = adc;
             }
@@ -795,14 +793,16 @@ async function Display()
                 adcmax = adc;
             }
             adcsum += adc;
-            if (adc < 0) {
-                adc = 0;
-            } else if (adc > 1023) {
-                adc = 1023;
+
+            var adcv = adc * 6.6/v;
+            if (adcv < -512) {
+                adcv = -512;
+            } else if (adcv > 511) {
+                adcv = 511;
             }
 
             sx = i*2;
-            path.lineTo(sx, 255-Math.floor(adc/4));
+            path.lineTo(sx, 128-Math.floor(adcv/4));
 
             for (b = 0; b < bits; b++) {
                 sy = 305+b*30;
