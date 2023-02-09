@@ -861,7 +861,7 @@ async function Display()
             }
         }
 
-        if (adcmax-adcmin < 1024/5) {
+        if (adcmax-adcmin < 1024/20) {
             document.getElementById("voltage").innerHTML = volt((adcsum/i)*(6.6/v)/512, false, 2);
         } else {
             document.getElementById("voltage").innerHTML = "" + volt(adcmin*(6.6/v)/512, false, 2) + "..." + volt(adcmax*(6.6/v)/512, false, 2);
