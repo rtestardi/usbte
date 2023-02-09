@@ -76,6 +76,9 @@ Select:
 <label for="delay">delay sec:</label>
 </td>
 <td>
+<label for="polar">polar:</label>
+</td>
+<td>
 <label for="probe">probe:</label>
 </td>
 <td>
@@ -189,10 +192,16 @@ Select:
 <input type="text" id="delay" value="0u" size="2"></input>
 </td>
 <td>
+<select id="polar" onchange='Send(String.fromCharCode(3));'>
+<option selected value="0">uni</option>
+<option value="1">bi</option>
+</select>
+<td>
 <select id="probe" onchange='Send(String.fromCharCode(3));'>
 <option selected value="1">x1</option>
 <option value="10">x10</option>
 </select>
+</td>
 </td>
 <td>
 <select id="volts" onchange='Send(String.fromCharCode(3));'>
@@ -226,7 +235,8 @@ Select:
 <table WIDTH="1800px">
 <tr>
 <td WIDTH="30%">
-<button type="button" id="zero" onclick="Zero();">zero</button>
+<button type="button" id="zero" onclick="CalZero();">cal_zero</button>
+<button type="button" id="3v3" onclick="Cal3v3();">cal_3v3</button>
 <button type="button" id="pause" onclick="Pause();">pause</button>
 <button type="button" id="single" onclick="Single();" disabled=true>single</button>
 <button type="button" id="measure" onclick="Measure();">measure</button>
@@ -297,6 +307,7 @@ var oldX, newX;
 var oldY, newY;
 
 var adczero = 0;
+var adc3v3 = 255;
 var adcrawcount = 0;
 var adcrawsum = 0;
 var calibration = { 0.5:0, 1.0:0, 1.8:0, 2.5:0, 3.3:0, 5:0, 6.6:0 };
@@ -315,11 +326,19 @@ function ScaleCanvas()
     canvas.setAttribute("height", height+30*bits+20);
 }
 
-function Zero()
+function CalZero()
 {
     if (adcrawcount) {
         adczero = adcrawsum/adcrawcount;
         document.getElementById("status").innerHTML = "adczero = " + adczero.toFixed(2);
+    }
+}
+
+function Cal3v3()
+{
+    if (adcrawcount) {
+        adc3v3 = adcrawsum/adcrawcount;
+        document.getElementById("status").innerHTML = "adc3v3 = " + adc3v3.toFixed(2);
     }
 }
 
@@ -785,7 +804,7 @@ async function Display()
             adcrawsum += adc;
             adcrawcount++;
 
-            adc -= adczero;
+            adc = (adc-adczero)/2/(adc3v3-adczero)*512;
             if (adc < adcmin) {
                 adcmin = adc;
             }
