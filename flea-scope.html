@@ -523,6 +523,7 @@ function Body()
         if (! measure) {
             Send(String.fromCharCode(3));  // Ctrl-C
             analogT = Math.max(e.offsetY, 0);
+            document.getElementById("status").innerHTML = "trigger = " + volt((height-analogT)/height, true, 2);
             Display();
         } else {
             if (measure == 1) {
@@ -713,7 +714,8 @@ async function Scope()
         } else {
             analogV = (height/2-1-analogT)/(height/2)*v;  // -v..v
         }
-        number2 += Math.floor((analogV+adcfull)/(adcfull*2)*1024-adczero);
+        var adcscaled = (analogV+adcfull)/(adcfull*2)*1024;
+        number2 += Math.floor((adcscaled-512)*adc3v3/256 + adczero + 512);
         number3 = 0;
     }
 
