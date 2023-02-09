@@ -506,7 +506,7 @@ function Body()
         down = true;
         if (! measure) {
             Send(String.fromCharCode(3));  // Ctrl-C
-            analogT = Math.max(height-1-e.offsetY, 0);
+            analogT = Math.max(e.offsetY, 0);
             Display();
         } else {
             if (measure == 1) {
@@ -696,7 +696,7 @@ async function Scope()
         } else {
             analogV = (height/2-1-analogT)/(height/2)*v;  // -v..v
         }
-        number2 += Math.floor((v+6.6)/13.2*1024+adczero);
+        number2 += Math.floor((analogV+6.6)/13.2*1024+adczero);
         number3 = 0;
     }
 
@@ -765,8 +765,8 @@ async function Display()
         ctx.setLineDash([10, 4]);
         ctx.strokeStyle = '#00BF00';
         ctx.beginPath();
-        ctx.moveTo(0, height-analogT);
-        ctx.lineTo(width, height-analogT);
+        ctx.moveTo(0, analogT);
+        ctx.lineTo(width, analogT);
         ctx.stroke();
     }
 
