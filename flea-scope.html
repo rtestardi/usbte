@@ -280,7 +280,7 @@ var pending = "";
 
 var digital = false;
 
-var analogT = 0;  // 0..255 (0..height-1)
+var analogT = 255;  // 0..255 (0..height-1)
 var measure = 0;
 
 const MSPS = 18;  // approximate target sample rate
@@ -337,7 +337,7 @@ function CalZero()
 function Cal3v3()
 {
     if (adcrawcount) {
-        adc3v3 = adcrawsum/adcrawcount;
+        adc3v3 = (adcrawsum/adcrawcount - adczero) * parseFloat(document.getElementById("probe").value);;
         document.getElementById("status").innerHTML = "adc3v3 = " + adc3v3.toFixed(2);
     }
 }
@@ -432,6 +432,20 @@ function volt(frac, scale, fixed)
     }
     return volts;
 }
+
+// return voltage for adc value -512..511 for -6.6V to 6.6V
+function voltadc(adc, scale, fixed)
+{
+    var voltv = adc/512*6.6 * parseFloat(document.getElementById("probe").value);
+    var volts;
+    if (scale && voltv < 0.01 && voltv > -0.01) {
+        volts = "" + (voltv*1000).toFixed(fixed) + "mV";
+    } else {
+        volts = "" + (voltv).toFixed(fixed) + "V";
+    }
+    return volts;
+}
+
 
 function ShowStatus()
 {
@@ -660,6 +674,7 @@ async function Scope()
     string = "";
 
     var v = parseFloat(document.getElementById("volts").value)
+    var p = parseFloat(document.getElementById("probe").value);
 
     digital = false;
     var number1 = document.getElementById("qusec").value;
@@ -696,6 +711,7 @@ async function Scope()
         } else {
             analogV = (height/2-1-analogT)/(height/2)*v;  // -v..v
         }
+        //analogV /= p;
         number2 += Math.floor((analogV+6.6)/13.2*1024+adczero);
         number3 = 0;
     }
@@ -813,13 +829,13 @@ async function Display()
         for (i = 0; i < width/2 && i < lines.length; i++) {
             // XXX -- if we find "done", reset to 0 and keep going
             var words = lines[i].split(/ /);
-            var adc = parseInt(words[0]) - 512;  // -512..511 for roughly -6.6V to 6.6V
+            var adc = parseInt(words[0]) - 512;  // -512..511 for roughly -6.6V to 6.6V at BNC
             var byte = parseInt(words[1]);
 
             adcrawsum += adc;
             adcrawcount++;
 
-            adc = (adc-adczero)/2/(adc3v3-adczero)*512;
+            adc = (adc-adczero)/2/(adc3v3)*512;
             if (adc < adcmin) {
                 adcmin = adc;
             }
@@ -861,10 +877,10 @@ async function Display()
             }
         }
 
-        if (adcmax-adcmin < 1024/20) {
-            document.getElementById("voltage").innerHTML = volt((adcsum/i)*(6.6/v)/512, false, 2);
+        if (adcmax-adcmin < 1024/50) {
+            document.getElementById("voltage").innerHTML = voltadc(adcsum/i, false, 2);
         } else {
-            document.getElementById("voltage").innerHTML = "" + volt(adcmin*(6.6/v)/512, false, 2) + "..." + volt(adcmax*(6.6/v)/512, false, 2);
+            document.getElementById("voltage").innerHTML = "" + voltadc(adcmin, false, 2) + "..." + voltadc(adcmax, false, 2);
         }
 
         path.moveTo(width, 255);
