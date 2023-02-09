@@ -193,8 +193,8 @@ Select:
 </td>
 <td>
 <select id="polar" onchange='Send(String.fromCharCode(3));'>
-<option selected value="0">uni</option>
-<option value="1">bi</option>
+<option selected value="1">uni</option>
+<option value="2">bi</option>
 </select>
 <td>
 <select id="probe" onchange='Send(String.fromCharCode(3));'>
@@ -280,7 +280,7 @@ var pending = "";
 
 var digital = false;
 
-var analogT = 0;  // 0..255
+var analogT = 0;  // 0..255 (0..height-1)
 var measure = 0;
 
 const MSPS = 18;  // approximate target sample rate
@@ -322,7 +322,7 @@ function ScaleCanvas()
     var pr = Math.floor(bus_mhz*usecv*INTERLEAVE/MSPS + 0.5);
     msps = bus_mhz*INTERLEAVE/pr;
     width = Math.floor(2000*msps*usecv/20);
-    canvas.setAttribute("width", width+44);
+    canvas.setAttribute("width", width+50);
     canvas.setAttribute("height", height+30*bits+20);
 }
 
@@ -378,6 +378,7 @@ function Wave()
     pending = "wave " + pattern + " " + hz;
 }
 
+// return time for fraction of display width
 function usec(frac, scale, fixed)
 {
     var usecv = parseInt(document.getElementById("qusec").value);  // this is per-division
@@ -396,6 +397,7 @@ function usec(frac, scale, fixed)
     return usecs;
 }
 
+// return frequency for fraction of display width
 function freq(frac, scale, fixed)
 {
     var usecv = parseInt(document.getElementById("qusec").value);  // this is per-division
@@ -417,10 +419,11 @@ function freq(frac, scale, fixed)
     return freqs;
 }
 
+// return voltage for fraction (-1..1) of display height
 function volt(frac, scale, fixed)
 {
-    var v = parseFloat(document.getElementById("volts").value);
-    var voltv = v*2 * frac;
+    var v = parseFloat(document.getElementById("probe").value) * document.getElementById("volts").value;
+    var voltv = v * frac;
     var volts;
     if (scale && voltv < 0.01 && voltv > -0.01) {
         volts = "" + (voltv*1000).toFixed(fixed) + "mV";
@@ -687,7 +690,13 @@ async function Scope()
         number3 = "0x" + mask.toString(16);
     } else {
         number2 = document.getElementById("trigger").value;
-        number2 += Math.floor(((analogT-height/2)/(6.6/v)+height/2)*1024/height);
+        var analogV;
+        if (document.getElementById("polar").value == 1) {
+            analogV = (height-1-analogT)/height*v;  // 0..v
+        } else {
+            analogV = (height/2-1-analogT)/(height/2)*v;  // -v..v
+        }
+        number2 += Math.floor((v+6.6)/13.2*1024+adczero);
         number3 = 0;
     }
 
@@ -713,16 +722,22 @@ async function Display()
 
     ctx.font = `12px Verdana`;
 
-    ctx.clearRect(0, 0, width+44, 546);
+    ctx.clearRect(0, 0, width+50, 546);
 
     ShowPoints(ctx);
 
     var v = parseFloat(document.getElementById("volts").value);
     var p = parseFloat(document.getElementById("probe").value);
 
-    ctx.fillText("+" + v*p + "V", width+8, 10);
-    ctx.fillText("0V", width+8, 128);
-    ctx.fillText("-" + v*p + "V", width+8, 256);
+    if (document.getElementById("polar").value == 1) {
+        ctx.fillText("" + v*p + "V", width+8, 10);
+        ctx.fillText("" + v*p/2 + "V", width+8, 128);
+        ctx.fillText("0V", width+8, 256);
+    } else {
+        ctx.fillText("+" + v*p + "V", width+8, 10);
+        ctx.fillText("0V", width+8, 128);
+        ctx.fillText("-" + v*p + "V", width+8, 256);
+    }
 
     for (var i = 0; i <= 10; i++) {
         if (Math.floor(i/5)*5 == i) {
@@ -798,7 +813,7 @@ async function Display()
         for (i = 0; i < width/2 && i < lines.length; i++) {
             // XXX -- if we find "done", reset to 0 and keep going
             var words = lines[i].split(/ /);
-            var adc = parseInt(words[0]) - 512;  // -512 to 511
+            var adc = parseInt(words[0]) - 512;  // -512..511 for roughly -6.6V to 6.6V
             var byte = parseInt(words[1]);
 
             adcrawsum += adc;
@@ -814,14 +829,23 @@ async function Display()
             adcsum += adc;
 
             var adcv = adc * 6.6/v;
-            if (adcv < -512) {
-                adcv = -512;
-            } else if (adcv > 511) {
-                adcv = 511;
-            }
 
             sx = i*2;
-            path.lineTo(sx, 128-Math.floor(adcv/4));
+            if (document.getElementById("polar").value == 1) {
+                if (adcv < 0) {
+                    adcv = 0;
+                } else if (adcv > 511) {
+                    adcv = 511;
+                }
+                path.lineTo(sx, 256-Math.floor(adcv/2));
+            } else {
+                if (adcv < -512) {
+                    adcv = -512;
+                } else if (adcv > 511) {
+                    adcv = 511;
+                }
+                path.lineTo(sx, 128-Math.floor(adcv/4));
+            }
 
             for (b = 0; b < bits; b++) {
                 sy = 305+b*30;
@@ -837,10 +861,10 @@ async function Display()
             }
         }
 
-        if (adcmax-adcmin < 1024/10) {
-            document.getElementById("voltage").innerHTML = volt((adcsum/i - 512)/1024, false, 2);
+        if (adcmax-adcmin < 1024/5) {
+            document.getElementById("voltage").innerHTML = volt((adcsum/i)*(6.6/v)/512, false, 2);
         } else {
-            document.getElementById("voltage").innerHTML = "" + volt(adcmin/1024*p, false, 2) + "..." + volt(adcmax/1024*p, false, 2);
+            document.getElementById("voltage").innerHTML = "" + volt(adcmin*(6.6/v)/512, false, 2) + "..." + volt(adcmax*(6.6/v)/512, false, 2);
         }
 
         path.moveTo(width, 255);
