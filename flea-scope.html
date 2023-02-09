@@ -713,7 +713,7 @@ async function Scope()
         } else {
             analogV = (height/2-1-analogT)/(height/2)*v;  // -v..v
         }
-        number2 += Math.floor((analogV+adcfull)/(adcfull*2)*1024+adczero);
+        number2 += Math.floor((analogV+adcfull)/(adcfull*2)*1024-adczero);
         number3 = 0;
     }
 
@@ -836,32 +836,32 @@ async function Display()
             adcrawsum += adc;
             adcrawcount++;
 
-            adc = (adc-adczero-512)/(adc3v3)*256+512;
-            if (adc < adcmin) {
-                adcmin = adc;
+            var adcscaled = (adc-adczero-512)/(adc3v3)*256 + 512;  // 0..1023
+            if (adcscaled < adcmin) {
+                adcmin = adcscaled;
             }
-            if (adc > adcmax) {
-                adcmax = adc;
+            if (adcscaled > adcmax) {
+                adcmax = adcscaled;
             }
-            adcsum += adc;
+            adcsum += adcscaled;
 
-            var adcv = adc * adcfull/v;
+            var adcv = (adcscaled-512) * adcfull/v + 512;  // 0..1023 or more
 
             sx = i*2;
             if (document.getElementById("polar").value == 1) {
+                if (adcv < 512) {
+                    adcv = 512;
+                } else if (adcv > 1023) {
+                    adcv = 1023;
+                }
+                path.lineTo(sx, 256-Math.floor((adcv-512)/2));
+            } else {
                 if (adcv < 0) {
                     adcv = 0;
-                } else if (adcv > 511) {
-                    adcv = 511;
+                } else if (adcv > 1023) {
+                    adcv = 1023;
                 }
-                path.lineTo(sx, 256-Math.floor(adcv/2));
-            } else {
-                if (adcv < -512) {
-                    adcv = -512;
-                } else if (adcv > 511) {
-                    adcv = 511;
-                }
-                path.lineTo(sx, 128-Math.floor(adcv/4));
+                path.lineTo(sx, 128-Math.floor((adcv-512)/4));
             }
 
             for (b = 0; b < bits; b++) {
