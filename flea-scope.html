@@ -331,7 +331,7 @@ function ScaleCanvas()
 function CalZero()
 {
     if (adcrawcount) {
-        adczero = adcrawsum/adcrawcount;
+        adczero = adcrawsum/adcrawcount - 512;
         document.getElementById("status").innerHTML = "adczero = " + adczero.toFixed(2);
     }
 }
@@ -339,7 +339,7 @@ function CalZero()
 function Cal3v3()
 {
     if (adcrawcount) {
-        adc3v3 = (adcrawsum/adcrawcount - adczero) * parseFloat(document.getElementById("probe").value);;
+        adc3v3 = (adcrawsum/adcrawcount - adczero - 512) * parseFloat(document.getElementById("probe").value);
         document.getElementById("status").innerHTML = "adc3v3 = " + adc3v3.toFixed(2);
     }
 }
@@ -438,7 +438,7 @@ function volt(frac, scale, fixed)
 // return voltage for adc value -512..511 for -6.6V to 6.6V
 function voltadc(adc, scale, fixed)
 {
-    var voltv = adc/512*adcfull * parseFloat(document.getElementById("probe").value);
+    var voltv = (adc-512)/512*adcfull * parseFloat(document.getElementById("probe").value);
     var volts;
     if (scale && voltv < 0.01 && voltv > -0.01) {
         volts = "" + (voltv*1000).toFixed(fixed) + "mV";
@@ -713,8 +713,7 @@ async function Scope()
         } else {
             analogV = (height/2-1-analogT)/(height/2)*v;  // -v..v
         }
-        //analogV /= p;
-        number2 += Math.floor((analogV+adcfull)/13.2*1024+adczero);
+        number2 += Math.floor((analogV+adcfull)/(adcfull*2)*1024+adczero);
         number3 = 0;
     }
 
@@ -831,13 +830,13 @@ async function Display()
         for (i = 0; i < width/2 && i < lines.length; i++) {
             // XXX -- if we find "done", reset to 0 and keep going
             var words = lines[i].split(/ /);
-            var adc = parseInt(words[0]) - 512;  // -512..511 for roughly -6.6V to 6.6V at BNC
+            var adc = parseInt(words[0]);  // 0..1023 for roughly -6.6V to 6.6V at BNC
             var byte = parseInt(words[1]);
 
             adcrawsum += adc;
             adcrawcount++;
 
-            adc = (adc-adczero)/2/(adc3v3)*512;
+            adc = (adc-adczero-512)/(adc3v3)*256+512;
             if (adc < adcmin) {
                 adcmin = adc;
             }
