@@ -306,7 +306,7 @@ var waiting;
 var oldX, newX;
 var oldY, newY;
 
-var adcmax = 6.6;  // +/- at bnc
+var adcfull = 6.6;  // +/- at bnc
 
 var adczero = 0;
 var adc3v3 = 255;
@@ -438,7 +438,7 @@ function volt(frac, scale, fixed)
 // return voltage for adc value -512..511 for -6.6V to 6.6V
 function voltadc(adc, scale, fixed)
 {
-    var voltv = adc/512*adcmax * parseFloat(document.getElementById("probe").value);
+    var voltv = adc/512*adcfull * parseFloat(document.getElementById("probe").value);
     var volts;
     if (scale && voltv < 0.01 && voltv > -0.01) {
         volts = "" + (voltv*1000).toFixed(fixed) + "mV";
@@ -714,7 +714,7 @@ async function Scope()
             analogV = (height/2-1-analogT)/(height/2)*v;  // -v..v
         }
         //analogV /= p;
-        number2 += Math.floor((analogV+adcmax)/13.2*1024+adczero);
+        number2 += Math.floor((analogV+adcfull)/13.2*1024+adczero);
         number3 = 0;
     }
 
@@ -846,7 +846,7 @@ async function Display()
             }
             adcsum += adc;
 
-            var adcv = adc * adcmax/v;
+            var adcv = adc * adcfull/v;
 
             sx = i*2;
             if (document.getElementById("polar").value == 1) {
