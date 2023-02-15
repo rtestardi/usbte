@@ -28,7 +28,7 @@ select { direction: rtl; }
 
 <body onload='Body()'>
 
-<h1>FLEA-SCOPE™</h1>
+<h1 id="h1">FLEA-SCOPE™</h1>
 
 <div id="config">
 Select:
@@ -296,6 +296,8 @@ var msps;  // actual based on mcu timer pr
 var width = SAMPLES*2;  // actual display width after ScaleCanvas()
 var height = 256;
 var bits = 9;
+
+var hostname = "";
 
 var single = false;
 var pause = false;
@@ -638,11 +640,17 @@ async function Discard()
     }
 }
 
+var once = true;
+
 async function Next()
 {
     if (pending != "") {
-        SendCommand(pending + "\n");
+        SendCommand(pending);
         pending = "";
+    } else if (once) {
+        string = "";  // XXX -- why is this needed???
+        SendCommand("hostname");
+        once = false;
     } else {
         if (single) {
             single = false;
@@ -732,7 +740,6 @@ async function Scope()
     var command = "scope " + number1 + " " + number2 + " " + number3 + " " + number4;
 
     SendCommand(command);
-beep();
 }
 
 async function Display()
@@ -807,6 +814,8 @@ async function Display()
 
     if (lines.length >= 100) {
         var sx, sy, sh;
+
+        beep();
 
         var path;
         path = new Path2D();  // analog
@@ -911,6 +920,13 @@ async function Display()
 
             ctx.fillText("b"+b, width+8, sy-2);
         }
+    } else if (lines.length < 5) {
+        hostname = lines[0];
+        if (! document.getElementById("h1").innerHTML.match(/[(]/)) {
+            document.getElementById("h1").innerHTML += " (" + hostname + ")";
+        }
+    } else {
+        beep();
     }
 }
 
