@@ -890,10 +890,10 @@ async function Display()
             }
         }
 
-        if (adcmax-adcmin < 1024/50) {
+        if (adcmax-adcmin < 50) {
             document.getElementById("voltage").innerHTML = voltadc(adcsum/i, false, 2);
         } else {
-            document.getElementById("voltage").innerHTML = "" + voltadc(adcmin, false, 2) + "..." + voltadc(adcmax, false, 2);
+            document.getElementById("voltage").innerHTML = "" + voltadc(adcmin, false, 2) + "..." + voltadc(adcmax, false, 2) + "=" + voltadc(adcmax-adcmin+512, false, 2);
         }
 
         path.moveTo(width, 255);
