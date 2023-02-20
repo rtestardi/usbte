@@ -555,11 +555,12 @@ function Body()
     ScaleCanvas();
 
     canvas.addEventListener('mousedown', function(e) {
+        var r = parseFloat(document.getElementById("polar").value);
         down = true;
         if (! measure) {
             Send(String.fromCharCode(3));  // Ctrl-C
             analogT = Math.max(e.offsetY, 0);
-            document.getElementById("status").innerHTML = "trigger = " + volt((height-analogT)/height, true, 2);
+            document.getElementById("status").innerHTML = "trigger = " + volt((height/r-1-analogT)/(height/r), true, 2);
             Display();
         } else {
             if (measure == 1) {
@@ -719,6 +720,7 @@ async function Scope()
 
     var v = parseFloat(document.getElementById("volts").value)
     var p = parseFloat(document.getElementById("probe").value);
+    var r = parseFloat(document.getElementById("polar").value);
 
     digital = false;
     var number1 = document.getElementById("qusec").value;
@@ -749,12 +751,7 @@ async function Scope()
         number3 = "0x" + mask.toString(16);
     } else {
         number2 = document.getElementById("trigger").value;
-        var analogV;
-        if (document.getElementById("polar").value == 1) {
-            analogV = (height-1-analogT)/height*v;  // 0..v
-        } else {
-            analogV = (height/2-1-analogT)/(height/2)*v;  // -v..v
-        }
+        var analogV = (height/r-1-analogT)/(height/r)*v;  // 0..v or -v..v
         var adcscaled = (analogV+adcfull)/(adcfull*2)*1024;
         number2 += Math.floor((adcscaled-512)*Get3v3()/256 + GetZero() + 512);
         number3 = 0;
