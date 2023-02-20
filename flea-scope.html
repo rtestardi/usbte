@@ -331,7 +331,7 @@ function ScaleCanvas()
 function GetZero()
 {
     var p = parseFloat(document.getElementById("probe").value);
-    var a = localStorage.getItem("adczero"+p);
+    var a = localStorage.getItem("adczerox"+p+hostname);
     if (a == undefined) {
         document.getElementById("status").innerHTML = "please calibrate x" + p + " probe zero";
         return 0;
@@ -343,15 +343,15 @@ function CalZero()
 {
     if (adcrawcount) {
         var p = parseFloat(document.getElementById("probe").value);
-        localStorage.setItem("adczero"+p, String(adcrawsum/adcrawcount - 512));
-        document.getElementById("status").innerHTML = "adczero"+p + " = " + GetZero().toFixed(2);
+        localStorage.setItem("adczerox"+p+hostname, String(adcrawsum/adcrawcount - 512));
+        document.getElementById("status").innerHTML = "adczerox"+p + " = " + GetZero().toFixed(2);
     }
 }
 
 function Get3v3()
 {
     var p = parseFloat(document.getElementById("probe").value);
-    var a = localStorage.getItem("adc3v3"+p);
+    var a = localStorage.getItem("adc3v3x"+p+hostname);
     if (a == undefined) {
         document.getElementById("status").innerHTML = "please calibrate x" + p + " probe 3v3";
         return 255;
@@ -363,8 +363,8 @@ function Cal3v3()
 {
     if (adcrawcount) {
         var p = parseFloat(document.getElementById("probe").value);
-        localStorage.setItem("adc3v3"+p, String((adcrawsum/adcrawcount - GetZero() - 512) * p));
-        document.getElementById("status").innerHTML = "adc3v3"+p + " = " + Get3v3().toFixed(2);
+        localStorage.setItem("adc3v3x"+p+hostname, String((adcrawsum/adcrawcount - GetZero() - 512) * p));
+        document.getElementById("status").innerHTML = "adc3v3x"+p + " = " + Get3v3().toFixed(2);
     }
 }
 
