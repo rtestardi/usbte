@@ -277,6 +277,7 @@ var discard;
 var discarded;
 var string = "";
 var pending = "";
+var running = "";
 
 var digital = false;
 
@@ -971,22 +972,14 @@ async function Display()
 
             ctx.fillText("b"+b, width+8, sy-2);
         }
-    } else if (lines.length > 1) {
+    } else if (running.match(/hostname/) && lines.length > 0) {
         // hostname result
 
         hostname = lines[0];
-        if (! document.getElementById("h1").innerHTML.match(/[(]/)) {
-            document.getElementById("h1").innerHTML += " (" + hostname + ")";
-        }
-
-    } else if (lines.length) {
-        // wave result
-
-    } else {
-        // no result
-
-        beep();
+        document.getElementById("h1").innerHTML += " (" + hostname + ")";
     }
+
+    beep();
 }
 
 // receive a string from the device
@@ -1010,6 +1003,7 @@ async function Receive()
             clearTimeout(waiting);
             document.getElementById("command").innerHTML = " ";  // N.B. need space to avoid jitter!
             Display();
+            running = "";
             setTimeout(Next, 1);
         }
     } else {
@@ -1021,6 +1015,8 @@ async function Receive()
 // send a string to the device
 async function Send(str)
 {
+    running = str;
+
     if (usb) {
         await usb.transferOut(3, enc.encode(str).buffer);
     } else {
