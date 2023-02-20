@@ -353,7 +353,9 @@ function Get3v3()
     var p = parseFloat(document.getElementById("probe").value);
     var a = localStorage.getItem("adc3v3x"+p+hostname);
     if (a == undefined) {
-        document.getElementById("status").innerHTML = "please calibrate x" + p + " probe 3v3";
+        if (localStorage.getItem("adczerox"+p+hostname) != undefined) {
+            document.getElementById("status").innerHTML = "please calibrate x" + p + " probe 3v3";
+        }
         return 255;
     }
     return Number(a);
@@ -404,9 +406,9 @@ function Wave()
     var pattern = document.getElementById("wave").value;
     var hz = document.getElementById("hz").value;
     if (hz.toLowerCase().match(/k$/)) {
-        hz = hz.replace(/k$/,"000");
+        hz = Math.floor(Number(hz.replace(/k$/, "")*1000));
     } else if (hz.toLowerCase().match(/m$/)) {
-        hz = hz.replace(/m$/,"000000");
+        hz = Math.floor(Number(hz.replace(/m$/,"")*1000000));
     }
 
     Send(String.fromCharCode(3));  // Ctrl-C
@@ -760,11 +762,11 @@ async function Scope()
 
     number4 = document.getElementById("delay").value;
     if (number4.toLowerCase().match(/u$/)) {
-        number4 = number4.replace(/u$/,"");
+        number4 = Math.floor(Number(number4.replace(/u$/,""))*1);
     } else if (number4.toLowerCase().match(/m$/)) {
-        number4 = number4.replace(/m$/,"000");
+        number4 = Math.floor(Number(number4.replace(/m$/,""))*1000);
     } else {
-        number4 = number4 + "000000";
+        number4 = Math.floor(Number(number4)*1);
     }
     number4 = Math.floor(number4 * msps);  // convert from us to samples
 
