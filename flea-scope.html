@@ -489,9 +489,10 @@ function ShowStatus()
 {
     var status = "";
     if (newX != -1) {
+        var r = parseFloat(document.getElementById("polar").value);
         status = "position: " + usec(newX/width, true, 2);
         if (newY < height) {
-            status +=  ", " + volt((height/2-newY-1)/height, true, 2);
+            status +=  ", " + volt((height/r-1-newY)/(height/r), true, 2);
         }
         var dx = Math.abs(oldX - newX);
         var dy = Math.abs(oldY - newY);
@@ -504,7 +505,7 @@ function ShowStatus()
                 status += ", " + freq(dx/width, true, 2);
             }
             if (newY < height) {
-                status += ", " + volt(dy/height, true, 2);
+                status += ", " + volt(dy/(height/r), true, 2);
             }
         }
     }
