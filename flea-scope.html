@@ -310,8 +310,6 @@ var oldY, newY;
 
 var adcfull = 6.6;  // +/- at bnc
 
-var adczero = 0;
-var adc3v3 = 255;
 var adcrawcount = 0;
 var adcrawsum = 0;
 var calibration = { 0.5:0, 1.0:0, 1.8:0, 2.5:0, 3.3:0, 5:0, 6.6:0 };
@@ -330,19 +328,41 @@ function ScaleCanvas()
     canvas.setAttribute("height", height+30*bits+20);
 }
 
+function GetZero()
+{
+    var p = parseFloat(document.getElementById("probe").value);
+    var a = localStorage.getItem("adczero"+p);
+    if (a == undefined) {
+        return 0;
+    }
+    return Number(a);
+}
+
 function CalZero()
 {
     if (adcrawcount) {
-        adczero = adcrawsum/adcrawcount - 512;
-        document.getElementById("status").innerHTML = "adczero = " + adczero.toFixed(2);
+        var p = parseFloat(document.getElementById("probe").value);
+        localStorage.setItem("adczero"+p, String(adcrawsum/adcrawcount - 512));
+        document.getElementById("status").innerHTML = "adczero"+p + " = " + GetZero().toFixed(2);
     }
+}
+
+function Get3v3()
+{
+    var p = parseFloat(document.getElementById("probe").value);
+    var a = localStorage.getItem("adc3v3"+p);
+    if (a == undefined) {
+        return 255;
+    }
+    return Number(a);
 }
 
 function Cal3v3()
 {
     if (adcrawcount) {
-        adc3v3 = (adcrawsum/adcrawcount - adczero - 512) * parseFloat(document.getElementById("probe").value);
-        document.getElementById("status").innerHTML = "adc3v3 = " + adc3v3.toFixed(2);
+        var p = parseFloat(document.getElementById("probe").value);
+        localStorage.setItem("adc3v3"+p, String((adcrawsum/adcrawcount - GetZero() - 512) * p));
+        document.getElementById("status").innerHTML = "adc3v3"+p + " = " + Get3v3().toFixed(2);
     }
 }
 
@@ -732,7 +752,7 @@ async function Scope()
             analogV = (height/2-1-analogT)/(height/2)*v;  // -v..v
         }
         var adcscaled = (analogV+adcfull)/(adcfull*2)*1024;
-        number2 += Math.floor((adcscaled-512)*adc3v3/256 + adczero + 512);
+        number2 += Math.floor((adcscaled-512)*Get3v3()/256 + GetZero() + 512);
         number3 = 0;
     }
 
@@ -858,7 +878,7 @@ async function Display()
             adcrawsum += adc;
             adcrawcount++;
 
-            var adcscaled = (adc-adczero-512)/(adc3v3)*256 + 512;  // 0..1023
+            var adcscaled = (adc-GetZero()-512)/(Get3v3())*256 + 512;  // 0..1023
             if (adcscaled < adcmin) {
                 adcmin = adcscaled;
             }
@@ -907,7 +927,7 @@ async function Display()
             var words = lines[i].split(/ /);
             var adc = parseInt(words[0]);  // 0..1023 for roughly -6.6V to 6.6V at BNC
 
-            var adcscaled = (adc-adczero-512)/(adc3v3)*256 + 512;  // 0..1023
+            var adcscaled = (adc-GetZero()-512)/(Get3v3())*256 + 512;  // 0..1023
 
             if (adcscaled > adcavg+1) {
                 adcnoise += adcscaled - (adcavg+1);
