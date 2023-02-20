@@ -974,7 +974,10 @@ async function Display()
         // hostname result
 
         hostname = lines[0];
-        document.getElementById("h1").innerHTML += " (" + hostname + ")";
+        
+        if (hostname != "Flea-Scope") {
+            document.getElementById("h1").innerHTML += " (" + hostname + ")";
+        }
     }
 
     beep();
