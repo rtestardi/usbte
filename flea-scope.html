@@ -275,7 +275,7 @@ var ctx;
 
 var discard;
 var discarded;
-var string;
+var string = "";
 var pending = "";
 
 var digital = false;
@@ -332,7 +332,7 @@ function GetZero()
 {
     var p = parseFloat(document.getElementById("probe").value);
     var a = localStorage.getItem("adczerox"+p+hostname);
-    if (a == undefined) {
+    if (a == undefined && hostname != "") {
         document.getElementById("status").innerHTML = "please calibrate x" + p + " probe zero";
         return 0;
     }
@@ -352,7 +352,7 @@ function Get3v3()
 {
     var p = parseFloat(document.getElementById("probe").value);
     var a = localStorage.getItem("adc3v3x"+p+hostname);
-    if (a == undefined) {
+    if (a == undefined && hostname != "") {
         if (localStorage.getItem("adczerox"+p+hostname) != undefined) {
             document.getElementById("status").innerHTML = "please calibrate x" + p + " probe 3v3";
         }
@@ -669,7 +669,8 @@ async function Discard()
         discarded = false;
         setTimeout(Discard, 200);
     } else {
-        setTimeout(Scope, 1);
+        discard = 0;
+        setTimeout(Next, 1);
     }
 }
 
@@ -681,7 +682,6 @@ async function Next()
         SendCommand(pending);
         pending = "";
     } else if (once) {
-        string = "";  // XXX -- why is this needed???
         SendCommand("hostname");
         once = false;
     } else {
@@ -714,7 +714,6 @@ async function SendCommand(command)
 
 async function Scope()
 {
-    discard = 0;
     string = "";
 
     var v = parseFloat(document.getElementById("volts").value)
@@ -846,6 +845,8 @@ async function Display()
 
 
     if (lines.length >= 100) {
+        // scope result
+
         var sx, sy, sh;
 
         beep();
@@ -970,12 +971,20 @@ async function Display()
 
             ctx.fillText("b"+b, width+8, sy-2);
         }
-    } else if (lines.length < 5) {
+    } else if (lines.length > 1) {
+        // hostname result
+
         hostname = lines[0];
         if (! document.getElementById("h1").innerHTML.match(/[(]/)) {
             document.getElementById("h1").innerHTML += " (" + hostname + ")";
         }
+
+    } else if (lines.length) {
+        // wave result
+
     } else {
+        // no result
+
         beep();
     }
 }
@@ -996,7 +1005,8 @@ async function Receive()
     if (! discard) {
         string += str.replace(/</g,'&lt;').replace(/>/g,'&gt;');
         if (string.match(/done\r\n$/)) {
-            // we have scope results!
+            // we have scope or other results!
+            string = string.replace(/done\r\n$/g, "");
             clearTimeout(waiting);
             document.getElementById("command").innerHTML = " ";  // N.B. need space to avoid jitter!
             Display();
