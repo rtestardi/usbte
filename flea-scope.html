@@ -76,10 +76,10 @@ Select:
 <label for="delay">delay sec:</label>
 </td>
 <td>
-<label for="polar">polar:</label>
+<label for="probe">probe:</label>
 </td>
 <td>
-<label for="probe">probe:</label>
+<label for="polar">polar:</label>
 </td>
 <td>
 <label for="volts">volts:</label>
@@ -192,17 +192,17 @@ Select:
 <input type="text" id="delay" value="0u" size="2"></input>
 </td>
 <td>
-<select id="polar" onchange='Send(String.fromCharCode(3));'>
-<option selected value="1">uni</option>
-<option value="2">bi</option>
-</select>
-<td>
-<select id="probe" onchange='Send(String.fromCharCode(3));'>
+<select id="probe" onchange='Send(String.fromCharCode(3)); Probe();'>
 <option selected value="1">x1</option>
 <option value="10">x10</option>
 </select>
 </td>
 </td>
+<td>
+<select id="polar" onchange='Send(String.fromCharCode(3));'>
+<option selected value="1">uni</option>
+<option value="2">bi</option>
+</select>
 <td>
 <select id="volts" onchange='Send(String.fromCharCode(3));'>
 <option value="0.5">0.5</option>
@@ -343,6 +343,15 @@ function Cal3v3()
     if (adcrawcount) {
         adc3v3 = (adcrawsum/adcrawcount - adczero - 512) * parseFloat(document.getElementById("probe").value);
         document.getElementById("status").innerHTML = "adc3v3 = " + adc3v3.toFixed(2);
+    }
+}
+
+function Probe()
+{
+    var p = parseFloat(document.getElementById("probe").value);
+    var e = document.getElementById("volts");
+    for (var i = 0; i < e.options.length; i++) {
+        e.options[i].innerHTML = "" + e.options[i].value*p;
     }
 }
 
@@ -836,6 +845,7 @@ async function Display()
         var adcmin = 1023;
         var adcmax = 0;
         var adcsum = 0;
+        var adcnoise = 0;
         adcrawcount = 0;
         adcrawsum = 0;
 
@@ -890,8 +900,24 @@ async function Display()
             }
         }
 
+        var adcavg = adcsum/i;
+
+        for (i = 0; i < width/2 && i < lines.length; i++) {
+            // XXX -- if we find "done", reset to 0 and keep going
+            var words = lines[i].split(/ /);
+            var adc = parseInt(words[0]);  // 0..1023 for roughly -6.6V to 6.6V at BNC
+
+            var adcscaled = (adc-adczero-512)/(adc3v3)*256 + 512;  // 0..1023
+
+            if (adcscaled > adcavg+1) {
+                adcnoise += adcscaled - (adcavg+1);
+            } else if (adcscaled < adcavg-1) {
+                adcnoise += (adcavg-1) - adcscaled;
+            }
+        }
+
         if (adcmax-adcmin < 50) {
-            document.getElementById("voltage").innerHTML = voltadc(adcsum/i, false, 2);
+            document.getElementById("voltage").innerHTML = voltadc(adcsum/i, false, 2) + " noise " + Math.floor(adcnoise);
         } else {
             document.getElementById("voltage").innerHTML = "" + voltadc(adcmin, false, 2) + "..." + voltadc(adcmax, false, 2) + "=" + voltadc(adcmax-adcmin+512, false, 2);
         }
