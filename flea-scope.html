@@ -333,6 +333,7 @@ function GetZero()
     var p = parseFloat(document.getElementById("probe").value);
     var a = localStorage.getItem("adczero"+p);
     if (a == undefined) {
+        document.getElementById("status").innerHTML = "please calibrate x" + p + " probe zero";
         return 0;
     }
     return Number(a);
@@ -352,6 +353,7 @@ function Get3v3()
     var p = parseFloat(document.getElementById("probe").value);
     var a = localStorage.getItem("adc3v3"+p);
     if (a == undefined) {
+        document.getElementById("status").innerHTML = "please calibrate x" + p + " probe 3v3";
         return 255;
     }
     return Number(a);
