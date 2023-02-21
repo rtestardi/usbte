@@ -907,10 +907,10 @@ async function Display()
 
             var oor = false;
             if (adcv < minv) {
-                oor = adcv < minv-50;
+                oor = adcv < minv-25;
                 adcv = minv;
             } else if (adcv > 1023) {
-                oor = adcv > 1023+50;
+                oor = adcv > 1023+25;
                 adcv = 1023;
             }
 
@@ -958,7 +958,7 @@ async function Display()
             }
         }
 
-        if (adcmax-adcmin < 50) {
+        if (adcmax-adcmin < 25*2) {
             document.getElementById("voltage").innerHTML = voltadc(adcsum/i, false, 2) + " noise " + Math.floor(adcnoise);
         } else {
             document.getElementById("voltage").innerHTML = "" + voltadc(adcmin, false, 2) + "..." + voltadc(adcmax, false, 2) + "=" + voltadc(adcmax-adcmin+512, false, 2);
