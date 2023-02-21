@@ -870,8 +870,11 @@ async function Display()
         var adcmax = 0;
         var adcsum = 0;
         var adcnoise = 0;
+
         adcrawcount = 0;
         adcrawsum = 0;
+
+        var inr = true;
 
         for (i = 0; i < width/2 && i < lines.length; i++) {
             // XXX -- if we find "done", reset to 0 and keep going
@@ -894,20 +897,35 @@ async function Display()
             var adcv = (adcscaled-512) * adcfull/v + 512;  // 0..1023 or more
 
             sx = i*2;
+            
+            var minv = 0;
+            var divv = 4;
             if (document.getElementById("polar").value == 1) {
-                if (adcv < 512) {
-                    adcv = 512;
-                } else if (adcv > 1023) {
-                    adcv = 1023;
+                minv = 512;
+                divv = 2;
+            }
+
+            var oor = false;
+            if (adcv < minv) {
+                oor = adcv < minv-50;
+                adcv = minv;
+            } else if (adcv > 1023) {
+                oor = adcv > 1023+50;
+                adcv = 1023;
+            }
+
+            path.lineTo(sx, (512/divv)-Math.floor((adcv-512)/divv));
+
+            if (oor != inr) {
+                ctx.stroke(path);
+                if (oor) {
+                    ctx.strokeStyle = '#FF0000';
+                } else {
+                    ctx.strokeStyle = '#000000';
                 }
-                path.lineTo(sx, 256-Math.floor((adcv-512)/2));
-            } else {
-                if (adcv < 0) {
-                    adcv = 0;
-                } else if (adcv > 1023) {
-                    adcv = 1023;
-                }
-                path.lineTo(sx, 128-Math.floor((adcv-512)/4));
+                path = new Path2D();  // analog
+                path.moveTo(sx, (512/divv)-Math.floor((adcv-512)/divv));
+                inr = oor;
             }
 
             for (b = 0; b < bits; b++) {
@@ -948,6 +966,7 @@ async function Display()
 
         path.moveTo(width, 255);
         ctx.stroke(path);
+        ctx.strokeStyle = '#000000';
 
         sx = i*2;
         for (b = 0; b < bits; b++) {
