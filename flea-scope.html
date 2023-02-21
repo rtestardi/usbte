@@ -958,7 +958,7 @@ async function Display()
             }
         }
 
-        document.getElementById("voltage").innerHTML = "avg: " + voltadc(adcsum/i, false, 2) + "; " + voltadc(adcmin, false, 2) + "..." + voltadc(adcmax, false, 2) + " = " + voltadc(adcmax-adcmin+512, false, 2);
+        document.getElementById("voltage").innerHTML = "" + voltadc(adcsum/i, false, 2) + " avg; " + voltadc(adcmin, false, 2) + "..." + voltadc(adcmax, false, 2) + " = " + voltadc(adcmax-adcmin+512, false, 2) + " pp";
 
         path.moveTo(width, 255);
         ctx.stroke(path);
