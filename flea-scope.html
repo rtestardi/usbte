@@ -874,7 +874,7 @@ async function Display()
         adcrawcount = 0;
         adcrawsum = 0;
 
-        var inr = true;
+        var inr = false;
 
         for (i = 0; i < width/2 && i < lines.length; i++) {
             // XXX -- if we find "done", reset to 0 and keep going
@@ -905,12 +905,11 @@ async function Display()
                 divv = 2;
             }
 
-            var oor = false;
+            var oor = (adcv <= minv) || (adcv >= 1023);
+
             if (adcv < minv) {
-                oor = adcv < minv-25;
                 adcv = minv;
             } else if (adcv > 1023) {
-                oor = adcv > 1023+25;
                 adcv = 1023;
             }
 
