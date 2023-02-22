@@ -241,15 +241,15 @@ Select:
 <button type="button" id="single" onclick="Single();" disabled=true>single</button>
 <button type="button" id="measure" onclick="Measure();">measure</button>
 </td>
-<td WIDTH="30%">
+<td WIDTH="25%">
 <pre id='status' color='red'></pre>
 </td>
-<td WIDTH="10%">
+<td WIDTH="25%">
 <pre id='voltage'></pre>
 </td>
 <td>
 <pre id='command'></pre>
-</td WIDTH="30%">
+</td WIDTH="20%">
 </table>
 
 <p id='copyright'>
@@ -958,7 +958,7 @@ async function Display()
             }
         }
 
-        document.getElementById("voltage").innerHTML = "" + voltadc(adcsum/i, false, 2) + " avg; " + voltadc(adcmin, false, 2) + "..." + voltadc(adcmax, false, 2) + " = " + voltadc(adcmax-adcmin+512, false, 2) + " pp";
+        document.getElementById("voltage").innerHTML = "" + voltadc(adcsum/i, false, 2) + " avg; " + voltadc(adcmax-adcmin+512, false, 2) + " pp";
 
         path.moveTo(width, 255);
         ctx.stroke(path);
