@@ -335,7 +335,7 @@ function GetZero()
     var a = localStorage.getItem("adczerox"+p+hostname);
     if (a == undefined && hostname != "") {
         document.getElementById("status").innerHTML = "please calibrate x" + p + " probe zero";
-        return 0;
+        return p==1 ? 85.67 : 98.31;  // default calibration values
     }
     return Number(a);
 }
@@ -357,7 +357,7 @@ function Get3v3()
         if (localStorage.getItem("adczerox"+p+hostname) != undefined) {
             document.getElementById("status").innerHTML = "please calibrate x" + p + " probe 3v3";
         }
-        return 255;
+        return p==1 ? 226.03 : 236.09;  // default calibration values
     }
     return Number(a);
 }
