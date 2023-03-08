@@ -559,7 +559,7 @@ function Body()
         down = true;
         if (! measure) {
             Send(String.fromCharCode(3));  // Ctrl-C
-            analogT = Math.max(e.offsetY, 0);
+            analogT = Math.min(Math.max(e.offsetY, 0), 255);
             document.getElementById("status").innerHTML = "trigger = " + volt((height/r-1-analogT)/(height/r), true, 2);
             Display();
         } else {
