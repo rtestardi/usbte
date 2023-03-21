@@ -103,6 +103,7 @@ async function Usb()
         await usb.open();
         await usb.selectConfiguration(1);
         await usb.claimInterface(1);
+        document.getElementById("config").hidden = true;
         Send("\r");
         Send("echo on\r");
         Send("prompt on\r");
@@ -128,6 +129,7 @@ async function Comm()
             await comm.open({ baudRate: 115200, bufferSize: 64 });
             reader = comm.readable.getReader();
             writer = comm.writable.getWriter();
+            document.getElementById("config").hidden = true;
             Send("\r");
             Send("echo on\r");
             Send("prompt on\r");
