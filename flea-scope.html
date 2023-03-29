@@ -17,8 +17,8 @@ a { text-decoration: none; }
 * { overflow-wrap: anywhere; word-wrap: anywhere; }
 button { overflow-wrap: normal; word-wrap: normal; }
 td { text-align: center; padding: 0px 15px 0px 0px; white-space: nowrap; }
-html,button,input,select { font: 36px Arial, Helvetica, sans-serif; padding: 10px 10px 10px 10px; margin: 10px 0px 10px 0px; }
-@media(min-width:80em){ html,button,input { font: 24px Arial, Helvetica, sans-serif; padding: 10px 10px 10px 10px; margin: 10px 0px 10px 0px; } }
+html,button,input,select { font: 34px Arial, Helvetica, sans-serif; padding: 10px 10px 10px 10px; margin: 10px 0px 10px 0px; }
+@media(min-width:80em){ html,button,input { font: 22px Arial, Helvetica, sans-serif; padding: 10px 10px 10px 10px; margin: 10px 0px 10px 0px; } }
 @supports(-webkit-touch-callout:none) { button,input { -webkit-appearance: none; border-radius: 2px; } }
 body,html { margin: 0px; }
 select { direction: rtl; }
@@ -232,7 +232,7 @@ Select:
 
 <br>
 
-<table WIDTH="1800px">
+<table WIDTH="1870px">
 <tr>
 <td WIDTH="30%">
 <button type="button" id="zero" onclick="CalZero();">cal_zero</button>
@@ -240,6 +240,7 @@ Select:
 <button type="button" id="pause" onclick="Pause();">pause</button>
 <button type="button" id="single" onclick="Single();" disabled=true>single</button>
 <button type="button" id="measure" onclick="Measure();">measure</button>
+<button type="button" id="background" onclick="Background();">background</button>
 </td>
 <td WIDTH="25%">
 <pre id='status' color='red'></pre>
@@ -280,6 +281,8 @@ var pending = "";
 var running = "";
 
 var digital = false;
+
+var bg = false;
 
 var analogT = 255;  // 0..255 (0..height-1)
 var measure = 0;
@@ -399,6 +402,17 @@ function Pause()
 function Single()
 {
     single = true;
+}
+
+function Background()
+{
+    if (! bg) {
+        bg = true;
+        document.getElementById('background').innerHTML = "foreground";
+    } else {
+        bg = false;
+        document.getElementById('background').innerHTML = "background";
+    }
 }
 
 function Wave()
@@ -847,7 +861,9 @@ async function Display()
 
         var sx, sy, sh;
 
-        //beep();
+        if (bg) {
+            beep();
+        }
 
         var path;
         path = new Path2D();  // analog
@@ -996,7 +1012,9 @@ async function Display()
         }
     }
 
-    //beep();
+    if (bg) {
+        beep();
+    }
 }
 
 // receive a string from the device
