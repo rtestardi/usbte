@@ -294,7 +294,7 @@ var digital = false;
 
 var bg = false;
 
-var analogV = 0;  // 0..v or -v..v
+var analogV = 0;  // 0..v or -v..v (must be multiplied by p!)
 var measure = 0;
 
 const MSPS = 18;  // approximate target sample rate
@@ -592,8 +592,8 @@ function Body()
         if (! measure) {
             Send(String.fromCharCode(3));  // Ctrl-C
             var analogY = Math.min(Math.max(e.offsetY, 0), 255);  // 0..255 (0..height-1)
-            analogV = (height/r - (analogY+1))/(height/r)*v*p;  // 0..v or -v..v
-            document.getElementById("status").innerHTML = "trigger = " + analogV.toFixed(2);
+            analogV = (height/r - (analogY+1))/(height/r)*v;  // 0..v or -v..v
+            document.getElementById("status").innerHTML = "trigger = " + analogV.toFixed(2)*p + "V";
             Display();
         } else {
             if (measure == 1) {
@@ -785,6 +785,11 @@ async function Scope()
     } else {
         number2 = document.getElementById("trigger").value;
         var adcscaled = (analogV+adcfull)/(adcfull*2)*1024;
+        if (adcscaled > 1023) {
+            adcscaled = 1023;
+        } else if (adcscaled < 0) {
+            adcscaled = 0;
+        }
         number2 += Math.floor((adcscaled-512)*Get3v3()/256 + GetZero() + 512);
         number3 = 0;
     }
@@ -873,7 +878,7 @@ async function Display()
 
     if (! digital) {
         var analogY;  // 0..255 (0..height-1)
-        if (analogV > p*v) {
+        if (analogV > v) {
             analogY = 0;
             ctx.setLineDash([10, 4]);
             ctx.strokeStyle = '#FF0000';
@@ -881,7 +886,7 @@ async function Display()
             ctx.moveTo(0, analogY);
             ctx.lineTo(width, analogY);
             ctx.stroke();
-        } else if ((r == 1 && analogV < 0) || (r == 2 && analogV < -p*v)) {
+        } else if ((r == 1 && analogV < 0) || (r == 2 && analogV < -v)) {
             analogY = 255;
             ctx.setLineDash([10, 4]);
             ctx.strokeStyle = '#FF0000';
@@ -891,9 +896,9 @@ async function Display()
             ctx.stroke();
         } else {
             if (r == 1) {
-                analogY = 256 - Math.floor(analogV*255/(p*v));
+                analogY = 256 - Math.floor(analogV*255/(v));
             } else {
-                analogY = 256 - Math.floor((analogV+p*v)*255/(2*p*v));
+                analogY = 256 - Math.floor((analogV+p*v)*255/(2*v));
             }
             ctx.setLineDash([10, 4]);
             ctx.strokeStyle = '#00BF00';
