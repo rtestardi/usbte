@@ -814,6 +814,8 @@ async function Display()
     // draw vertical labels
     ctx = labels.getContext('2d');
 
+    ctx.clearRect(0, 0, 50, 546);
+
     ctx.font = `12px Verdana`;
 
     var v = parseFloat(document.getElementById("volts").value);
@@ -842,7 +844,7 @@ async function Display()
     // draw lines and horizontal labels
     ctx = canvas.getContext('2d');
 
-    ctx.clearRect(0, 0, width+50, 546);
+    ctx.clearRect(0, 0, width, 546);
 
     ShowPoints();
 
