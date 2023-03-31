@@ -294,7 +294,7 @@ var digital = false;
 
 var bg = false;
 
-var analogT = 255;  // 0..255 (0..height-1)
+var analogV = 0;  // 0..v or -v..v
 var measure = 0;
 
 const MSPS = 18;  // approximate target sample rate
@@ -585,12 +585,15 @@ function Body()
     ScaleCanvas();
 
     canvas.addEventListener('mousedown', function(e) {
+        var v = parseFloat(document.getElementById("volts").value);
+        var p = parseFloat(document.getElementById("probe").value);
         var r = parseFloat(document.getElementById("polar").value);
         down = true;
         if (! measure) {
             Send(String.fromCharCode(3));  // Ctrl-C
-            analogT = Math.min(Math.max(e.offsetY, 0), 255);
-            document.getElementById("status").innerHTML = "trigger = " + volt((height/r-1-analogT)/(height/r), true, 2);
+            var analogY = Math.min(Math.max(e.offsetY, 0), 255);  // 0..255 (0..height-1)
+            analogV = (height/r - (analogY+1))/(height/r)*v*p;  // 0..v or -v..v
+            document.getElementById("status").innerHTML = "trigger = " + analogV.toFixed(2);
             Display();
         } else {
             if (measure == 1) {
@@ -748,7 +751,7 @@ async function Scope()
 {
     string = "";
 
-    var v = parseFloat(document.getElementById("volts").value)
+    var v = parseFloat(document.getElementById("volts").value);
     var p = parseFloat(document.getElementById("probe").value);
     var r = parseFloat(document.getElementById("polar").value);
 
@@ -781,7 +784,6 @@ async function Scope()
         number3 = "0x" + mask.toString(16);
     } else {
         number2 = document.getElementById("trigger").value;
-        var analogV = (height/r-1-analogT)/(height/r)*v;  // 0..v or -v..v
         var adcscaled = (analogV+adcfull)/(adcfull*2)*1024;
         number2 += Math.floor((adcscaled-512)*Get3v3()/256 + GetZero() + 512);
         number3 = 0;
@@ -818,6 +820,7 @@ async function Display()
 
     var v = parseFloat(document.getElementById("volts").value);
     var p = parseFloat(document.getElementById("probe").value);
+    var r = parseFloat(document.getElementById("polar").value);
 
     // voltage
     if (document.getElementById("polar").value == 1) {
@@ -869,12 +872,36 @@ async function Display()
     }
 
     if (! digital) {
-        ctx.setLineDash([10, 4]);
-        ctx.strokeStyle = '#00BF00';
-        ctx.beginPath();
-        ctx.moveTo(0, analogT);
-        ctx.lineTo(width, analogT);
-        ctx.stroke();
+        var analogY;  // 0..255 (0..height-1)
+        if (analogV > p*v) {
+            analogY = 0;
+            ctx.setLineDash([10, 4]);
+            ctx.strokeStyle = '#FF0000';
+            ctx.beginPath();
+            ctx.moveTo(0, analogY);
+            ctx.lineTo(width, analogY);
+            ctx.stroke();
+        } else if ((r == 1 && analogV < 0) || (r == 2 && analogV < -p*v)) {
+            analogY = 255;
+            ctx.setLineDash([10, 4]);
+            ctx.strokeStyle = '#FF0000';
+            ctx.beginPath();
+            ctx.moveTo(0, analogY);
+            ctx.lineTo(width, analogY);
+            ctx.stroke();
+        } else {
+            if (r == 1) {
+                analogY = 256 - Math.floor(analogV*255/(p*v));
+            } else {
+                analogY = 256 - Math.floor((analogV+p*v)*255/(2*p*v));
+            }
+            ctx.setLineDash([10, 4]);
+            ctx.strokeStyle = '#00BF00';
+            ctx.beginPath();
+            ctx.moveTo(0, analogY);
+            ctx.lineTo(width, analogY);
+            ctx.stroke();
+        }
     }
 
     ctx.beginPath();
