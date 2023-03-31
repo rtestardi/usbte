@@ -4,6 +4,7 @@
 <!-- FLEA-SCOPE -->
 <!-- See: https://wicg.github.io/webusb/ -->
 <!-- See: https://wicg.github.io/serial/ -->
+<!-- top right bottom left -->
 
 <head>
 <meta charset="utf-8">
@@ -13,16 +14,20 @@
 pre { white-space: pre-wrap; word-wrap: break-word; }
 a { text-decoration: none; }
 #status { color: red; }
-#copyright { font-size:65%; padding: 0px; }
+#copyright { font-size:65%; padding: 0px; margin: 0px; }
 * { overflow-wrap: anywhere; word-wrap: anywhere; }
 button { overflow-wrap: normal; word-wrap: normal; }
 td { text-align: center; padding: 0px 15px 0px 0px; white-space: nowrap; }
-html,button,input,select { font: 34px Arial, Helvetica, sans-serif; padding: 10px 10px 10px 10px; margin: 10px 0px 10px 0px; }
-@media(min-width:80em){ html,button,input { font: 22px Arial, Helvetica, sans-serif; padding: 10px 10px 10px 10px; margin: 10px 0px 10px 0px; } }
+html,button,input,select { font: 34px Arial, Helvetica, sans-serif; padding: 10px 10px 10px 10px; margin: 0px 0px 10px 0px; }
+@media(min-width:80em){ html,button,input { font: 22px Arial, Helvetica, sans-serif; padding: 10px 10px 10px 10px; margin: 0px 0px 10px 0px; } }
 @supports(-webkit-touch-callout:none) { button,input { -webkit-appearance: none; border-radius: 2px; } }
 body,html { margin: 0px; }
 select { direction: rtl; }
-#canvas { outline: red 1px solid; padding: 4px; }
+#wrapper { display: flex; }
+#view { outline: red 1px solid; flex: 97; overflow-x: scroll; }
+#canvas { padding: 3px; }
+#view2 { flex: 3; padding: 0px 5px 0px 5px; }
+#labels { width = 50px; }
     </style>
 </head>
 
@@ -228,7 +233,14 @@ Select:
 </tr>
 </table>
 
+<div id="wrapper">
+<div id="view">
 <canvas id="canvas"></canvas>
+</div>
+<div id="view2">
+<canvas id="labels"></canvas>
+</div>
+</div>
 
 <br>
 
@@ -272,7 +284,7 @@ var writer;
 var enc = new TextEncoder();
 var dec = new TextDecoder();
 var canvas;
-var ctx;
+var labels;
 
 var discard;
 var discarded;
@@ -288,9 +300,11 @@ var analogT = 255;  // 0..255 (0..height-1)
 var measure = 0;
 
 const MSPS = 18;  // approximate target sample rate
-const SAMPLES = 1000*MSPS/20;  // approximate width of display canvas
-const EXTRA = 100;  // extra samples in case web page wants to fine-scale
+const SAMPLES = 2000*MSPS/20;  // approximate width of display canvas
+const EXTRA = 200;  // extra samples in case web page wants to fine-scale
 const INTERLEAVE = 5;  // we interleave results from 5 adcs
+const DIVSV = 10;
+const DIVST = 20;
 
 const bus_frequency = 120000000;
 const bus_mhz = bus_frequency/1000000;
@@ -326,9 +340,11 @@ function ScaleCanvas()
     }
     var pr = Math.floor(bus_mhz*usecv*INTERLEAVE/MSPS + 0.5);
     msps = bus_mhz*INTERLEAVE/pr;
-    width = Math.floor(2000*msps*usecv/20);
-    canvas.setAttribute("width", width+50);
+    width = Math.floor(2*2000*msps*usecv/20);
+    canvas.setAttribute("width", width);
     canvas.setAttribute("height", height+30*bits+20);
+    labels.setAttribute("width", 50);
+    labels.setAttribute("height", height+30*bits+20);
 }
 
 function GetZero()
@@ -438,7 +454,7 @@ function usec(frac, scale, fixed)
     } else {
         usecv *= 5;
     }
-    usecv = usecv * 10 * frac;
+    usecv = usecv * DIVST * frac;
     var usecs;
     if (scale && usecv >= 1000) {
         usecs = "" + (usecv/1000).toFixed(fixed) + "ms";
@@ -457,7 +473,7 @@ function freq(frac, scale, fixed)
     } else {
         usecv *= 5;
     }
-    usecv = usecv * 10 * frac;
+    usecv = usecv * DIVST * frac;
     var freqv = 1000000/usecv;
     var freqs;
     if (scale && freqv >= 1000000) {
@@ -525,10 +541,12 @@ function ShowStatus()
     document.getElementById("status").innerHTML = status;
 }
 
-function ShowPoints(ctx)
+function ShowPoints()
 {
     var x;
     var y;
+    var ctx;
+    ctx = canvas.getContext('2d');
     ctx.beginPath();
     if (oldX >= 0 && oldY >= 0 && (oldX != newX || oldY != newY)) {
         x = oldX;
@@ -565,7 +583,7 @@ function Measure()
 function Body()
 {
     canvas = document.getElementById('canvas');
-    ctx = canvas.getContext('2d');
+    labels = document.getElementById('labels');
     ScaleCanvas();
 
     canvas.addEventListener('mousedown', function(e) {
@@ -590,7 +608,7 @@ function Body()
                 measure = 1;
             }
             ShowStatus();
-            ShowPoints(ctx);
+            ShowPoints();
         }
     });
 
@@ -791,45 +809,63 @@ async function Display()
     // result is in string
     var lines = string.split(/\r?\n/);
 
+    var ctx;
+
+    // draw vertical labels
+    ctx = labels.getContext('2d');
+
     ctx.font = `12px Verdana`;
-
-    ctx.clearRect(0, 0, width+50, 546);
-
-    ShowPoints(ctx);
 
     var v = parseFloat(document.getElementById("volts").value);
     var p = parseFloat(document.getElementById("probe").value);
 
+    // voltage
     if (document.getElementById("polar").value == 1) {
-        ctx.fillText("" + v*p + "V", width+8, 10);
-        ctx.fillText("" + v*p/2 + "V", width+8, 128);
-        ctx.fillText("0V", width+8, 256);
+        ctx.fillText("" + v*p + "V", 0, 10);
+        ctx.fillText("" + v*p/2 + "V", 0, 128);
+        ctx.fillText("0V", 0, 256);
     } else {
-        ctx.fillText("+" + v*p + "V", width+8, 10);
-        ctx.fillText("0V", width+8, 128);
-        ctx.fillText("-" + v*p + "V", width+8, 256);
+        ctx.fillText("+" + v*p + "V", 0, 10);
+        ctx.fillText("0V", 0, 128);
+        ctx.fillText("-" + v*p + "V", 0, 256);
     }
 
-    for (var i = 0; i <= 10; i++) {
-        if (Math.floor(i/5)*5 == i) {
+    var b;
+
+    // bits
+    for (b = 0; b < bits; b++) {
+        sy = 305+b*30;
+
+        ctx.fillText("b"+b, 0, sy-2);
+    }
+
+    // draw lines and horizontal labels
+    ctx = canvas.getContext('2d');
+
+    ctx.clearRect(0, 0, width+50, 546);
+
+    ShowPoints();
+
+    for (var i = 0; i <= DIVST; i++) {
+        if (i%(DIVSV/2) == 0) {
             ctx.setLineDash([6, 10]);
         } else {
             ctx.setLineDash([2, 10]);
         }
         ctx.beginPath();
-        ctx.moveTo(width/10*i, 0);
-        ctx.lineTo(width/10*i, 255);
+        ctx.moveTo(width/DIVST*i, 0);
+        ctx.lineTo(width/DIVST*i, 255);
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.moveTo(width/10*i, 305-20);
-        ctx.lineTo(width/10*i, 305+7*30);
+        ctx.moveTo(width/DIVST*i, 305-20);
+        ctx.lineTo(width/DIVST*i, 305+bits*30);
         ctx.stroke();
         ctx.setLineDash([]);
 
-        var t = "" + usec(i/10, true, 1).replace(/[.]0/,"");
-        var w = (i==10)?(ctx.measureText(t).width):((i)?(ctx.measureText(t).width/2):0);
-        ctx.fillText(t, (width/10*i)-w, 274);
+        var t = "" + usec(i/DIVST, true, 1).replace(/[.]0/,"");
+        var w = (i==DIVST)?(ctx.measureText(t).width):((i)?(ctx.measureText(t).width/2):0);
+        ctx.fillText(t, (width/DIVST*i)-w, 274);
     }
 
     if (! digital) {
@@ -840,7 +876,6 @@ async function Display()
         ctx.lineTo(width, analogT);
         ctx.stroke();
     }
-
 
     ctx.beginPath();
     ctx.strokeStyle = '#000000';
@@ -854,7 +889,6 @@ async function Display()
     ctx.stroke();
 
     ctx.setLineDash([]);
-
 
     if (lines.length >= 100) {
         // scope result
@@ -999,8 +1033,6 @@ async function Display()
             if (document.getElementById("b"+b).value != "") {
                 ctx.strokeStyle = '#000000';
             }
-
-            ctx.fillText("b"+b, width+8, sy-2);
         }
     } else if (running.match(/hostname/) && lines.length > 0) {
         // hostname result
