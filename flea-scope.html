@@ -595,7 +595,7 @@ function Body()
             Send(String.fromCharCode(3));  // Ctrl-C
             var analogY = Math.min(Math.max(e.offsetY, 0), 255);  // 0..255 (0..height-1)
             analogV = (height/r - (analogY+1))/(height/r)*v;  // 0..v or -v..v
-            document.getElementById("status").innerHTML = "trigger = " + analogV.toFixed(2)*p + "V";
+            document.getElementById("status").innerHTML = "trigger = " + (analogV*p).toFixed(2) + "V";
             Display();
         } else {
             if (measure == 1) {
@@ -900,7 +900,7 @@ async function Display()
             if (r == 1) {
                 analogY = 256 - Math.floor(analogV*255/(v));
             } else {
-                analogY = 256 - Math.floor((analogV+p*v)*255/(2*v));
+                analogY = 256 - Math.floor((analogV+v)*255/(2*v));
             }
             ctx.setLineDash([10, 4]);
             ctx.strokeStyle = '#00BF00';
@@ -1058,7 +1058,9 @@ async function Display()
         }
         adcrms = Math.pow(adcrms/i, 0.5);
 
-        document.getElementById("voltage").innerHTML = "" + voltadc(adcsum/i, false, 2) + " avg; " + voltadc(adcmax-adcmin+512, false, 2) + " pp; " + voltadc(adcrms+512, false, 2) + " rms";
+        document.getElementById("voltage").innerHTML = "" + voltadc(adcsum/i, false, 2) + " avg; " +
+                                                            voltadc(adcmax-adcmin+512, false, 2) + " pp; " +
+                                                            voltadc(adcrms+512, false, 2) + " rms";
 
         path.moveTo(width, 255);
         ctx.stroke(path);
