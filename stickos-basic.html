@@ -29,7 +29,7 @@ body,html { margin: 0px; }
 
 <div id="config">
 Select:
-<button type='button' onclick="if (navigator.appVersion.indexOf('Win') != -1) { Comm(); } else { Usb(); }">Connect</button>
+<button type='button' onclick="Comm(); if (! comm) { Usb(); }">Connect</button>
 </div>
 
 <pre id='results'></pre>
@@ -96,6 +96,7 @@ async function Usb()
     var filter = [
         { vendorId: 0x1b4f, productId: 0xA660 },
         { vendorId: 0x0403, productId: 0xA660 },
+        { vendorId: 0x0403, productId: 0xE66E },
         { vendorId: 0x04D8, productId: 0xE66E },
     ];
 
@@ -122,6 +123,7 @@ async function Comm()
     var filter = [
         { usbVendorId: 0x1b4f, usbProductId: 0xA660 },
         { usbVendorId: 0x0403, usbProductId: 0xA660 },
+        { usbVendorId: 0x0403, usbProductId: 0xE66E },
         { usbVendorId: 0x04D8, usbProductId: 0xE66E },
     ];
 
