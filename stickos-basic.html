@@ -29,7 +29,7 @@ body,html { margin: 0px; }
 
 <div id="config">
 Select:
-<button type='button' onclick="Comm(); if (! comm) { Usb(); }">Connect</button>
+<button type='button' onclick="if (navigator.appVersion.indexOf('Win') != -1) { Comm(); } else { Usb(); }">Connect</button>
 </div>
 
 <pre id='results'></pre>
