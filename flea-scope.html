@@ -37,7 +37,7 @@ select { direction: rtl; }
 
 <div id="config">
 Select:
-<button type='button' onclick="if (navigator.appVersion.indexOf('Win') != -1) { Comm(); } else { Usb(); }">Connect</button>
+<button type='button' onclick="if (/\b(CrOS|Windows)\b/.test(navigator.userAgent)) { Comm(); } else { Usb(); }">Connect</button>
 </div>
 
 <table>
