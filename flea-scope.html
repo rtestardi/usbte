@@ -746,7 +746,7 @@ async function WarnCommand()
 
 async function SendCommand(command)
 {
-    waiting = setTimeout(WarnCommand, 1000);
+    waiting = setTimeout(WarnCommand, 2000);
     document.getElementById('command').style.color = 'black';
     document.getElementById("command").innerHTML = command;
 
