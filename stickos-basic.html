@@ -29,7 +29,12 @@ body,html { margin: 0px; }
 
 <div id="config">
 Select:
-<button type='button' onclick="if (/\b(CrOS|Windows)\b/.test(navigator.userAgent)) { Comm(); } else { Usb(); }">Connect</button>
+<button type='button'
+        onclick="if (/\b(CrOS|Windows)\b/.test(navigator.userAgent)) {
+                     Comm();
+                 } else {
+                     Usb();
+                 }">Connect</button>
 </div>
 
 <pre id='results'></pre>
@@ -100,20 +105,32 @@ async function Usb()
         { vendorId: 0x04D8, productId: 0xE66E },
     ];
 
-    try {
-        usb = await navigator.usb.requestDevice({ filters: filter });
-        await usb.open();
-        await usb.selectConfiguration(1);
-        await usb.claimInterface(1);
-        document.getElementById("config").hidden = true;
-        Send("\r");
-        Send("echo on\r");
-        Send("prompt on\r");
-        setTimeout(Receive, 100);
-        document.getElementById("command").disabled = false;
-        document.getElementById("command").focus();
-    } catch(err) {
-        document.getElementById("results").innerHTML += err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
+    if ('usb' in navigator) {
+        try {
+            usb = await navigator.usb.requestDevice({ filters: filter });
+            await usb.open();
+            await usb.selectConfiguration(1);
+            await usb.claimInterface(1);
+
+            document.getElementById("config").hidden = true;
+
+            Send("\r");
+            Send("echo on\r");
+            Send("prompt on\r");
+
+            setTimeout(Receive, 1);
+            document.getElementById("command").disabled = false;
+            document.getElementById("command").focus();
+        } catch(err) {
+            document.getElementById("results").innerHTML += err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
+        }
+    } else {
+        document.getElementById("status").innerHTML =
+`The usb API needs to be enabled in your browser thru:
+   - <a href=edge://flags/#enable-experimental-web-platform-features>edge://flags/#enable-experimental-web-platform-features</a>
+   - <a href=chrome://flags/#enable-experimental-web-platform-features>chrome://flags/#enable-experimental-web-platform-features</a>
+   - <a href=opera://flags/#enable-experimental-web-platform-features>opera://flags/#enable-experimental-web-platform-features</a>
+`;
     }
 }
 
@@ -133,11 +150,14 @@ async function Comm()
             await comm.open({ baudRate: 115200, bufferSize: 64 });
             reader = comm.readable.getReader();
             writer = comm.writable.getWriter();
+
             document.getElementById("config").hidden = true;
+
             Send("\r");
             Send("echo on\r");
             Send("prompt on\r");
-            setTimeout(Receive, 100);
+
+            setTimeout(Receive, 1);
             document.getElementById("command").disabled = false;
             document.getElementById("command").focus();
         } catch(err) {
@@ -158,6 +178,7 @@ async function Receive()
 {
     var result;
     var str;
+
     if (usb) {
         result = await usb.transferIn(2, 64);
         str = dec.decode(result.data.buffer);
@@ -172,7 +193,7 @@ async function Receive()
         document.getElementById("results").innerHTML += str.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'');
     }
     document.getElementById("command").scrollIntoView();
-    setTimeout(Receive, 10);
+    setTimeout(Receive, 1);
 }
 
 // send a string to the device
