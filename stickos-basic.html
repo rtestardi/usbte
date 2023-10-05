@@ -57,10 +57,12 @@ Select:
 <script>
 'use strict';
 
+var usb;
 var comm;
+var epin = 2;
+var epout = 3;
 var reader;
 var writer;
-var usb;
 var enc = new TextEncoder();
 var dec = new TextDecoder();
 var lines = [];
@@ -180,7 +182,7 @@ async function Receive()
     var str;
 
     if (usb) {
-        result = await usb.transferIn(2, 64);
+        result = await usb.transferIn(epin, 64);
         str = dec.decode(result.data.buffer);
     } else {
         result = await reader.read();
@@ -200,7 +202,7 @@ async function Receive()
 async function Send(str)
 {
     if (usb) {
-        await usb.transferOut(3, enc.encode(str).buffer);
+        await usb.transferOut(epout, enc.encode(str).buffer);
     } else {
         await writer.write(enc.encode(str).buffer);
     }

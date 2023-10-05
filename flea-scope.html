@@ -281,6 +281,8 @@ Select:
 
 var usb;
 var comm;
+var epin = 2;
+var epout = 3;
 var reader;
 var writer;
 var enc = new TextEncoder();
@@ -1115,7 +1117,7 @@ async function Receive()
     var result;
 
     if (usb) {
-        result = await usb.transferIn(2, 1024);
+        result = await usb.transferIn(epin, 1024);
         str = dec.decode(result.data.buffer);
     } else {
         result = await reader.read();
@@ -1144,7 +1146,7 @@ async function Send(str)
     running = str;
 
     if (usb) {
-        await usb.transferOut(3, enc.encode(str).buffer);
+        await usb.transferOut(epout, enc.encode(str).buffer);
     } else {
         await writer.write(enc.encode(str).buffer);
     }
