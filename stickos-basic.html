@@ -149,7 +149,7 @@ async function Comm()
     if ('serial' in navigator) {
         try {
             comm = await navigator.serial.requestPort({ filters: filter });
-            await comm.open({ baudRate: 115200, bufferSize: 64 });
+            await comm.open({ baudRate: 115200, bufferSize: 1024 });
             reader = comm.readable.getReader();
             writer = comm.writable.getWriter();
 
@@ -182,7 +182,7 @@ async function Receive()
     var str;
 
     if (usb) {
-        result = await usb.transferIn(epin, 64);
+        result = await usb.transferIn(epin, 1024);
         str = dec.decode(result.data.buffer);
     } else {
         result = await reader.read();
