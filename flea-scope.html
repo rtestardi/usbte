@@ -369,7 +369,7 @@ function GetZero()
     }
     if (a == undefined || a == 0) {
         document.getElementById("status").innerHTML = "please calibrate x" + p + " probe zero";
-        return p==1 ? 15 : 28;  // default calibration values
+        return p==1 ? 14 : 28;  // default calibration values
     }
     return Number(a);
 }
@@ -400,7 +400,7 @@ function Get3v3()
     }
     if (a == undefined || a == 0) {
         document.getElementById("status").innerHTML = "please calibrate x" + p + " probe 3v3";
-        return p==1 ? 257 : 255;  // default calibration values
+        return p==1 ? 259 : 270;  // default calibration values
     }
     return Number(a);
 }
