@@ -329,6 +329,11 @@ var down = false;
 
 var waiting;
 
+var cal_zero_x1;
+var cal_3v3_x1;
+var cal_zero_x10;
+var cal_3v3_x10;
+
 var oldX, newX;
 var oldY, newY;
 
@@ -355,9 +360,14 @@ function ScaleCanvas()
 
 function GetZero()
 {
+    var a;
     var p = parseFloat(document.getElementById("probe").value);
-    var a = localStorage.getItem("adczerox"+p+hostname);
-    if (a == undefined && hostname != "") {
+    if (p == 1) {
+        a = cal_zero_x1;
+    } else {
+        a = cal_zero_x10;
+    }
+    if (a == undefined || a == 0) {
         document.getElementById("status").innerHTML = "please calibrate x" + p + " probe zero";
         return p==1 ? 15 : 28;  // default calibration values
     }
@@ -368,19 +378,28 @@ function CalZero()
 {
     if (adcrawcount) {
         var p = parseFloat(document.getElementById("probe").value);
-        localStorage.setItem("adczerox"+p+hostname, String(adcrawsum/adcrawcount - 512));
+        if (p == 1) {
+            cal_zero_x1 = Math.floor((adcrawsum/adcrawcount - 512) * 1);
+            once.push("cal_zero_x1 = " + cal_zero_x1 + "\n");
+        } else {
+            cal_zero_x10 = Math.floor((adcrawsum/adcrawcount - 512) * 1);
+            once.push("cal_zero_x10 = " + cal_zero_x10 + "\n");
+        }
         document.getElementById("status").innerHTML = "adczerox"+p + " = " + GetZero().toFixed(2);
     }
 }
 
 function Get3v3()
 {
+    var a;
     var p = parseFloat(document.getElementById("probe").value);
-    var a = localStorage.getItem("adc3v3x"+p+hostname);
-    if (a == undefined && hostname != "") {
-        if (localStorage.getItem("adczerox"+p+hostname) != undefined) {
-            document.getElementById("status").innerHTML = "please calibrate x" + p + " probe 3v3";
-        }
+    if (p == 1) {
+        a = cal_3v3_x1;
+    } else {
+        a = cal_3v3_x10;
+    }
+    if (a == undefined || a == 0) {
+        document.getElementById("status").innerHTML = "please calibrate x" + p + " probe 3v3";
         return p==1 ? 257 : 255;  // default calibration values
     }
     return Number(a);
@@ -390,7 +409,13 @@ function Cal3v3()
 {
     if (adcrawcount) {
         var p = parseFloat(document.getElementById("probe").value);
-        localStorage.setItem("adc3v3x"+p+hostname, String((adcrawsum/adcrawcount - GetZero() - 512) * p));
+        if (p == 1) {
+            cal_3v3_x1 = Math.floor((adcrawsum/adcrawcount - GetZero() - 512) * p);
+            once.push("cal_3v3_x1 = " + cal_3v3_x1 + "\n");
+        } else {
+            cal_3v3_x10 = Math.floor((adcrawsum/adcrawcount - GetZero() - 512) * p);
+            once.push("cal_3v3_x10 = " + cal_3v3_x10 + "\n");
+        }
         document.getElementById("status").innerHTML = "adc3v3x"+p + " = " + Get3v3().toFixed(2);
     }
 }
@@ -651,6 +676,8 @@ async function Usb()
             Send(String.fromCharCode(3));  // Ctrl-C
             Send("echo off\n");  // XXX -- figure out how to undo?
             Send("prompt off\n");  // XXX -- figure out how to undo?
+            Send("dim cal_zero_x1 as flash, cal_3v3_x1 as flash\n");
+            Send("dim cal_zero_x10 as flash, cal_3v3_x10 as flash\n");
             Wave();
 
             discarded = false;
@@ -693,6 +720,8 @@ async function Comm()
             Send(String.fromCharCode(3));  // Ctrl-C
             Send("echo off\n");  // XXX -- figure out how to undo?
             Send("prompt off\n");  // XXX -- figure out how to undo?
+            Send("dim cal_zero_x1 as flash, cal_3v3_x1 as flash\n");
+            Send("dim cal_zero_x10 as flash, cal_3v3_x10 as flash\n");
             Wave();
 
             discarded = false;
@@ -721,16 +750,18 @@ async function Discard()
     }
 }
 
-var once = true;
+var once = [
+    "print cal_zero_x1, cal_3v3_x1, cal_zero_x10, cal_3v3_x10\n",
+    "hostname\n"
+];
 
 async function Next()
 {
-    if (pending != "") {
+    if (once.length) {
+        SendCommand(once.shift());
+    } else if (pending != "") {
         SendCommand(pending);
         pending = "";
-    } else if (once) {
-        SendCommand("hostname");
-        once = false;
     } else {
         if (single) {
             single = false;
@@ -752,6 +783,8 @@ async function WarnCommand()
 
 async function SendCommand(command)
 {
+    string = "";
+
     waiting = setTimeout(WarnCommand, 3000);
     document.getElementById('command').style.color = 'black';
     document.getElementById("command").innerHTML = command;
@@ -761,8 +794,6 @@ async function SendCommand(command)
 
 async function Scope()
 {
-    string = "";
-
     var v = parseFloat(document.getElementById("volts").value);
     var p = parseFloat(document.getElementById("probe").value);
     var r = parseFloat(document.getElementById("polar").value);
@@ -1102,6 +1133,19 @@ async function Display()
         
         if (hostname != "Flea-Scope") {
             document.getElementById("h1").innerHTML += " (" + hostname + ")";
+        }
+    } else if (running.match(/print/) && lines.length > 0) {
+        // calibration value result
+
+        var words = lines[0].split(/ /);
+
+        if (words[0] > 0 && words[1] > 0) {
+            cal_zero_x1 = Number(words[0]);
+            cal_3v3_x1 = Number(words[1]);
+        }
+        if (words[2] > 0 && words[3] > 0) {
+            cal_zero_x10 = Number(words[2]);
+            cal_3v3_x10 = Number(words[3]);
         }
     }
 
