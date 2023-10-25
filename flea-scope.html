@@ -379,13 +379,13 @@ function CalZero()
     if (adcrawcount) {
         var p = parseFloat(document.getElementById("probe").value);
         if (p == 1) {
-            cal_zero_x1 = Math.floor((adcrawsum/adcrawcount - 512) * 1);
+            cal_zero_x1 = Math.round((adcrawsum/adcrawcount - 512) * 1);
             once.push("cal_zero_x1 = " + cal_zero_x1 + "\n");
         } else {
-            cal_zero_x10 = Math.floor((adcrawsum/adcrawcount - 512) * 1);
+            cal_zero_x10 = Math.round((adcrawsum/adcrawcount - 512) * 1);
             once.push("cal_zero_x10 = " + cal_zero_x10 + "\n");
         }
-        document.getElementById("status").innerHTML = "adczerox"+p + " = " + GetZero().toFixed(2);
+        document.getElementById("status").innerHTML = "cal_zero_x"+p + " = " + GetZero();
     }
 }
 
@@ -410,13 +410,13 @@ function Cal3v3()
     if (adcrawcount) {
         var p = parseFloat(document.getElementById("probe").value);
         if (p == 1) {
-            cal_3v3_x1 = Math.floor((adcrawsum/adcrawcount - GetZero() - 512) * p);
+            cal_3v3_x1 = Math.round((adcrawsum/adcrawcount - GetZero() - 512) * p);
             once.push("cal_3v3_x1 = " + cal_3v3_x1 + "\n");
         } else {
-            cal_3v3_x10 = Math.floor((adcrawsum/adcrawcount - GetZero() - 512) * p);
+            cal_3v3_x10 = Math.round((adcrawsum/adcrawcount - GetZero() - 512) * p);
             once.push("cal_3v3_x10 = " + cal_3v3_x10 + "\n");
         }
-        document.getElementById("status").innerHTML = "adc3v3x"+p + " = " + Get3v3().toFixed(2);
+        document.getElementById("status").innerHTML = "cal_3v3_x"+p + " = " + Get3v3();
     }
 }
 
