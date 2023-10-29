@@ -3,21 +3,22 @@
 <!-- StickOS® BASIC -->
 <!-- See: https://wicg.github.io/webusb/ -->
 <!-- See: https://wicg.github.io/serial/ -->
+<!-- top right bottom left -->
 
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width">
+<meta name="viewport" content="width=1870">
 <title>StickOS® BASIC</title>
     <style>
 pre { white-space: pre-wrap; word-wrap: break-word; }
 a { text-decoration: none; }
 #results { line-height: 1.2; }
 #command { width: 96%; font-size:120%; }
-#copyright { font-size:65%; padding: 0px; }
+#copyright { font-size:65%; padding: 0px; margin: 0px; }
 * { overflow-wrap: anywhere; word-wrap: anywhere; }
 button { overflow-wrap: normal; word-wrap: normal; }
-html,button,input { font: 36px Arial, Helvetica, sans-serif; padding: 15px 10px 15px 10px; margin: 15px 0px 15px 0px; }
-@media(min-width:80em){ html,button,input { font: 24px Arial, Helvetica, sans-serif; padding: 10px; margin: 10px 0px 10px 0px; } }
+html,button,input,select { font: 34px Arial, Helvetica, sans-serif; padding: 10px 10px 10px 10px; margin: 0px 0px 10px 0px; }
+@media(min-width:80em){ html,button,input { font: 22px Arial, Helvetica, sans-serif; padding: 10px 10px 10px 10px; margin: 0px 0px 10px 0px; } }
 @supports(-webkit-touch-callout:none) { button,input { -webkit-appearance: none; border-radius: 2px; } }
 body,html { margin: 0px; }
     </style>
@@ -34,8 +35,7 @@ Select:
                      Comm();
                  } else {
                      Usb();
-                 }">Connect</button>
-</div>
+                 }">Connect</button></div>
 
 <pre id='results'></pre>
 
