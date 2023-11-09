@@ -1053,7 +1053,7 @@ async function Display()
                 adcv = 1023;
             }
 
-            path.lineTo(sx, (512/divv)-Math.floor((adcv-512)/divv));
+            path.lineTo(sx, (512/divv)-Math.round((adcv-512)/divv));
 
             if (oor != inr) {
                 ctx.stroke(path);
@@ -1063,7 +1063,7 @@ async function Display()
                     ctx.strokeStyle = '#000000';
                 }
                 path = new Path2D();  // analog
-                path.moveTo(sx, (512/divv)-Math.floor((adcv-512)/divv));
+                path.moveTo(sx, (512/divv)-Math.round((adcv-512)/divv));
                 inr = oor;
             }
 
