@@ -1,6 +1,13 @@
-For Linux, assuming username "ubuntu", to allow the browser to access USB serial ports, run these two commands:
+Note that for Ubuntu Linux, assuming username "ubuntu", to allow the browser to access USB serial ports, run these two commands:
 
-  usermod -a -G dialout ubuntu
-  usermod -a -G dialout root
+  sudo usermod -a -G dialout ubuntu
+  sudo usermod -a -G dialout root
 
 then log out and log back in.
+
+You may also have to:
+
+  systemctl stop brltty-udev.service
+  sudo systemctl mask brltty-udev.service
+  systemctl stop brltty.service
+  systemctl disable brltty.service
