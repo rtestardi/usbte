@@ -7,7 +7,7 @@ then log out and log back in.
 
 Note some distros use "uucp" rather than "dialout" group.
 
-Using Ubuntu Live, you can't exactly log out, so you can effectively re-log in and re-launch the browser again with:
+Using Ubuntu Live, you can't completely log out, so after doing so, you can effectively re-log in and re-launch the browser again with:
 
   sudo su - ubuntu
   google-chrome
