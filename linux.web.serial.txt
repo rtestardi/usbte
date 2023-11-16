@@ -1,0 +1,6 @@
+For Linux, to allow Chrome to use the web serial API, run these two commands:
+
+usermod -a -G dialout ubuntu
+usermod -a -G dialout root
+
+then you need to log out and log back in.
