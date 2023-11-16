@@ -1,4 +1,4 @@
-For Linux, assuning username "ubuntu", to allow the browser to access USB serial ports, run these two commands:
+For Linux, assuming username "ubuntu", to allow the browser to access USB serial ports, run these two commands:
 
   usermod -a -G dialout ubuntu
   usermod -a -G dialout root
