@@ -38,7 +38,7 @@ select { direction: rtl; }
 <div id="config">
 Select:
 <button type='button'
-        onclick="if (/\b(CrOS|Windows)\b/.test(navigator.userAgent)) {
+        onclick="if (/\b(Linux|CrOS|Windows)\b/.test(navigator.userAgent)) {
                      Comm();
                  } else {
                      Usb();
