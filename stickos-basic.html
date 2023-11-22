@@ -31,7 +31,7 @@ body,html { margin: 0px; }
 <div id="config">
 Select:
 <button type='button'
-        onclick="if (/\b(Linux|CrOS|Windows)\b/.test(navigator.userAgent)) {
+        onclick="if (/\b(Linux|CrOS|Windows)\b/.test(navigator.userAgent) && ! navigator.userAgent.match(/android/i)) {
                      Comm();
                  } else {
                      Usb();
