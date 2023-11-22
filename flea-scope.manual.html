@@ -1,0 +1,1213 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<!-- FLEA-SCOPE -->
+<!-- See: https://wicg.github.io/webusb/ -->
+<!-- See: https://wicg.github.io/serial/ -->
+<!-- top right bottom left -->
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1870">
+<title>Flea-Scope™</title>
+    <style>
+pre { white-space: pre-wrap; word-wrap: break-word; }
+a { text-decoration: none; }
+#status { color: red; }
+#copyright { font-size:65%; padding: 0px; margin: 0px; }
+* { overflow-wrap: anywhere; word-wrap: anywhere; }
+button { overflow-wrap: normal; word-wrap: normal; }
+td { text-align: center; padding: 0px 15px 0px 0px; white-space: nowrap; }
+html,button,input,select { font: 34px Arial, Helvetica, sans-serif; padding: 10px 10px 10px 10px; margin: 0px 0px 10px 0px; }
+@media(min-width:80em){ html,button,input { font: 22px Arial, Helvetica, sans-serif; padding: 10px 10px 10px 10px; margin: 0px 0px 10px 0px; } }
+@supports(-webkit-touch-callout:none) { button,input { -webkit-appearance: none; border-radius: 2px; } }
+body,html { margin: 0px; }
+select { direction: rtl; }
+#wrapper { display: flex; padding: 10px 0px 15px 0px; }
+#view { outline: red 1px solid; flex: 97; overflow-x: scroll; }
+#canvas { padding: 3px; }
+#view2 { flex: 3; padding: 0px 5px 0px 5px; }
+#labels { width = 50px; }
+    </style>
+</head>
+
+<body onload='Body()'>
+
+<h1 id="h1">Flea-Scope™</h1>
+
+<div id="config">
+Select:
+<button type='button' onclick="Comm();">Connect Comm</button>
+<button type='button' onclick="Usb();">Connect USB</button>
+</div>
+<table>
+<tr>
+<td>
+<label for="qusec">secs/div:</label>
+</td>
+<td>
+<label for="trigger">trigger:</label>
+</td>
+<td>
+<label for="b0">b0:</label>
+</td>
+<td>
+<label for="b1">b1:</label>
+</td>
+<td>
+<label for="b2">b2:</label>
+</td>
+<td>
+<label for="b3">b3:</label>
+</td>
+<td>
+<label for="b4">b4:</label>
+</td>
+<td>
+<label for="b5">b5:</label>
+</td>
+<td>
+<label for="b6">b6:</label>
+</td>
+<td>
+<label for="b7">b7:</label>
+</td>
+<td>
+<label for="b8">b8:</label>
+</td>
+<td>
+</td>
+<td>
+<label for="delay">delay sec:</label>
+</td>
+<td>
+<label for="probe">probe:</label>
+</td>
+<td>
+<label for="polar">polar:</label>
+</td>
+<td>
+<label for="volts">volts:</label>
+</td>
+<td>
+<label for="wave">wave out:</label>
+</td>
+<td>
+<label for="hz">hertz out:</label>
+</td>
+</tr>
+
+<tr>
+<td>
+<select id="qusec" onchange="ScaleCanvas();">
+<option value="-10">0.5u*</option>
+<option value="-5">1u*</option>
+<option value="-2">2.5u*</option>
+<option value="1">5u</option>
+<option value="2">10u</option>
+<option value="5">25u</option>
+<option value="10">50u</option>
+<option value="20">100u</option>
+<option value="50">250u</option>
+<option value="100">500u</option>
+<option value="200" selected>1m</option>
+<option value="500">2.5m</option>
+<option value="1000">5m</option>
+<option value="2000">10m</option>
+<option value="5000">25m</option>
+<option value="10000">50m</option>
+<option value="20000">100m</option>
+</select>
+</td>
+<td>
+<select id="trigger" onchange='Send(String.fromCharCode(3));'>
+<option selected value="~">auto</option>
+<option value="">level</option>
+<option value="+">rise</option>
+<option value="-">fall</option>
+</select>
+</td>
+<td>
+<select id="b0">
+<option selected value="">-</option>
+<option value="0">0</option>
+<option value="1">1</option>
+</select>
+</td>
+<td>
+<select id="b1">
+<option selected value="">-</option>
+<option value="0">0</option>
+<option value="1">1</option>
+</select>
+</td>
+<td>
+<select id="b2">
+<option selected value="">-</option>
+<option value="0">0</option>
+<option value="1">1</option>
+</select>
+</td>
+<td>
+<select id="b3">
+<option selected value="">-</option>
+<option value="0">0</option>
+<option value="1">1</option>
+</select>
+</td>
+<td>
+<select id="b4">
+<option selected value="">-</option>
+<option value="0">0</option>
+<option value="1">1</option>
+</select>
+</td>
+<td>
+<select id="b5">
+<option selected value="">-</option>
+<option value="0">0</option>
+<option value="1">1</option>
+</select>
+</td>
+<td>
+<select id="b6">
+<option selected value="">-</option>
+<option value="0">0</option>
+<option value="1">1</option>
+</select>
+</td>
+<td>
+<select id="b7">
+<option selected value="">-</option>
+<option value="0">0</option>
+<option value="1">1</option>
+</select>
+</td>
+<td>
+<select id="b8">
+<option selected value="">-</option>
+<option value="0">0</option>
+<option value="1">1</option>
+</select>
+</td>
+<td>
+<button type="button" onclick="for (var b = 0; b < bits; b++) { document.getElementById('b'+b).selectedIndex = 0; }">clear</button>
+</td>
+<td>
+<input type="text" id="delay" value="0u" size="2"></input>
+</td>
+<td>
+<select id="probe" onchange='Send(String.fromCharCode(3)); Probe();'>
+<option selected value="1">x1</option>
+<option value="10">x10</option>
+</select>
+</td>
+</td>
+<td>
+<select id="polar" onchange='Send(String.fromCharCode(3));'>
+<option selected value="1">uni</option>
+<option value="2">bi</option>
+</select>
+<td>
+<select id="volts" onchange='Send(String.fromCharCode(3));'>
+<option value="0.5">0.5</option>
+<option value="1.0">1.0</option>
+<option value="1.8">1.8</option>
+<option value="2.5">2.5</option>
+<option selected value="3.3">3.3</option>
+<option value="5.0">5.0</option>
+<option value="6.6">6.6</option>
+</select>
+</td>
+<td>
+<select id="wave" onchange="Wave();">
+<option>ekg</option>
+<option selected>sine</option>
+<option>square</option>
+<option>triangle</option>
+</select>
+</td>
+<td>
+<input type="text" id="hz" onchange="Wave();" value="1k" size="2"></input>
+</td>
+</tr>
+</table>
+
+<div id="wrapper">
+<div id="view">
+<canvas id="canvas"></canvas>
+</div>
+<div id="view2">
+<canvas id="labels"></canvas>
+</div>
+</div>
+
+<table WIDTH="1870px">
+<tr>
+<td WIDTH="25%">
+<button type="button" id="zero" onclick="CalZero();">cal_zero</button>
+<button type="button" id="3v3" onclick="Cal3v3();">cal_3v3</button>
+<button type="button" id="pause" onclick="Pause();">pause</button>
+<button type="button" id="single" onclick="Single();" disabled=true>single</button>
+<button type="button" id="measure" onclick="Measure();">measure</button>
+<button type="button" id="background" onclick="Background();">background</button>
+</td>
+<td WIDTH="25%">
+<pre id='status' color='red'></pre>
+</td>
+<td WIDTH="25%">
+<pre id='voltage'></pre>
+</td>
+<td>
+<pre id='command'></pre>
+</td>
+</table>
+
+<p id='copyright'>
+<a href=https://rtestardi.github.io/usbte/flea-scope.pdf target=_blank>Flea-Scope™ User's Guide</a>
+&nbsp;&nbsp;&nbsp;
+<a href=https://rtestardi.github.io/StickOS target=_blank>StickOS® website</a>
+&nbsp;&nbsp;&nbsp;
+<a href=https://github.com/rtestardi/usbte target=_blank>github.com/rtestardi/usbte</a>
+&nbsp;&nbsp;&nbsp;
+<a href=https://github.com/rtestardi/StickOS2 target=_blank>github.com/rtestardi/StickOS2</a>
+
+<script>
+'use strict';
+
+var usb;
+var comm;
+var epin = 2;
+var epout = 3;
+var reader;
+var writer;
+var enc = new TextEncoder();
+var dec = new TextDecoder();
+var canvas;
+var labels;
+var bytes = 1024;
+
+var discard;
+var discarded;
+var string = "";
+var pending = "";
+var running = "";
+
+var digital = false;
+
+var bg = false;
+
+var analogV = 0;  // 0..v or -v..v (must be multiplied by p!)
+var measure = 0;
+
+const MSPS = 18;  // approximate target sample rate
+const SAMPLES = 2000*MSPS/20;  // approximate width of display canvas
+const EXTRA = 200;  // extra samples in case web page wants to fine-scale
+const INTERLEAVE = 5;  // we interleave results from 5 adcs
+const DIVSV = 10;
+const DIVST = 20;
+
+const ROLLS = 4;
+
+const bus_frequency = 120000000;
+const bus_mhz = bus_frequency/1000000;
+
+var msps;  // actual based on mcu timer pr
+
+var width = SAMPLES*2;  // actual display width after ScaleCanvas()
+var height = 256;
+var bits = 9;
+
+var hostname = "";
+
+var single = false;
+var pause = false;
+var down = false;
+
+var waiting;
+
+var cal_zero_x1;
+var cal_3v3_x1;
+var cal_zero_x10;
+var cal_3v3_x10;
+
+var oldX, newX;
+var oldY, newY;
+
+var adcfull = 6.6;  // +/- at bnc
+
+var adcrawcount = 0;
+var adcrawsum = 0;
+
+function ScaleCanvas()
+{
+    // account for clock rounding inaccuracies at 18 Msps
+    var usecv = parseInt(document.getElementById("qusec").value);  // this is per-division
+    if (usecv < 0) {
+        usecv = 1;
+    }
+    var pr = Math.floor(bus_mhz*usecv*INTERLEAVE/MSPS + 0.5);
+    msps = bus_mhz*INTERLEAVE/pr;
+    width = Math.floor(2*2000*msps*usecv/20);
+    canvas.setAttribute("width", width);
+    canvas.setAttribute("height", height+30*bits+20);
+    labels.setAttribute("width", 50);
+    labels.setAttribute("height", height+30*bits+20);
+}
+
+function GetZero()
+{
+    var a;
+    var p = parseFloat(document.getElementById("probe").value);
+    if (p == 1) {
+        a = cal_zero_x1;
+    } else {
+        a = cal_zero_x10;
+    }
+    if (a == undefined || a == 0) {
+        document.getElementById("status").innerHTML = "please calibrate x" + p + " probe zero";
+        return p==1 ? 14 : 28;  // default calibration values
+    }
+    return Number(a);
+}
+
+function CalZero()
+{
+    if (adcrawcount) {
+        var p = parseFloat(document.getElementById("probe").value);
+        if (p == 1) {
+            cal_zero_x1 = Math.round((adcrawsum/adcrawcount - 512) * 1);
+            once.push("cal_zero_x1 = " + cal_zero_x1 + "\n");
+        } else {
+            cal_zero_x10 = Math.round((adcrawsum/adcrawcount - 512) * 1);
+            once.push("cal_zero_x10 = " + cal_zero_x10 + "\n");
+        }
+        document.getElementById("status").innerHTML = "cal_zero_x"+p + " = " + GetZero();
+    }
+}
+
+function Get3v3()
+{
+    var a;
+    var p = parseFloat(document.getElementById("probe").value);
+    if (p == 1) {
+        a = cal_3v3_x1;
+    } else {
+        a = cal_3v3_x10;
+    }
+    if (a == undefined || a == 0) {
+        document.getElementById("status").innerHTML = "please calibrate x" + p + " probe 3v3";
+        return p==1 ? 259 : 270;  // default calibration values
+    }
+    return Number(a);
+}
+
+function Cal3v3()
+{
+    if (adcrawcount) {
+        var p = parseFloat(document.getElementById("probe").value);
+        if (p == 1) {
+            cal_3v3_x1 = Math.round((adcrawsum/adcrawcount - GetZero() - 512) * p);
+            once.push("cal_3v3_x1 = " + cal_3v3_x1 + "\n");
+        } else {
+            cal_3v3_x10 = Math.round((adcrawsum/adcrawcount - GetZero() - 512) * p);
+            once.push("cal_3v3_x10 = " + cal_3v3_x10 + "\n");
+        }
+        document.getElementById("status").innerHTML = "cal_3v3_x"+p + " = " + Get3v3();
+    }
+}
+
+function Probe()
+{
+    var p = parseFloat(document.getElementById("probe").value);
+    var e = document.getElementById("volts");
+    for (var i = 0; i < e.options.length; i++) {
+        e.options[i].innerHTML = "" + e.options[i].value*p;
+    }
+}
+
+function Pause()
+{
+    if (! pause) {
+        pause = true;
+        document.getElementById('pause').innerHTML = "resume";
+        document.getElementById('pause').style.color = 'red';
+        document.getElementById('single').disabled = false;
+        document.getElementById('single').style.color = 'red';
+    } else {
+        pause = false;
+        document.getElementById('pause').innerHTML = "pause";
+        document.getElementById('pause').style.color = 'black';
+        document.getElementById('single').disabled = true;
+        document.getElementById('single').style.color = 'black';
+    }
+}
+
+function Single()
+{
+    single = true;
+}
+
+function Background()
+{
+    if (! bg) {
+        bg = true;
+        document.getElementById('background').innerHTML = "foreground";
+    } else {
+        bg = false;
+        document.getElementById('background').innerHTML = "background";
+    }
+}
+
+function Wave()
+{
+    var pattern = document.getElementById("wave").value;
+    var hz = document.getElementById("hz").value;
+    if (hz.toLowerCase().match(/k$/)) {
+        hz = Math.floor(Number(hz.replace(/k$/, "")*1000));
+    } else if (hz.toLowerCase().match(/m$/)) {
+        hz = Math.floor(Number(hz.replace(/m$/,"")*1000000));
+    }
+
+    Send(String.fromCharCode(3));  // Ctrl-C
+    pending = "wave " + pattern + " " + hz;
+}
+
+// return time for fraction of display width
+function usec(frac, scale, fixed)
+{
+    var usecv = parseInt(document.getElementById("qusec").value);  // this is per-division
+    if (usecv < 0) {
+        usecv = -5/usecv;
+    } else {
+        usecv *= 5;
+    }
+    usecv = usecv * DIVST * frac;
+    var usecs;
+    if (scale && usecv >= 1000) {
+        usecs = "" + (usecv/1000).toFixed(fixed) + "ms";
+    } else {
+        usecs = "" + (usecv).toFixed(fixed) + "us";
+    }
+    return usecs;
+}
+
+// return frequency for fraction of display width
+function freq(frac, scale, fixed)
+{
+    var usecv = parseInt(document.getElementById("qusec").value);  // this is per-division
+    if (usecv < 0) {
+        usecv = -5/usecv;
+    } else {
+        usecv *= 5;
+    }
+    usecv = usecv * DIVST * frac;
+    var freqv = 1000000/usecv;
+    var freqs;
+    if (scale && freqv >= 1000000) {
+        freqs = "" + (freqv/1000000).toFixed(fixed) + "MHz";
+    } else if (scale && freqv >= 1000) {
+        freqs = "" + (freqv/1000).toFixed(fixed) + "kHz";
+    } else {
+        freqs = "" + (freqv).toFixed(fixed) + "Hz";
+    }
+    return freqs;
+}
+
+// return voltage for fraction (-1..1) of display height
+function volt(frac, scale, fixed)
+{
+    var v = parseFloat(document.getElementById("probe").value) * document.getElementById("volts").value;
+    var voltv = v * frac;
+    var volts;
+    if (scale && voltv < 0.01 && voltv > -0.01) {
+        volts = "" + (voltv*1000).toFixed(fixed) + "mV";
+    } else {
+        volts = "" + (voltv).toFixed(fixed) + "V";
+    }
+    return volts;
+}
+
+// return voltage for adc value -512..511 for -6.6V to 6.6V
+function voltadc(adc, scale, fixed)
+{
+    var voltv = (adc-512)/512*adcfull * parseFloat(document.getElementById("probe").value);
+    var volts;
+    if (scale && voltv < 0.01 && voltv > -0.01) {
+        volts = "" + (voltv*1000).toFixed(fixed) + "mV";
+    } else {
+        volts = "" + (voltv).toFixed(fixed) + "V";
+    }
+    return volts;
+}
+
+
+function ShowStatus()
+{
+    var status = "";
+    if (newX != -1) {
+        var r = parseFloat(document.getElementById("polar").value);
+        status = "position: " + usec(newX/width, true, 2);
+        if (newY < height) {
+            status +=  ", " + volt((height/r-1-newY)/(height/r), true, 2);
+        }
+        var dx = Math.abs(oldX - newX);
+        var dy = Math.abs(oldY - newY);
+        if (oldY > 255 || newY > 255) {
+            dy = 0;
+        }
+        if (oldX != -1 && (dx || dy)) {
+            status = "delta: " + usec(dx/width, true, 2);
+            if (dx) {
+                status += ", " + freq(dx/width, true, 2);
+            }
+            if (newY < height) {
+                status += ", " + volt(dy/(height/r), true, 2);
+            }
+        }
+    }
+    document.getElementById("status").innerHTML = status;
+}
+
+function ShowPoints()
+{
+    var x;
+    var y;
+    var ctx;
+    ctx = canvas.getContext('2d');
+    ctx.beginPath();
+    if (oldX >= 0 && oldY >= 0 && (oldX != newX || oldY != newY)) {
+        x = oldX;
+        y = oldY;
+        ctx.fillStyle = 'red';
+        ctx.arc(x, y, 4, 0, 2*Math.PI, false);
+        ctx.fill();
+        ctx.fillStyle = 'black';
+    }
+    if (newX >= 0 && newY >= 0) {
+        x = newX;
+        y = newY;
+        ctx.fillStyle = 'red';
+        ctx.arc(x, y, 4, 0, 2*Math.PI, false);
+        ctx.fill();
+        ctx.fillStyle = 'black';
+    }
+}
+
+function Measure()
+{
+    if (measure) {
+        document.getElementById('measure').style.color = 'black';
+        document.getElementById('status').innerHTML = '';
+        measure = 0;
+    } else {
+        document.getElementById('measure').style.color = 'red';
+        measure = 2;
+    }
+    newX = oldX = -1;
+}
+
+// the user loaded the webpage; set up keyboard listeners
+function Body()
+{
+    if (/\b(Linux)\b/.test(navigator.userAgent)) {
+        // linux gets ooo data at larger web serial buffer sizes
+        bytes = 256;
+    }
+
+    canvas = document.getElementById('canvas');
+    labels = document.getElementById('labels');
+    ScaleCanvas();
+
+    canvas.addEventListener('mousedown', function(e) {
+        var v = parseFloat(document.getElementById("volts").value);
+        var p = parseFloat(document.getElementById("probe").value);
+        var r = parseFloat(document.getElementById("polar").value);
+        down = true;
+        if (! measure) {
+            Send(String.fromCharCode(3));  // Ctrl-C
+            var analogY = Math.min(Math.max(e.offsetY, 0), 255);  // 0..255 (0..height-1)
+            analogV = (height/r - (analogY+1))/(height/r)*v;  // 0..v or -v..v
+            document.getElementById("status").innerHTML = "trigger = " + (analogV*p).toFixed(2) + "V";
+            Display();
+        } else {
+            if (measure == 1) {
+                oldX = newX;
+                oldY = newY;
+                newX = e.offsetX;
+                newY = e.offsetY;
+                document.getElementById('measure').style.color = 'black';
+                measure = 0;
+            } else {
+                newX = e.offsetX;
+                newY = e.offsetY;
+                measure = 1;
+            }
+            ShowStatus();
+            ShowPoints();
+        }
+    });
+
+    canvas.addEventListener('mouseup', function(e) {
+        down = false;
+    });
+}
+
+// the user wants to connect to a USB device's bulk endpoints directly
+async function Usb()
+{
+    var filter = [
+        { vendorId: 0x0403, productId: 0xA660 },
+        { vendorId: 0x1b4f, productId: 0xA660 },
+        { vendorId: 0x1b4f, productId: 0xE66E },
+        { vendorId: 0x04D8, productId: 0xE66E },
+    ];
+
+    if ('usb' in navigator) {
+        try {
+            usb = await navigator.usb.requestDevice({ filters: filter });
+            await usb.open();
+            await usb.selectConfiguration(1);
+            await usb.claimInterface(1);
+
+            document.getElementById("config").hidden = true;
+
+            discard = 1;
+            setTimeout(Receive, 1);
+
+            Send(String.fromCharCode(3));  // Ctrl-C
+            Send("echo off\n");  // XXX -- figure out how to undo?
+            Send("prompt off\n");  // XXX -- figure out how to undo?
+            Send("dim cal_zero_x1 as flash, cal_3v3_x1 as flash\n");
+            Send("dim cal_zero_x10 as flash, cal_3v3_x10 as flash\n");
+            Wave();
+
+            discarded = false;
+            setTimeout(Discard, 200);
+        } catch(err) {
+            document.getElementById("status").innerHTML = err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
+        }
+    } else {
+        document.getElementById("status").innerHTML =
+`The usb API needs to be enabled in your browser thru:
+   - <a href=edge://flags/#enable-experimental-web-platform-features>edge://flags/#enable-experimental-web-platform-features</a>
+   - <a href=chrome://flags/#enable-experimental-web-platform-features>chrome://flags/#enable-experimental-web-platform-features</a>
+   - <a href=opera://flags/#enable-experimental-web-platform-features>opera://flags/#enable-experimental-web-platform-features</a>
+`;
+    }
+}
+
+// the user wants to connect to an emulated COM port
+async function Comm()
+{
+    var filter = [
+        { usbVendorId: 0x0403, usbProductId: 0xA660 },
+        { usbVendorId: 0x1b4f, usbProductId: 0xA660 },
+        { usbVendorId: 0x1b4f, usbProductId: 0xE66E },
+        { usbVendorId: 0x04D8, usbProductId: 0xE66E },
+    ];
+
+    if ('serial' in navigator) {
+        try {
+            comm = await navigator.serial.requestPort({ filters: filter });
+            await comm.open({ baudRate: 115200, bufferSize: bytes });
+            reader = comm.readable.getReader();
+            writer = comm.writable.getWriter();
+
+            document.getElementById("config").hidden = true;
+
+            discard = 1;
+            setTimeout(Receive, 1);
+
+            Send(String.fromCharCode(3));  // Ctrl-C
+            Send("echo off\n");  // XXX -- figure out how to undo?
+            Send("prompt off\n");  // XXX -- figure out how to undo?
+            Send("dim cal_zero_x1 as flash, cal_3v3_x1 as flash\n");
+            Send("dim cal_zero_x10 as flash, cal_3v3_x10 as flash\n");
+            Wave();
+
+            discarded = false;
+            setTimeout(Discard, 200);
+        } catch(err) {
+            document.getElementById("status").innerHTML = err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
+        }
+    } else {
+        document.getElementById("status").innerHTML =
+`The Web serial API needs to be enabled in your browser thru:
+   - <a href=edge://flags/#enable-experimental-web-platform-features>edge://flags/#enable-experimental-web-platform-features</a>
+   - <a href=chrome://flags/#enable-experimental-web-platform-features>chrome://flags/#enable-experimental-web-platform-features</a>
+   - <a href=opera://flags/#enable-experimental-web-platform-features>opera://flags/#enable-experimental-web-platform-features</a>
+`;
+    }
+}
+
+async function Discard()
+{
+    if (discarded) {
+        discarded = false;
+        setTimeout(Discard, 200);
+    } else {
+        discard = 0;
+        setTimeout(Next, 1);
+    }
+}
+
+var once = [
+    "print cal_zero_x1, cal_3v3_x1, cal_zero_x10, cal_3v3_x10\n",
+    "hostname\n"
+];
+
+async function Next()
+{
+    if (once.length) {
+        SendCommand(once.shift());
+    } else if (pending != "") {
+        SendCommand(pending);
+        pending = "";
+    } else {
+        if (single) {
+            single = false;
+            setTimeout(Scope, 1);
+        } else if (down || pause) {
+            Display();
+            setTimeout(Next, 300);
+        } else {
+            setTimeout(Scope, 1);
+        }
+    }
+}
+
+async function WarnCommand()
+{
+    document.getElementById('command').style.color = 'red';
+    document.getElementById("command").innerHTML += " [waiting]";
+}
+
+async function SendCommand(command)
+{
+    string = "";
+
+    waiting = setTimeout(WarnCommand, 3000);
+    document.getElementById('command').style.color = 'black';
+    document.getElementById("command").innerHTML = command;
+
+    Send(command + "\n");
+}
+
+async function Scope()
+{
+    var v = parseFloat(document.getElementById("volts").value);
+    var p = parseFloat(document.getElementById("probe").value);
+    var r = parseFloat(document.getElementById("polar").value);
+
+    digital = false;
+    var number1 = document.getElementById("qusec").value;
+    var number2;
+    var number3;
+    var number4;
+    var number5;
+
+    for (var b = 0; b < bits; b++) {
+        if (document.getElementById("b"+b).value != "") {
+            digital = true;
+        }
+    }
+
+    if (digital) {
+        var mask = 0;
+        var sel = 0;
+        for (b = 0; b < bits; b++) {
+            if (document.getElementById("b"+b).value != "") {
+                mask |= 1<<b;
+            }
+            if (document.getElementById("b"+b).value == "1") {
+                sel |= 1<<b;
+            }
+        }
+        number2 = document.getElementById("trigger").value;
+        number2 += "0x" + sel.toString(16);
+        number3 = "0x" + mask.toString(16);
+    } else {
+        number2 = document.getElementById("trigger").value;
+        var adcscaled = (analogV+adcfull)/(adcfull*2)*1024;
+        if (adcscaled > 1023) {
+            adcscaled = 1023;
+        } else if (adcscaled < 0) {
+            adcscaled = 0;
+        }
+        number2 += Math.floor((adcscaled-512)*Get3v3()/256 + GetZero() + 512);
+        number3 = 0;
+    }
+
+    number4 = document.getElementById("delay").value;
+    if (number4.toLowerCase().match(/u$/)) {
+        number4 = Math.floor(Number(number4.replace(/u$/,""))*1);
+    } else if (number4.toLowerCase().match(/m$/)) {
+        number4 = Math.floor(Number(number4.replace(/m$/,""))*1000);
+    } else {
+        number4 = Math.floor(Number(number4)*1);
+    }
+    number4 = Math.floor(number4 * msps);  // convert from us to samples
+
+    var command = "scope " + number1 + " " + number2 + " " + number3 + " " + number4;
+
+    SendCommand(command);
+}
+
+async function Display()
+{
+    // result is in string
+    var lines = string.split(/\r?\n/);
+
+    var ctx;
+
+    // draw vertical labels
+    ctx = labels.getContext('2d');
+
+    ctx.clearRect(0, 0, 50, 546);
+
+    ctx.font = `12px Verdana`;
+
+    var v = parseFloat(document.getElementById("volts").value);
+    var p = parseFloat(document.getElementById("probe").value);
+    var r = parseFloat(document.getElementById("polar").value);
+
+    // voltage
+    if (document.getElementById("polar").value == 1) {
+        ctx.fillText("" + v*p + "V", 0, 10);
+        ctx.fillText("" + v*p/2 + "V", 0, 128);
+        ctx.fillText("0V", 0, 256);
+    } else {
+        ctx.fillText("+" + v*p + "V", 0, 10);
+        ctx.fillText("0V", 0, 128);
+        ctx.fillText("-" + v*p + "V", 0, 256);
+    }
+
+    var b;
+
+    // bits
+    for (b = 0; b < bits; b++) {
+        sy = 305+b*30;
+
+        ctx.fillText("b"+b, 0, sy-2);
+    }
+
+    // draw lines and horizontal labels
+    ctx = canvas.getContext('2d');
+
+    ctx.clearRect(0, 0, width, 546);
+
+    ShowPoints();
+
+    for (var i = 0; i <= DIVST; i++) {
+        if (i%(DIVSV/2) == 0) {
+            ctx.setLineDash([6, 10]);
+        } else {
+            ctx.setLineDash([2, 10]);
+        }
+        ctx.beginPath();
+        ctx.moveTo(width/DIVST*i, 0);
+        ctx.lineTo(width/DIVST*i, 255);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(width/DIVST*i, 305-20);
+        ctx.lineTo(width/DIVST*i, 305+bits*30);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        var t = "" + usec(i/DIVST, true, 1).replace(/[.]0/,"");
+        var w = (i==DIVST)?(ctx.measureText(t).width):((i)?(ctx.measureText(t).width/2):0);
+        ctx.fillText(t, (width/DIVST*i)-w, 274);
+    }
+
+    if (! digital) {
+        var analogY;  // 0..255 (0..height-1)
+        if (analogV > v) {
+            analogY = 0;
+            ctx.setLineDash([10, 4]);
+            ctx.strokeStyle = '#FF0000';
+            ctx.beginPath();
+            ctx.moveTo(0, analogY);
+            ctx.lineTo(width, analogY);
+            ctx.stroke();
+        } else if ((r == 1 && analogV < 0) || (r == 2 && analogV < -v)) {
+            analogY = 255;
+            ctx.setLineDash([10, 4]);
+            ctx.strokeStyle = '#FF0000';
+            ctx.beginPath();
+            ctx.moveTo(0, analogY);
+            ctx.lineTo(width, analogY);
+            ctx.stroke();
+        } else {
+            if (r == 1) {
+                analogY = 256 - Math.floor(analogV*255/(v));
+            } else {
+                analogY = 256 - Math.floor((analogV+v)*255/(2*v));
+            }
+            ctx.setLineDash([10, 4]);
+            ctx.strokeStyle = '#00BF00';
+            ctx.beginPath();
+            ctx.moveTo(0, analogY);
+            ctx.lineTo(width, analogY);
+            ctx.stroke();
+        }
+    }
+
+    ctx.beginPath();
+    ctx.strokeStyle = '#000000';
+    ctx.setLineDash([5, 5]);
+    ctx.moveTo(0, 0);
+    ctx.lineTo(width, 0);
+    ctx.moveTo(0, (height-1)/2);
+    ctx.lineTo(width, (height-1)/2);
+    ctx.moveTo(0, height-1);
+    ctx.lineTo(width, height-1);
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+
+    if (lines.length >= 100) {
+        // scope result
+
+        var sx, sy, sh;
+
+        if (bg) {
+            beep();
+        }
+
+        var path;
+        path = new Path2D();  // analog
+        path.moveTo(0, 255);
+
+        var paths = [];
+        var lastBit = [];
+        for (var b = 0; b < bits; b++) {
+            sy = 305+b*30;
+
+            paths[b] = new Path2D();  // digital
+            paths[b].moveTo(0, sy);
+            lastBit[b] = false;
+        }
+
+        sh = 20;
+
+        var adcmin = 1023;
+        var adcmax = 0;
+        var adcsum = 0;
+        var adcnoise = 0;
+
+        var j;
+        var adcroll = [];
+        var adcrolled;
+
+        adcrawcount = 0;
+        adcrawsum = 0;
+
+        var inr = false;
+
+        for (i = 0; i < width/2 && i < lines.length; i++) {
+            // XXX -- if we find "done", reset to 0 and keep going
+            var words = lines[i].split(/ /);
+            var adc = parseInt(words[0]);  // 0..1023 for roughly -6.6V to 6.6V at BNC
+            var byte = parseInt(words[1]);
+
+            adcrawsum += adc;
+            adcrawcount++;
+
+            var adcscaled = (adc-GetZero()-512)/(Get3v3())*256 + 512;  // 0..1023
+
+            // filter noise from pp reading
+            adcroll[i%ROLLS] = adcscaled;
+            if (i >= ROLLS) {
+                adcrolled = 0;
+                for (j = 0; j < ROLLS; j++) {
+                    adcrolled += adcroll[j];
+                }
+                adcrolled /= ROLLS;
+                if (adcrolled < adcmin) {
+                    adcmin = adcrolled;
+                }
+                if (adcrolled > adcmax) {
+                    adcmax = adcrolled;
+                }
+            }
+
+            adcsum += adcscaled;
+
+            var adcv = (adcscaled-512) * adcfull/v + 512;  // 0..1023 or more
+
+            sx = i*2;
+            
+            var oor;
+            var minv = 0;
+            var divv = 4;
+            oor = (adcv <= minv) || (adcv >= 1023);
+            if (document.getElementById("polar").value == 1) {
+                minv = 512;
+                divv = 2;
+                oor = (adcv < minv) || (adcv >= 1023);
+            }
+
+            if (adcv < minv) {
+                adcv = minv;
+            } else if (adcv > 1023) {
+                adcv = 1023;
+            }
+
+            path.lineTo(sx, (512/divv)-Math.round((adcv-512)/divv));
+
+            if (oor != inr) {
+                ctx.stroke(path);
+                if (oor) {
+                    ctx.strokeStyle = '#FF0000';
+                } else {
+                    ctx.strokeStyle = '#000000';
+                }
+                path = new Path2D();  // analog
+                path.moveTo(sx, (512/divv)-Math.round((adcv-512)/divv));
+                inr = oor;
+            }
+
+            for (b = 0; b < bits; b++) {
+                sy = 305+b*30;
+
+                var bit = (byte & (1 << b)) != 0;
+                if (bit == lastBit[b]) {
+                    paths[b].lineTo(sx, sy - (bit?sh:0));
+                } else {
+                    paths[b].lineTo(sx, sy - (lastBit[b]?sh:0));
+                    paths[b].lineTo(sx, sy - (bit?sh:0));
+                }
+                lastBit[b] = bit;
+            }
+        }
+
+        var adcavg = adcsum/i;
+        var adcrms = 0;
+
+        for (i = 0; i < width/2 && i < lines.length; i++) {
+            // XXX -- if we find "done", reset to 0 and keep going
+            var words = lines[i].split(/ /);
+            var adc = parseInt(words[0]);  // 0..1023 for roughly -6.6V to 6.6V at BNC
+
+            var adcscaled = (adc-GetZero()-512)/(Get3v3())*256 + 512;  // 0..1023
+
+            if (adcscaled >= adcavg) {
+                adcrms += (adcscaled-adcavg)*(adcscaled-adcavg);
+            } else {
+                adcrms += (adcavg-adcscaled)*(adcavg-adcscaled);
+            }
+        }
+        adcrms = Math.pow(adcrms/i, 0.5);
+
+        document.getElementById("voltage").innerHTML = "" + voltadc(adcsum/i, false, 2) + " avg; " +
+                                                            voltadc(adcmax-adcmin+512, false, 2) + " pp; " +
+                                                            voltadc(adcrms+512, false, 2) + " rms";
+
+        path.moveTo(width, 255);
+        ctx.stroke(path);
+        ctx.strokeStyle = '#000000';
+
+        sx = i*2;
+        for (b = 0; b < bits; b++) {
+            sy = 305+b*30;
+
+            if (false == lastBit[b]) {
+                paths[b].lineTo(sx, sy - (false?sh:0));
+            } else {
+                paths[b].lineTo(sx, sy - (lastBit[b]?sh:0));
+                paths[b].lineTo(sx, sy - (false?sh:0));
+            }
+
+            if (document.getElementById("b"+b).value != "") {
+                ctx.strokeStyle = '#00BF00';
+            }
+            ctx.stroke(paths[b]);
+            if (document.getElementById("b"+b).value != "") {
+                ctx.strokeStyle = '#000000';
+            }
+        }
+    } else if (running.match(/hostname/) && lines.length > 0) {
+        // hostname result
+
+        hostname = lines[0];
+        
+        if (hostname != "Flea-Scope") {
+            document.getElementById("h1").innerHTML += " (" + hostname + ")";
+        }
+    } else if (running.match(/print/) && lines.length > 0) {
+        // calibration value result
+
+        var words = lines[0].split(/ /);
+
+        if (words[0] > 0 && words[1] > 0) {
+            cal_zero_x1 = Number(words[0]);
+            cal_3v3_x1 = Number(words[1]);
+        }
+        if (words[2] > 0 && words[3] > 0) {
+            cal_zero_x10 = Number(words[2]);
+            cal_3v3_x10 = Number(words[3]);
+        }
+    }
+
+    if (bg) {
+        beep();
+    }
+}
+
+// receive a string from the device
+async function Receive()
+{
+    var str;
+    var result;
+
+    if (usb) {
+        result = await usb.transferIn(epin, bytes);
+        str = dec.decode(result.data.buffer);
+    } else {
+        result = await reader.read();
+        str = dec.decode(result.value);
+    }
+    if (! discard) {
+        string += str.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        if (string.match(/done\r\n$/)) {
+            // we have scope or other results!
+            string = string.replace(/done\r\n$/g, "");
+            clearTimeout(waiting);
+            document.getElementById("command").innerHTML = " ";  // N.B. need space to avoid jitter!
+            Display();
+            running = "";
+            setTimeout(Next, 1);
+        }
+    } else {
+        discarded = true;
+    }
+    setTimeout(Receive, 1);
+}
+
+// send a string to the device
+async function Send(str)
+{
+    running = str;
+
+    if (usb) {
+        await usb.transferOut(epout, enc.encode(str).buffer);
+    } else {
+        await writer.write(enc.encode(str).buffer);
+    }
+}
+
+// https://mp3cut.net  (Online MP3 Cutter - Cut Songs, Make Ringtones)
+// https://dopiaza.org/tools/datauri/index.php  (data: URI Generator)
+
+function beep()
+{
+var audioElement = new Audio();
+audioElement.src = "data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU5LjI3LjEwMAAAAAAAAAAAAAAA//vkwAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAACAAALQACqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//////////////////////////////////////////////////////////////////8AAAAATGF2YzU5LjM3AAAAAAAAAAAAAAAAJAWcAAAAAAAAC0D+akbFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//vkxAAAMTnm+DXtAB+XxGBDP7AAAEwKgEhkA0GgbGFcKAY7hOhl6GlGa4YYZGwNxkRmfmr0twa2ioBpKHtGZMUAY8wrBhsAyCgHJgug3mDqDKf7UeSscBIGATHnTSqTUpzTpzTnzXKjVLDWLDWLjXLjXLDWKjUJjTHDWpzTpzTpTRnzNlzIjTDgUF3X5MMoVIqRiEgbmhLMAAAwBAAsR3JZz6lPb1UpIw7CwiKhZMAgTAgTAgTAgQEDLjq7nmts7d+H7dx9FyJiFyy05ZMwIEwYMwoUwYMBAy7ZeAu4WwLaFyEHFBGIO45bW13sTa/F44uRFQtuXLLxoBy5ZbMsuAQICDmGCGEBGCBGCBGCBGCBGCAGAAAYAYUCYECYECYECWTLTl40H0i0HEVEVEVExExFSKkWIqdU6Y6Y6Y6p1jrvZ2xBdjEEVFBGIO5OV4xYrxuX35Q7DOFB1TrHXeqdU6p1TrHVIuxiEORiMP4/juNfcty3Lcty3fh+X0lJSUlJYw/OkpLGGFJSUlJT09PT09PTyuNxiMRiMRiMSyk5AMApAujAkA94wHsEwMDFBmTACQAIwCYApMqJSvzIJA0MwWAReMPgDuzASQMAwFECSMVmD5zCHgL4wLkEqMC8ALzAQQBsEAJB+HKHFJ7j2dyeGBiQyAmMBxWFI5HUEBxgmJkYhJACGJVmRF5ipcZilG/JhqQUbGVjIkCQZTczc0LAyYkNmOEZEFmrKhixsZyimaJghQCqABcAX+6ClTTR4CHgd3Q4KVjMJSTCjQxtABB6BSIy00aE1mAmnJ60oiAjFxQvutBH5xVhTFisBFxl40ZMGgpLMrAChQcpGVwXiR1XLABgo0AAUwIRMOFwuJGLixipEYEImTjI8fmQBBk4yYGHmMCxjIyVRdN1W1/GMsBgSC3BMOETAANP4BAT5MFTCSObuxUEEBgYmYALgkiLAKYoOmCiwCBTFg8w0Cg6XRGHW5djLMo1EVSyRW5AUhxLulyWXI9IrMLWrGRoYDCEoKzFgIWGAgvMSDAIAGEhZhAkSBgNEQYHL6dqSr6cKVticKXxx9pPZc+gam28YYlAb8s9j0ihVFMyGEW4d//////////BIgQCZKBGDhwECQcBGHhAGER4XBw8PDoGHysJDBgw8HLbmDARg4b//////////Kos+vI03GUypmL60DPXZlD0ujLJKkxBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//vkxAAD77XopF2sgAgAADSAAAAEAkZzEtDn2DpugMnNZLOxVN8RMbCO7WMgMOTkPHIAzc2lc8mE5B0wbw7NwXFOPw/7A5c2sz87OosGxHrsUMGrMc7Q0OZTpyRmsCIUDfeJgDJWNc5AmBCzQRBSI6AZZi4AKMY4Skk0SyKGrdDFGXCDQDDAQWi65VSsRfmOv7RNKSGRSfNG0sy75cEvi3AEhGKEvZI0si65dUuy7hdYBBJ9JGmAC24MBLWuoXuMkgOCFATIJX+BBwEaxQt0YoSA5MkwAW/LUloWoqVFylLmMlpXOTlQdabBTDmXT0pjVqq7LDWuyxcyRUMJfJ1QWl6iq2qqxeJ+ETkfn/QSltVep7FmnULrF2n7QSlmU+U9izTqF1i4yowISZhoQSMgGWUvQAkGSEuIuaYQZelbRZJzEExcZkzoqArpljtRW5DUqjVNnDL+139h2ga016ROiu2NrlYjGFzKmdZuKYsXUxU1ii5kxmnNxTFh9TFQWEMqTGac8KpYuuVYshdJdzjTbsw8smIKaimZcYmBhVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
+audioElement.play();
+}
+
+</script>
+</body>
+</html>
