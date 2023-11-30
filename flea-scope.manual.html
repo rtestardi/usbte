@@ -28,6 +28,7 @@ select { direction: rtl; }
 #canvas { padding: 3px; }
 #view2 { flex: 3; padding: 0px 5px 0px 5px; }
 #labels { width = 50px; }
+#command { font-size:65%; }
     </style>
 </head>
 
@@ -40,6 +41,7 @@ Select:
 <button type='button' onclick="Comm();">Connect Comm</button>
 <button type='button' onclick="Usb();">Connect USB</button>
 </div>
+
 <table>
 <tr>
 <td>
@@ -244,7 +246,7 @@ Select:
 
 <table WIDTH="1870px">
 <tr>
-<td WIDTH="25%">
+<td WIDTH=35%>
 <button type="button" id="zero" onclick="CalZero();">cal_zero</button>
 <button type="button" id="3v3" onclick="Cal3v3();">cal_3v3</button>
 <button type="button" id="pause" onclick="Pause();">pause</button>
@@ -252,13 +254,13 @@ Select:
 <button type="button" id="measure" onclick="Measure();">measure</button>
 <button type="button" id="background" onclick="Background();">background</button>
 </td>
-<td WIDTH="25%">
+<td WIDTH=25%>
 <pre id='status' color='red'></pre>
 </td>
-<td WIDTH="25%">
+<td WIDTH=25%>
 <pre id='voltage'></pre>
 </td>
-<td>
+<td WIDTH=15%>
 <pre id='command'></pre>
 </td>
 </table>
@@ -613,11 +615,6 @@ function Body()
     if (/\b(Linux)\b/.test(navigator.userAgent)) {
         // linux gets ooo data at larger web serial buffer sizes
         bytes = 256;
-    }
-
-    document.getElementById("status").innerHTML = navigator.userAgent;
-    for (var vv in navigator) {
-        document.getElementById("command").innerHTML += vv + ", ";
     }
 
     canvas = document.getElementById('canvas');
