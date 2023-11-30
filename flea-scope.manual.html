@@ -617,6 +617,11 @@ function Body()
         bytes = 256;
     }
 
+    document.getElementById("status").innerHTML = navigator.userAgent;
+    for (var vv in navigator) {
+        document.getElementById("command").innerHTML += vv + ", ";
+    }
+
     canvas = document.getElementById('canvas');
     labels = document.getElementById('labels');
     ScaleCanvas();
