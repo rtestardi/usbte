@@ -277,6 +277,8 @@ Select:
 <a href=https://github.com/rtestardi/usbte target=_blank>github.com/rtestardi/usbte</a>
 &nbsp;&nbsp;&nbsp;
 <a href=https://github.com/rtestardi/StickOS2 target=_blank>github.com/rtestardi/StickOS2</a>
+&nbsp;&nbsp;&nbsp;
+<span id='calibration' style='color:red; font-weight: bold'></span>
 
 <script>
 'use strict';
@@ -361,6 +363,11 @@ function ScaleCanvas()
     labels.setAttribute("height", height+30*bits+20);
 }
 
+function ClearSpan()
+{
+    document.getElementById("calibration").innerHTML = "";
+}
+
 function GetZero()
 {
     var a;
@@ -388,7 +395,8 @@ function CalZero()
             cal_zero_x10 = Math.round((adcrawsum/adcrawcount - 512) * 1);
             once.push("cal_zero_x10 = " + cal_zero_x10 + "\n");
         }
-        document.getElementById("status").innerHTML = "cal_zero_x"+p + " = " + GetZero();
+        document.getElementById("calibration").innerHTML = "cal_zero_x"+p + " = " + GetZero();
+        setTimeout(ClearSpan, 2000);
     }
 }
 
@@ -419,7 +427,8 @@ function Cal3v3()
             cal_3v3_x10 = Math.round((adcrawsum/adcrawcount - GetZero() - 512) * p);
             once.push("cal_3v3_x10 = " + cal_3v3_x10 + "\n");
         }
-        document.getElementById("status").innerHTML = "cal_3v3_x"+p + " = " + Get3v3();
+        document.getElementById("calibration").innerHTML = "cal_3v3_x"+p + " = " + Get3v3();
+        setTimeout(ClearSpan, 2000);
     }
 }
 
