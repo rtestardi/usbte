@@ -13,7 +13,7 @@
     <style>
 pre { white-space: pre-wrap; word-wrap: break-word; }
 a { text-decoration: none; }
-#status { color: red; }
+#status { color: red; padding: 0px 10px 0px 10px; margin: 0px 0px 0px 0px; }
 #copyright { font-size:65%; padding: 0px; margin: 0px; }
 * { overflow-wrap: anywhere; word-wrap: anywhere; }
 button { overflow-wrap: normal; word-wrap: normal; }
@@ -27,7 +27,7 @@ select { direction: rtl; }
 #view { outline: red 1px solid; flex: 97; overflow-x: scroll; }
 #canvas { padding: 3px; }
 #view2 { flex: 3; padding: 0px 5px 0px 5px; }
-#labels { width = 50px; }
+#labels { width: 50px; }
 #command { font-size:65%; }
     </style>
 </head>
@@ -277,8 +277,6 @@ Select:
 <a href=https://github.com/rtestardi/usbte target=_blank>github.com/rtestardi/usbte</a>
 &nbsp;&nbsp;&nbsp;
 <a href=https://github.com/rtestardi/StickOS2 target=_blank>github.com/rtestardi/StickOS2</a>
-&nbsp;&nbsp;&nbsp;
-<span id='calibration' style='color:red; font-weight: bold'></span>
 
 <script>
 'use strict';
@@ -363,11 +361,6 @@ function ScaleCanvas()
     labels.setAttribute("height", height+30*bits+20);
 }
 
-function ClearSpan()
-{
-    document.getElementById("calibration").innerHTML = "";
-}
-
 function GetZero()
 {
     var a;
@@ -388,29 +381,43 @@ function CalZero()
 {
     if (adcrawcount) {
         var p = parseFloat(document.getElementById("probe").value);
+        var t = Math.round((adcrawsum/adcrawcount - 512) * 1);
         if (p == 1) {
-            cal_zero_x1 = Math.round((adcrawsum/adcrawcount - 512) * 1);
-            once.push("cal_zero_x1 = " + cal_zero_x1 + "\n");
+            if (t >= 7 && t <= 23) {  // calibration limits
+                cal_zero_x1 = t;
+                once.push("cal_zero_x1 = " + cal_zero_x1 + "\n");
+            } else {
+                t = 0;
+            }
         } else {
-            cal_zero_x10 = Math.round((adcrawsum/adcrawcount - 512) * 1);
-            once.push("cal_zero_x10 = " + cal_zero_x10 + "\n");
+            if (t >= 14 && t <= 40) {  // calibration limits
+                cal_zero_x10 = t;
+                once.push("cal_zero_x10 = " + cal_zero_x10 + "\n");
+            } else {
+                t = 0;
+            }
         }
-        document.getElementById("calibration").innerHTML = "cal_zero_x"+p + " = " + GetZero();
-        setTimeout(ClearSpan, 2000);
-    }
+        if (t != 0) {
+            document.getElementById("status").innerHTML = "cal_zero_x"+p + " = " + GetZero();
+        }
+   }
 }
 
 function Get3v3()
 {
-    var a;
+    var a, b;
     var p = parseFloat(document.getElementById("probe").value);
     if (p == 1) {
         a = cal_3v3_x1;
+        b = cal_zero_x1;
     } else {
         a = cal_3v3_x10;
+        b = cal_zero_x10;
     }
     if (a == undefined || a == 0) {
-        document.getElementById("status").innerHTML = "please calibrate x" + p + " probe 3v3";
+        if (! (b == undefined || b == 0)) {
+            document.getElementById("status").innerHTML = "cal_zero_x"+p + " = " + GetZero() + "\n" + "please calibrate x" + p + " probe 3v3";
+        }
         return p==1 ? 259 : 270;  // default calibration values
     }
     return Number(a);
@@ -420,15 +427,25 @@ function Cal3v3()
 {
     if (adcrawcount) {
         var p = parseFloat(document.getElementById("probe").value);
+        var t = Math.round((adcrawsum/adcrawcount - GetZero() - 512) * p);
         if (p == 1) {
-            cal_3v3_x1 = Math.round((adcrawsum/adcrawcount - GetZero() - 512) * p);
-            once.push("cal_3v3_x1 = " + cal_3v3_x1 + "\n");
+            if (t >= 245 && t <= 275) {  // calibration limits
+                cal_3v3_x1 = t;
+                once.push("cal_3v3_x1 = " + cal_3v3_x1 + "\n");
+            } else {
+                t = 0;
+            }
         } else {
-            cal_3v3_x10 = Math.round((adcrawsum/adcrawcount - GetZero() - 512) * p);
-            once.push("cal_3v3_x10 = " + cal_3v3_x10 + "\n");
+            if (t >= 220 && t <= 300) {  // calibration limits
+                cal_3v3_x10 = t;
+                once.push("cal_3v3_x10 = " + cal_3v3_x10 + "\n");
+            } else {
+                t = 0;
+            }
         }
-        document.getElementById("calibration").innerHTML = "cal_3v3_x"+p + " = " + Get3v3();
-        setTimeout(ClearSpan, 2000);
+        if (t != 0) {
+            document.getElementById("status").innerHTML = "cal_3v3_x"+p + " = " + Get3v3();
+        }
     }
 }
 
