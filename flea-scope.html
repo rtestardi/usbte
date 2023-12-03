@@ -387,6 +387,7 @@ function CalZero()
                 cal_zero_x1 = t;
                 once.push("cal_zero_x1 = " + cal_zero_x1 + "\n");
             } else {
+                document.getElementById("status").innerHTML = "FAILED " + t;
                 t = 0;
             }
         } else {
@@ -394,13 +395,12 @@ function CalZero()
                 cal_zero_x10 = t;
                 once.push("cal_zero_x10 = " + cal_zero_x10 + "\n");
             } else {
+                document.getElementById("status").innerHTML = "FAILED " + t;
                 t = 0;
             }
         }
         if (t != 0) {
             document.getElementById("status").innerHTML = "cal_zero_x"+p + " = " + GetZero();
-        } else {
-            document.getElementById("status").innerHTML = "FAILED";
         }
    }
 }
@@ -435,6 +435,7 @@ function Cal3v3()
                 cal_3v3_x1 = t;
                 once.push("cal_3v3_x1 = " + cal_3v3_x1 + "\n");
             } else {
+                document.getElementById("status").innerHTML = "FAILED " + t;
                 t = 0;
             }
         } else {
@@ -442,13 +443,12 @@ function Cal3v3()
                 cal_3v3_x10 = t;
                 once.push("cal_3v3_x10 = " + cal_3v3_x10 + "\n");
             } else {
+                document.getElementById("status").innerHTML = "FAILED " + t;
                 t = 0;
             }
         }
         if (t != 0) {
             document.getElementById("status").innerHTML = "cal_3v3_x"+p + " = " + Get3v3();
-        } else {
-            document.getElementById("status").innerHTML = "FAILED";
         }
     }
 }
