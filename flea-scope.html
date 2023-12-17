@@ -381,7 +381,7 @@ function CalZero()
 {
     if (adcrawcount) {
         var p = parseFloat(document.getElementById("probe").value);
-        var t = Math.round((adcrawsum/adcrawcount - 512) * 1);
+        var t = Math.round((adcrawsum/adcrawcount - 512) * 4)/4;
         if (p == 1) {
             if (t >= 7 && t <= 23 || measure == 2) {  // calibration limits
                 cal_zero_x1 = t;
@@ -429,7 +429,7 @@ function Cal3v3()
 {
     if (adcrawcount) {
         var p = parseFloat(document.getElementById("probe").value);
-        var t = Math.round((adcrawsum/adcrawcount - GetZero() - 512) * p);
+        var t = Math.round((adcrawsum/adcrawcount - GetZero() - 512) * p*4)/4;
         if (p == 1) {
             if (t >= 245 && t <= 275 || measure == 2) {  // calibration limits
                 cal_3v3_x1 = t;
