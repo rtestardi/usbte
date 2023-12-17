@@ -1044,8 +1044,12 @@ async function Display()
 
         for (i = 0; i < width/2 && i < lines.length; i++) {
             // XXX -- if we find "done", reset to 0 and keep going
-            var words = lines[i].split(/ /);
+            var twelve = lines[i].match(/,/);
+            var words = lines[i].split(/[ ,]/);
             var adc = parseInt(words[0]);  // 0..1023 for roughly -6.6V to 6.6V at BNC
+            if (twelve) {
+                adc /= 4;  // N.B. no longer integer!
+            }
             var byte = parseInt(words[1]);
 
             adcrawsum += adc;
@@ -1124,8 +1128,12 @@ async function Display()
 
         for (i = 0; i < width/2 && i < lines.length; i++) {
             // XXX -- if we find "done", reset to 0 and keep going
-            var words = lines[i].split(/ /);
+            var twelve = lines[i].match(/,/);
+            var words = lines[i].split(/[ ,]/);
             var adc = parseInt(words[0]);  // 0..1023 for roughly -6.6V to 6.6V at BNC
+            if (twelve) {
+                adc /= 4;  // N.B. no longer integer!
+            }
 
             var adcscaled = (adc-GetZero()-512)/(Get3v3())*256 + 512;  // 0..1023
 
