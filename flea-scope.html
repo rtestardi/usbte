@@ -912,13 +912,13 @@ async function Display()
 
     // voltage
     if (document.getElementById("polar").value == 1) {
-        ctx.fillText("" + v*p + "V", 0, 10);
-        ctx.fillText("" + v*p/2 + "V", 0, 128);
+        ctx.fillText("" + +(v*p).toFixed(2) + "V", 0, 10);
+        ctx.fillText("" + +(v*p/2).toFixed(2) + "V", 0, 128);
         ctx.fillText("0V", 0, 256);
     } else {
-        ctx.fillText("+" + v*p + "V", 0, 10);
+        ctx.fillText("+" + +(v*p).toFixed(2) + "V", 0, 10);
         ctx.fillText("0V", 0, 128);
-        ctx.fillText("-" + v*p + "V", 0, 256);
+        ctx.fillText("-" + +(v*p).toFixed(2) + "V", 0, 256);
     }
 
     var b;
