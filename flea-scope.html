@@ -216,7 +216,6 @@ Select:
 </select>
 <td>
 <select id="volts" onchange='Send(String.fromCharCode(3));'>
-<option value="0.25">0.25</option>
 <option value="0.33">0.33</option>
 <option value="0.5">0.5</option>
 <option value="0.66">0.66</option>
@@ -461,7 +460,7 @@ function Probe()
     var p = parseFloat(document.getElementById("probe").value);
     var e = document.getElementById("volts");
     for (var i = 0; i < e.options.length; i++) {
-        e.options[i].innerHTML = "" + e.options[i].value*p;
+        e.options[i].innerHTML = "" + +(e.options[i].value*p).toFixed(2);
     }
 }
 
