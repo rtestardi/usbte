@@ -717,6 +717,7 @@ async function Usb()
             Send(String.fromCharCode(3));  // Ctrl-C
             Send("echo off\n");  // XXX -- figure out how to undo?
             Send("prompt off\n");  // XXX -- figure out how to undo?
+            Send("dim a as flash, b as flash, c as flash, d as flash\n");
             Send("dim cal_zero_x1 as flash, cal_3v3_x1 as flash\n");
             Send("dim cal_zero_x10 as flash, cal_3v3_x10 as flash\n");
             Wave();
@@ -761,6 +762,7 @@ async function Comm()
             Send(String.fromCharCode(3));  // Ctrl-C
             Send("echo off\n");  // XXX -- figure out how to undo?
             Send("prompt off\n");  // XXX -- figure out how to undo?
+            Send("dim a as flash, b as flash, c as flash, d as flash\n");
             Send("dim cal_zero_x1 as flash, cal_3v3_x1 as flash\n");
             Send("dim cal_zero_x10 as flash, cal_3v3_x10 as flash\n");
             Wave();
