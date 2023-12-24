@@ -213,6 +213,7 @@ Select:
 <select id="polar" onchange='Send(String.fromCharCode(3));'>
 <option selected value="1">uni</option>
 <option value="2">bi</option>
+<option value="2.">ac</option>
 </select>
 <td>
 <select id="volts" onchange='Send(String.fromCharCode(3));'>
@@ -912,6 +913,7 @@ async function Display()
     var v = parseFloat(document.getElementById("volts").value);
     var p = parseFloat(document.getElementById("probe").value);
     var r = parseFloat(document.getElementById("polar").value);
+    var ac = document.getElementById("polar").value == "2.";
 
     // voltage
     if (document.getElementById("polar").value == 1) {
@@ -1036,7 +1038,7 @@ async function Display()
         var adcmin = 1023;
         var adcmax = 0;
         var adcsum = 0;
-        var adcnoise = 0;
+        var adcrms = 0;
 
         var j;
         var adcroll = [];
@@ -1047,6 +1049,7 @@ async function Display()
 
         var inr = false;
 
+        // compute adcmin, adcmax, adcavg up front
         for (i = 0; i < width/2 && i < lines.length; i++) {
             // XXX -- if we find "done", reset to 0 and keep going
             var twelve = lines[i].match(/,/);
@@ -1055,7 +1058,6 @@ async function Display()
             if (twelve) {
                 adc /= 4;  // N.B. no longer integer!
             }
-            var byte = parseInt(words[1]);
 
             adcrawsum += adc;
             adcrawcount++;
@@ -1079,6 +1081,31 @@ async function Display()
             }
 
             adcsum += adcscaled;
+        }
+        var adcavg = adcsum/i;
+
+        // plot points and compute adcrms
+        for (i = 0; i < width/2 && i < lines.length; i++) {
+            // XXX -- if we find "done", reset to 0 and keep going
+            var twelve = lines[i].match(/,/);
+            var words = lines[i].split(/[ ,]/);
+            var adc = parseInt(words[0]);  // 0..1023 for roughly -6.6V to 6.6V at BNC
+            if (twelve) {
+                adc /= 4;  // N.B. no longer integer!
+            }
+            var byte = parseInt(words[1]);
+
+            var adcscaled = (adc-GetZero()-512)/(Get3v3())*256 + 512;  // 0..1023
+
+            if (adcscaled >= adcavg) {
+                adcrms += (adcscaled-adcavg)*(adcscaled-adcavg);
+            } else {
+                adcrms += (adcavg-adcscaled)*(adcavg-adcscaled);
+            }
+
+            if (ac) {
+                adcscaled = (adcscaled-512)-(adcavg-512)+512;
+            }
 
             var adcv = (adcscaled-512) * adcfull/v + 512;  // 0..1023 or more
 
@@ -1125,27 +1152,6 @@ async function Display()
                     paths[b].lineTo(sx, sy - (bit?sh:0));
                 }
                 lastBit[b] = bit;
-            }
-        }
-
-        var adcavg = adcsum/i;
-        var adcrms = 0;
-
-        for (i = 0; i < width/2 && i < lines.length; i++) {
-            // XXX -- if we find "done", reset to 0 and keep going
-            var twelve = lines[i].match(/,/);
-            var words = lines[i].split(/[ ,]/);
-            var adc = parseInt(words[0]);  // 0..1023 for roughly -6.6V to 6.6V at BNC
-            if (twelve) {
-                adc /= 4;  // N.B. no longer integer!
-            }
-
-            var adcscaled = (adc-GetZero()-512)/(Get3v3())*256 + 512;  // 0..1023
-
-            if (adcscaled >= adcavg) {
-                adcrms += (adcscaled-adcavg)*(adcscaled-adcavg);
-            } else {
-                adcrms += (adcavg-adcscaled)*(adcavg-adcscaled);
             }
         }
         adcrms = Math.pow(adcrms/i, 0.5);
