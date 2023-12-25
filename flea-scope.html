@@ -300,7 +300,6 @@ var bytes = 1024;
 var discard;
 var discarded;
 var string = "";
-var pending = "";  // wave command
 var running = "";
 
 var digital = false;
@@ -389,7 +388,7 @@ function CalZero()
         if (p == 1) {
             if (t >= 7 && t <= 23 || measure == 2) {  // calibration limits
                 cal_zero_x1 = t;
-                once.push("cal_zero_x1 = " + Math.round(cal_zero_x1*4) + "\n");
+                once.push("cal_zero_x1 = " + Math.round(cal_zero_x1*4));
             } else {
                 document.getElementById("status").innerHTML = "FAILED " + t;
                 t = 0;
@@ -397,7 +396,7 @@ function CalZero()
         } else {
             if (t >= 14 && t <= 40 || measure == 2) {  // calibration limits
                 cal_zero_x10 = t;
-                once.push("cal_zero_x10 = " + Math.round(cal_zero_x10*4) + "\n");
+                once.push("cal_zero_x10 = " + Math.round(cal_zero_x10*4));
             } else {
                 document.getElementById("status").innerHTML = "FAILED " + t;
                 t = 0;
@@ -437,7 +436,7 @@ function Cal3v3()
         if (p == 1) {
             if (t >= 245 && t <= 275 || measure == 2) {  // calibration limits
                 cal_3v3_x1 = t;
-                once.push("cal_3v3_x1 = " + Math.round(cal_3v3_x1*4) + "\n");
+                once.push("cal_3v3_x1 = " + Math.round(cal_3v3_x1*4));
             } else {
                 document.getElementById("status").innerHTML = "FAILED " + t;
                 t = 0;
@@ -445,7 +444,7 @@ function Cal3v3()
         } else {
             if (t >= 220 && t <= 300 || measure == 2) {  // calibration limits
                 cal_3v3_x10 = t;
-                once.push("cal_3v3_x10 = " + Math.round(cal_3v3_x10*4) + "\n");
+                once.push("cal_3v3_x10 = " + Math.round(cal_3v3_x10*4));
             } else {
                 document.getElementById("status").innerHTML = "FAILED " + t;
                 t = 0;
@@ -509,7 +508,7 @@ function Wave()
         hz = Math.floor(Number(hz.replace(/m$/,"")*1000000));
     }
 
-    pending = "wave " + pattern + " " + hz;
+    once.push("wave " + pattern + " " + hz);
 }
 
 // return time for fraction of display width
@@ -579,7 +578,6 @@ function voltadc(adc, scale, fixed)
     }
     return volts;
 }
-
 
 function ShowStatus()
 {
@@ -794,18 +792,14 @@ async function Discard()
 }
 
 var once = [
-    "print cal_zero_x1, cal_3v3_x1, cal_zero_x10, cal_3v3_x10\n",
-    "hostname\n"
+    "print cal_zero_x1, cal_3v3_x1, cal_zero_x10, cal_3v3_x10",
+    "hostname"
 ];
 
 async function Next()
 {
     if (once.length) {
         SendCommand(once.shift());
-    } else if (pending != "") {
-        Send(String.fromCharCode(3));  // Ctrl-C
-        SendCommand(pending);
-        pending = "";
     } else {
         if (single) {
             single = false;
