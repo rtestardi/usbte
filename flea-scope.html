@@ -916,7 +916,11 @@ async function Display()
         ctx.fillText("0V", 0, 256);
     } else {
         ctx.fillText("+" + +(v*p).toFixed(2) + "V", 0, 10);
-        ctx.fillText("0V", 0, 128);
+        if (document.getElementById("polar").value == "2") {
+            ctx.fillText("0V", 0, 128);
+        } else {
+            ctx.fillText("avg V", 0, 128);
+        }
         ctx.fillText("-" + +(v*p).toFixed(2) + "V", 0, 256);
     }
 
