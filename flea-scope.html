@@ -300,6 +300,7 @@ var bytes = 1024;
 var discard;
 var discarded;
 var string = "";
+var pending = "";  // wave command
 var running = "";
 
 var digital = false;
@@ -508,8 +509,7 @@ function Wave()
         hz = Math.floor(Number(hz.replace(/m$/,"")*1000000));
     }
 
-    Send(String.fromCharCode(3));  // Ctrl-C
-    once.push("wave " + pattern + " " + hz + "\n");
+    pending = "wave " + pattern + " " + hz;
 }
 
 // return time for fraction of display width
@@ -723,7 +723,7 @@ async function Usb()
             Wave();
 
             discarded = false;
-            setTimeout(Discard, 400);
+            setTimeout(Discard, 200);
         } catch(err) {
             document.getElementById("status").innerHTML = err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
         }
@@ -768,7 +768,7 @@ async function Comm()
             Wave();
 
             discarded = false;
-            setTimeout(Discard, 400);
+            setTimeout(Discard, 200);
         } catch(err) {
             document.getElementById("status").innerHTML = err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
         }
@@ -786,7 +786,7 @@ async function Discard()
 {
     if (discarded) {
         discarded = false;
-        setTimeout(Discard, 400);
+        setTimeout(Discard, 200);
     } else {
         discard = 0;
         setTimeout(Next, 1);
@@ -802,6 +802,10 @@ async function Next()
 {
     if (once.length) {
         SendCommand(once.shift());
+    } else if (pending != "") {
+        Send(String.fromCharCode(3));  // Ctrl-C
+        SendCommand(pending);
+        pending = "";
     } else {
         if (single) {
             single = false;
