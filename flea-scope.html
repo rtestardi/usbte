@@ -300,7 +300,6 @@ var bytes = 1024;
 var discard;
 var discarded;
 var string = "";
-var pending = "";
 var running = "";
 
 var digital = false;
@@ -510,7 +509,7 @@ function Wave()
     }
 
     Send(String.fromCharCode(3));  // Ctrl-C
-    pending = "wave " + pattern + " " + hz;
+    once.push("wave " + pattern + " " + hz + "\n");
 }
 
 // return time for fraction of display width
@@ -724,7 +723,7 @@ async function Usb()
             Wave();
 
             discarded = false;
-            setTimeout(Discard, 200);
+            setTimeout(Discard, 400);
         } catch(err) {
             document.getElementById("status").innerHTML = err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
         }
@@ -769,7 +768,7 @@ async function Comm()
             Wave();
 
             discarded = false;
-            setTimeout(Discard, 200);
+            setTimeout(Discard, 400);
         } catch(err) {
             document.getElementById("status").innerHTML = err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
         }
@@ -787,7 +786,7 @@ async function Discard()
 {
     if (discarded) {
         discarded = false;
-        setTimeout(Discard, 200);
+        setTimeout(Discard, 400);
     } else {
         discard = 0;
         setTimeout(Next, 1);
@@ -803,9 +802,6 @@ async function Next()
 {
     if (once.length) {
         SendCommand(once.shift());
-    } else if (pending != "") {
-        SendCommand(pending);
-        pending = "";
     } else {
         if (single) {
             single = false;
@@ -1187,7 +1183,11 @@ async function Display()
         // hostname result
 
         hostname = lines[0];
-        
+
+        if (hostname == "") {
+            debugger;  // XXX -- deleteme!
+        }
+
         if (hostname != "Flea-Scope") {
             document.getElementById("h1").innerHTML += " (" + hostname + ")";
         }
