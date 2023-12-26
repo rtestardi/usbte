@@ -306,6 +306,7 @@ var digital = false;
 
 var bg = false;
 
+var avgV = 0;  // ac only
 var analogV = 0;  // 0..v or -v..v (must be multiplied by p!)
 var measure = 0;
 
@@ -665,6 +666,7 @@ function Body()
             Send(String.fromCharCode(3));  // Ctrl-C
             var analogY = Math.min(Math.max(e.offsetY, 0), 255);  // 0..255 (0..height-1)
             analogV = (height/r - (analogY+1))/(height/r)*v;  // 0..v or -v..v
+            analogV += avgV;
             document.getElementById("status").innerHTML = "trigger = " + (analogV*p).toFixed(2) + "V";
             Display();
         } else {
@@ -964,7 +966,7 @@ async function Display()
 
     if (! digital) {
         var analogY;  // 0..255 (0..height-1)
-        if (analogV > v) {
+        if (analogV > v+avgV) {
             analogY = 0;
             ctx.setLineDash([10, 4]);
             ctx.strokeStyle = '#FF0000';
@@ -972,7 +974,7 @@ async function Display()
             ctx.moveTo(0, analogY);
             ctx.lineTo(width, analogY);
             ctx.stroke();
-        } else if ((r == 1 && analogV < 0) || (r == 2 && analogV < -v)) {
+        } else if ((r == 1 && analogV < 0+avgV) || (r == 2 && analogV < -v+avgV)) {
             analogY = 255;
             ctx.setLineDash([10, 4]);
             ctx.strokeStyle = '#FF0000';
@@ -982,9 +984,9 @@ async function Display()
             ctx.stroke();
         } else {
             if (r == 1) {
-                analogY = 256 - Math.floor(analogV*255/(v));
+                analogY = 256 - Math.floor((analogV-avgV)*255/(v));
             } else {
-                analogY = 256 - Math.floor((analogV+v)*255/(2*v));
+                analogY = 256 - Math.floor((analogV-avgV+v)*255/(2*v));
             }
             ctx.setLineDash([10, 4]);
             ctx.strokeStyle = '#00BF00';
@@ -1154,6 +1156,11 @@ async function Display()
         }
         adcrms = Math.pow(adcrms/i, 0.5);
 
+        if (ac) {
+            avgV = (adcsum/i-512)/512*adcfull;
+        } else {
+            avgV = 0;
+        }
         document.getElementById("voltage").innerHTML = "" + voltadc(adcsum/i, false, 2) + " avg; " +
                                                             voltadc(adcmax-adcmin+512, false, 2) + " pp; " +
                                                             voltadc(adcrms+512, false, 2) + " rms";
