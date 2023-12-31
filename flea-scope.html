@@ -387,7 +387,7 @@ function CalZero()
         var p = parseFloat(document.getElementById("probe").value);
         var t = Math.round((adcrawsum/adcrawcount - 512) * 4)/4;
         if (p == 1) {
-            if (t >= 7 && t <= 23 || measure == 2) {  // calibration limits
+            if (t >= -5 && t <= 23 || measure == 2) {  // calibration limits
                 cal_zero_x1 = t;
                 once.push("cal_zero_x1 = " + Math.round(cal_zero_x1*4));
             } else {
@@ -395,7 +395,7 @@ function CalZero()
                 t = 0;
             }
         } else {
-            if (t >= 14 && t <= 40 || measure == 2) {  // calibration limits
+            if (t >= -5 && t <= 40 || measure == 2) {  // calibration limits
                 cal_zero_x10 = t;
                 once.push("cal_zero_x10 = " + Math.round(cal_zero_x10*4));
             } else {
@@ -435,7 +435,7 @@ function Cal3v3()
         var p = parseFloat(document.getElementById("probe").value);
         var t = Math.round((adcrawsum/adcrawcount - GetZero() - 512) * p*4)/4;
         if (p == 1) {
-            if (t >= 245 && t <= 275 || measure == 2) {  // calibration limits
+            if (t >= 235 && t <= 275 || measure == 2) {  // calibration limits
                 cal_3v3_x1 = t;
                 once.push("cal_3v3_x1 = " + Math.round(cal_3v3_x1*4));
             } else {
