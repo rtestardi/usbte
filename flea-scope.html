@@ -1199,6 +1199,7 @@ async function Display()
 
         if (hostname != "Flea-Scope") {
             document.getElementById("h1").innerHTML += " (" + hostname + ")";
+            document.title += " (" + hostname + ")";
         }
     } else if (running.match(/print/) && lines.length > 0) {
         // calibration value result
