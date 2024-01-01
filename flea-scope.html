@@ -1206,11 +1206,11 @@ async function Display()
 
         var words = lines[0].split(/ /);
 
-        if (words[0] > 0 && words[1] > 0) {
+        if (words[0] != 0 && words[1] != 0) {
             cal_zero_x1 = Number(words[0])/4;
             cal_3v3_x1 = Number(words[1])/4;
         }
-        if (words[2] > 0 && words[3] > 0) {
+        if (words[2] != 0 && words[3] != 0) {
             cal_zero_x10 = Number(words[2])/4;
             cal_3v3_x10 = Number(words[3])/4;
         }
