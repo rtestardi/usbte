@@ -1091,6 +1091,8 @@ async function Display()
         }
         var adcavg = adcsum/i;
 
+        ctx.lineWidth = 1.5;
+
         // plot points and compute adcrms
         for (i = 0; i < width/2 && i < lines.length; i++) {
             // XXX -- if we find "done", reset to 0 and keep going
@@ -1195,6 +1197,9 @@ async function Display()
                 ctx.strokeStyle = '#000000';
             }
         }
+
+        ctx.lineWidth = 1;
+
     } else if (running.match(/hostname/) && lines.length > 0) {
         // hostname result
 
