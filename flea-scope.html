@@ -106,7 +106,7 @@ Select:
 
 <tr>
 <td>
-<select id="qusec" onchange="ScaleCanvas();">
+<select id="qusec" onchange="ScaleCanvas(); Send(String.fromCharCode(3));">
 <option value="-10">0.5u*</option>
 <option value="-5">1u*</option>
 <option value="-2">2.5u*</option>
@@ -135,73 +135,73 @@ Select:
 </select>
 </td>
 <td>
-<select id="b0">
+<select id="b0" onchange='Send(String.fromCharCode(3));'>
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
 </td>
 <td>
-<select id="b1">
+<select id="b1" onchange='Send(String.fromCharCode(3));'>
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
 </td>
 <td>
-<select id="b2">
+<select id="b2" onchange='Send(String.fromCharCode(3));'>
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
 </td>
 <td>
-<select id="b3">
+<select id="b3" onchange='Send(String.fromCharCode(3));'>
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
 </td>
 <td>
-<select id="b4">
+<select id="b4" onchange='Send(String.fromCharCode(3));'>
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
 </td>
 <td>
-<select id="b5">
+<select id="b5" onchange='Send(String.fromCharCode(3));'>
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
 </td>
 <td>
-<select id="b6">
+<select id="b6" onchange='Send(String.fromCharCode(3));'>
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
 </td>
 <td>
-<select id="b7">
+<select id="b7" onchange='Send(String.fromCharCode(3));'>
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
 </td>
 <td>
-<select id="b8">
+<select id="b8" onchange='Send(String.fromCharCode(3));'>
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
 </td>
 <td>
-<button type="button" onclick="for (var b = 0; b < bits; b++) { document.getElementById('b'+b).selectedIndex = 0; }">clear</button>
+<button type="button" onclick="for (var b = 0; b < bits; b++) { document.getElementById('b'+b).selectedIndex = 0; }; Send(String.fromCharCode(3));">clear</button>
 </td>
 <td>
-<input type="text" id="delay" value="0u" size="2"></input>
+<input type="text" id="delay" onchange='Send(String.fromCharCode(3)); value="0u" size="2"></input>
 </td>
 <td>
 <select id="probe" onchange='Send(String.fromCharCode(3)); Probe();'>
