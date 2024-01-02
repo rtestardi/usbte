@@ -201,7 +201,7 @@ Select:
 <button type="button" onclick="for (var b = 0; b < bits; b++) { document.getElementById('b'+b).selectedIndex = 0; }; Send(String.fromCharCode(3));">clear</button>
 </td>
 <td>
-<input type="text" id="delay" onchange='Send(String.fromCharCode(3)); value="0u" size="2"></input>
+<input type="text" id="delay" onchange='Send(String.fromCharCode(3));'' value="0u" size="2"></input>
 </td>
 <td>
 <select id="probe" onchange='Send(String.fromCharCode(3)); Probe();'>
