@@ -18,8 +18,8 @@ a { text-decoration: none; }
 * { overflow-wrap: anywhere; word-wrap: anywhere; }
 button { overflow-wrap: normal; word-wrap: normal; }
 td { text-align: center; padding: 0px 15px 0px 0px; white-space: nowrap; }
-html,button,input,select { font: 34px Arial, Helvetica, sans-serif; padding: 10px 10px 10px 10px; margin: 0px 0px 10px 0px; }
-@media(min-width:80em){ html,button,input { font: 22px Arial, Helvetica, sans-serif; padding: 10px 10px 10px 10px; margin: 0px 0px 10px 0px; } }
+html,button,input,select { font: 34px Arial, Helvetica, sans-serif; padding: 10px 5px 10px 5px; margin: 0px 0px 10px 0px; }
+@media(min-width:80em){ html,button,input { font: 22px Arial, Helvetica, sans-serif; padding: 10px 5px 10px 5px; margin: 0px 0px 10px 0px; } }
 @supports(-webkit-touch-callout:none) { button,input { -webkit-appearance: none; border-radius: 2px; } }
 body,html { margin: 0px; }
 select { direction: rtl; }
@@ -29,6 +29,7 @@ select { direction: rtl; }
 #view2 { flex: 3; padding: 0px 5px 0px 5px; }
 #labels { width: 50px; }
 #command { font-size:65%; }
+.dark { filter: invert(1); background: black; }
     </style>
 </head>
 
@@ -261,6 +262,7 @@ Select:
 <button type="button" id="single" onclick="Single();" disabled=true>single</button>
 <button type="button" id="measure" onclick="Measure();">measure</button>
 <button type="button" id="background" onclick="Background();">background</button>
+<button type="button" id="bw" onclick="document.querySelector('body').classList.toggle('dark');">bw</button>
 </td>
 <td WIDTH=25%>
 <pre id='status' color='red'></pre>
@@ -316,6 +318,7 @@ const EXTRA = 200;  // extra samples in case web page wants to fine-scale
 const INTERLEAVE = 5;  // we interleave results from 5 adcs
 const DIVSV = 10;
 const DIVST = 20;
+const VERT = 4;
 
 const ROLLS = 3;
 
@@ -997,16 +1000,18 @@ async function Display()
         }
     }
 
-    ctx.beginPath();
-    ctx.strokeStyle = '#000000';
-    ctx.setLineDash([5, 5]);
-    ctx.moveTo(0, 0);
-    ctx.lineTo(width, 0);
-    ctx.moveTo(0, (height-1)/2);
-    ctx.lineTo(width, (height-1)/2);
-    ctx.moveTo(0, height-1);
-    ctx.lineTo(width, height-1);
-    ctx.stroke();
+    for (i = 0; i < VERT+1; i++) {
+        ctx.beginPath();
+        ctx.strokeStyle = '#000000';
+        if (i%(VERT/2) == 0) {
+            ctx.setLineDash([6, 10]);
+        } else {
+            ctx.setLineDash([2, 10]);
+        }
+        ctx.moveTo(0, (height-1)*i/VERT);
+        ctx.lineTo(width, (height-1)*i/VERT);
+        ctx.stroke();
+    }
 
     ctx.setLineDash([]);
 
