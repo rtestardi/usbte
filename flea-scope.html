@@ -17,13 +17,13 @@ a { text-decoration: none; }
 #copyright { font-size:65%; padding: 0px; margin: 0px; }
 * { overflow-wrap: anywhere; word-wrap: anywhere; }
 button { overflow-wrap: normal; word-wrap: normal; }
-td { text-align: center; padding: 0px 15px 0px 0px; white-space: nowrap; }
-html,button,input,select { font: 34px Arial, Helvetica, sans-serif; padding: 10px 5px 10px 5px; margin: 0px 0px 10px 0px; }
-@media(min-width:80em){ html,button,input { font: 22px Arial, Helvetica, sans-serif; padding: 10px 5px 10px 5px; margin: 0px 0px 10px 0px; } }
+td { text-align: center; padding: 0px 10px 0px 0px; white-space: nowrap; }
+html,button,input,select { font: 34px Arial, Helvetica, sans-serif; padding: 10px 7px 10px 7px; margin: 0px 0px 10px 0px; }
+@media(min-width:80em){ html,button,input { font: 22px Arial, Helvetica, sans-serif; padding: 10px 7px 10px 7px; margin: 0px 0px 10px 0px; } }
 @supports(-webkit-touch-callout:none) { button,input { -webkit-appearance: none; border-radius: 2px; } }
 body,html { margin: 0px; }
 select { direction: rtl; }
-#wrapper { display: flex; padding: 10px 0px 15px 0px; }
+#wrapper { display: flex; padding: 10px 0px 10px 0px; }
 #view { outline: red 1px solid; flex: 97; overflow-x: scroll; }
 #canvas { padding: 3px; }
 #view2 { flex: 3; padding: 0px 5px 0px 5px; }
@@ -900,6 +900,8 @@ async function Display()
     // result is in string
     var lines = string.split(/\r?\n/);
 
+    var bw = document.querySelector('body').classList.contains('dark')
+
     var ctx;
 
     // draw vertical labels
@@ -1004,9 +1006,9 @@ async function Display()
         ctx.beginPath();
         ctx.strokeStyle = '#000000';
         if (i%(VERT/2) == 0) {
-            ctx.setLineDash([6, 10]);
+            ctx.setLineDash([bw?4:6, 10]);
         } else {
-            ctx.setLineDash([2, 10]);
+            ctx.setLineDash([bw?1:2, 10]);
         }
         ctx.moveTo(0, (height-1)*i/VERT);
         ctx.lineTo(width, (height-1)*i/VERT);
