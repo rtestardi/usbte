@@ -285,6 +285,9 @@ Select:
 <a href=https://github.com/rtestardi/usbte target=_blank>github.com/rtestardi/usbte</a>
 &nbsp;&nbsp;&nbsp;
 <a href=https://github.com/rtestardi/StickOS2 target=_blank>github.com/rtestardi/StickOS2</a>
+&nbsp;&nbsp;&nbsp;
+firmware version
+<span id="ver"></span>
 
 <script>
 'use strict';
@@ -333,6 +336,7 @@ var width = SAMPLES*2;  // actual display width after ScaleCanvas()
 var height = 256;
 var bits = 9;
 
+var ver;
 var hostname = "";
 
 var single = false;
@@ -800,6 +804,7 @@ async function Discard()
 
 var once = [
     "print cal_zero_x1, cal_3v3_x1, cal_zero_x10, cal_3v3_x10",
+    "ver",
     "hostname"
 ];
 
@@ -1201,6 +1206,12 @@ async function Display()
         }
 
         ctx.lineWidth = 1;
+
+    } else if (running.match(/ver/) && lines.length > 0) {
+        // ver result
+
+        ver = lines[0];
+        document.getElementById("ver").innerHTML = ver;
 
     } else if (running.match(/hostname/) && lines.length > 0) {
         // hostname result
