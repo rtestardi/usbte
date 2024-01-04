@@ -1211,6 +1211,9 @@ async function Display()
         // ver result
 
         ver = lines[0];
+        if (ver != "2.27f (checksum 0x55c1)") {
+            ver += " -- PLEASE UPDATE!";
+        }
         document.getElementById("ver").innerHTML = "<b>" + ver + "</b>";
 
     } else if (running.match(/hostname/) && lines.length > 0) {
