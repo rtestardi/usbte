@@ -286,7 +286,7 @@ Select:
 &nbsp;&nbsp;&nbsp;
 <a href=https://github.com/rtestardi/StickOS2 target=_blank>github.com/rtestardi/StickOS2</a>
 &nbsp;&nbsp;&nbsp;
-firmware version
+firmware version:
 <span id="ver"></span>
 
 <script>
@@ -1211,7 +1211,7 @@ async function Display()
         // ver result
 
         ver = lines[0];
-        document.getElementById("ver").innerHTML = ver;
+        document.getElementById("ver").innerHTML = "<b>" + ver + "</b>";
 
     } else if (running.match(/hostname/) && lines.length > 0) {
         // hostname result
