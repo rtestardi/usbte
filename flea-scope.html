@@ -1130,12 +1130,11 @@ async function Display()
             var oor;
             var minv = 0;
             var divv = 4;
-            oor = (adcv <= minv) || (adcv >= 1023);
             if (document.getElementById("polar").value == 1) {
                 minv = 512;
                 divv = 2;
-                oor = (adcv < minv) || (adcv >= 1023);
             }
+            oor = (adcv < minv) || (adcv > 1023);
 
             if (adcv < minv) {
                 adcv = minv;
