@@ -398,7 +398,7 @@ function CalZero()
         if (p == 1) {
             if (t >= -5 && t <= 23 || measure == 2) {  // calibration limits
                 cal_zero_x1 = t;
-                once.push("cal_zero_x1 = " + Math.round(cal_zero_x1*4)+1000);
+                once.push("cal_zero_x1 = " + (Math.round(cal_zero_x1*4)+1000));
             } else {
                 document.getElementById("status").innerHTML = "FAILED " + t;
                 t = 0;
@@ -406,7 +406,7 @@ function CalZero()
         } else {
             if (t >= -5 && t <= 40 || measure == 2) {  // calibration limits
                 cal_zero_x10 = t;
-                once.push("cal_zero_x10 = " + Math.round(cal_zero_x10*4)+1000);
+                once.push("cal_zero_x10 = " + (Math.round(cal_zero_x10*4)+1000));
             } else {
                 document.getElementById("status").innerHTML = "FAILED " + t;
                 t = 0;
@@ -446,7 +446,7 @@ function Cal3v3()
         if (p == 1) {
             if (t >= 235 && t <= 275 || measure == 2) {  // calibration limits
                 cal_3v3_x1 = t;
-                once.push("cal_3v3_x1 = " + Math.round(cal_3v3_x1*4)+1000);
+                once.push("cal_3v3_x1 = " + (Math.round(cal_3v3_x1*4)+1000));
             } else {
                 document.getElementById("status").innerHTML = "FAILED " + t;
                 t = 0;
@@ -454,7 +454,7 @@ function Cal3v3()
         } else {
             if (t >= 220 && t <= 300 || measure == 2) {  // calibration limits
                 cal_3v3_x10 = t;
-                once.push("cal_3v3_x10 = " + Math.round(cal_3v3_x10*4)+1000);
+                once.push("cal_3v3_x10 = " + (Math.round(cal_3v3_x10*4)+1000));
             } else {
                 document.getElementById("status").innerHTML = "FAILED " + t;
                 t = 0;
