@@ -13,22 +13,23 @@
     <style>
 pre { white-space: pre-wrap; word-wrap: break-word; }
 a { text-decoration: none; }
-#status { color: red; }
+#status { color: red; padding: 0px 10px 0px 10px; margin: 0px 0px 0px 0px; }
 #copyright { font-size:65%; padding: 0px; margin: 0px; }
 * { overflow-wrap: anywhere; word-wrap: anywhere; }
 button { overflow-wrap: normal; word-wrap: normal; }
-td { text-align: center; padding: 0px 15px 0px 0px; white-space: nowrap; }
-html,button,input,select { font: 34px Arial, Helvetica, sans-serif; padding: 10px 10px 10px 10px; margin: 0px 0px 10px 0px; }
-@media(min-width:80em){ html,button,input { font: 22px Arial, Helvetica, sans-serif; padding: 10px 10px 10px 10px; margin: 0px 0px 10px 0px; } }
+td { text-align: center; padding: 0px 10px 0px 0px; white-space: nowrap; }
+html,button,input,select { font: 34px Arial, Helvetica, sans-serif; padding: 10px 7px 10px 7px; margin: 0px 0px 10px 0px; }
+@media(min-width:80em){ html,button,input { font: 22px Arial, Helvetica, sans-serif; padding: 10px 7px 10px 7px; margin: 0px 0px 10px 0px; } }
 @supports(-webkit-touch-callout:none) { button,input { -webkit-appearance: none; border-radius: 2px; } }
 body,html { margin: 0px; }
 select { direction: rtl; }
-#wrapper { display: flex; padding: 10px 0px 15px 0px; }
+#wrapper { display: flex; padding: 10px 0px 10px 0px; }
 #view { outline: red 1px solid; flex: 97; overflow-x: scroll; }
 #canvas { padding: 3px; }
 #view2 { flex: 3; padding: 0px 5px 0px 5px; }
-#labels { width = 50px; }
+#labels { width: 50px; }
 #command { font-size:65%; }
+.dark { filter: invert(1); background: black; }
     </style>
 </head>
 
@@ -90,7 +91,7 @@ Select:
 <label for="probe">probe:</label>
 </td>
 <td>
-<label for="polar">polar:</label>
+<label for="polar">signal:</label>
 </td>
 <td>
 <label for="volts">volts:</label>
@@ -105,7 +106,7 @@ Select:
 
 <tr>
 <td>
-<select id="qusec" onchange="ScaleCanvas();">
+<select id="qusec" onchange="ScaleCanvas(); Send(String.fromCharCode(3));">
 <option value="-10">0.5u*</option>
 <option value="-5">1u*</option>
 <option value="-2">2.5u*</option>
@@ -134,73 +135,73 @@ Select:
 </select>
 </td>
 <td>
-<select id="b0">
+<select id="b0" onchange='Send(String.fromCharCode(3));'>
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
 </td>
 <td>
-<select id="b1">
+<select id="b1" onchange='Send(String.fromCharCode(3));'>
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
 </td>
 <td>
-<select id="b2">
+<select id="b2" onchange='Send(String.fromCharCode(3));'>
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
 </td>
 <td>
-<select id="b3">
+<select id="b3" onchange='Send(String.fromCharCode(3));'>
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
 </td>
 <td>
-<select id="b4">
+<select id="b4" onchange='Send(String.fromCharCode(3));'>
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
 </td>
 <td>
-<select id="b5">
+<select id="b5" onchange='Send(String.fromCharCode(3));'>
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
 </td>
 <td>
-<select id="b6">
+<select id="b6" onchange='Send(String.fromCharCode(3));'>
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
 </td>
 <td>
-<select id="b7">
+<select id="b7" onchange='Send(String.fromCharCode(3));'>
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
 </td>
 <td>
-<select id="b8">
+<select id="b8" onchange='Send(String.fromCharCode(3));'>
 <option selected value="">-</option>
 <option value="0">0</option>
 <option value="1">1</option>
 </select>
 </td>
 <td>
-<button type="button" onclick="for (var b = 0; b < bits; b++) { document.getElementById('b'+b).selectedIndex = 0; }">clear</button>
+<button type="button" onclick="for (var b = 0; b < bits; b++) { document.getElementById('b'+b).selectedIndex = 0; }; Send(String.fromCharCode(3));">clear</button>
 </td>
 <td>
-<input type="text" id="delay" value="0u" size="2"></input>
+<input type="text" id="delay" onchange='Send(String.fromCharCode(3));'' value="0u" size="2"></input>
 </td>
 <td>
 <select id="probe" onchange='Send(String.fromCharCode(3)); Probe();'>
@@ -213,10 +214,16 @@ Select:
 <select id="polar" onchange='Send(String.fromCharCode(3));'>
 <option selected value="1">uni</option>
 <option value="2">bi</option>
+<option value="2.">ac</option>
 </select>
 <td>
 <select id="volts" onchange='Send(String.fromCharCode(3));'>
+<option value="0.10">0.10</option>
+<option value="0.18">0.18</option>
+<option value="0.25">0.25</option>
+<option value="0.33">0.33</option>
 <option value="0.5">0.5</option>
+<option value="0.66">0.66</option>
 <option value="1.0">1.0</option>
 <option value="1.8">1.8</option>
 <option value="2.5">2.5</option>
@@ -257,6 +264,7 @@ Select:
 <button type="button" id="single" onclick="Single();" disabled=true>single</button>
 <button type="button" id="measure" onclick="Measure();">measure</button>
 <button type="button" id="background" onclick="Background();">background</button>
+<button type="button" id="bw" onclick="document.querySelector('body').classList.toggle('dark');">bw</button>
 </td>
 <td WIDTH=25%>
 <pre id='status' color='red'></pre>
@@ -277,6 +285,9 @@ Select:
 <a href=https://github.com/rtestardi/usbte target=_blank>github.com/rtestardi/usbte</a>
 &nbsp;&nbsp;&nbsp;
 <a href=https://github.com/rtestardi/StickOS2 target=_blank>github.com/rtestardi/StickOS2</a>
+&nbsp;&nbsp;&nbsp;
+firmware version:
+<span id="ver"></span>
 
 <script>
 'use strict';
@@ -296,13 +307,13 @@ var bytes = 1024;
 var discard;
 var discarded;
 var string = "";
-var pending = "";
 var running = "";
 
 var digital = false;
 
 var bg = false;
 
+var avgV = 0;  // ac only
 var analogV = 0;  // 0..v or -v..v (must be multiplied by p!)
 var measure = 0;
 
@@ -312,8 +323,9 @@ const EXTRA = 200;  // extra samples in case web page wants to fine-scale
 const INTERLEAVE = 5;  // we interleave results from 5 adcs
 const DIVSV = 10;
 const DIVST = 20;
+const VERT = 4;
 
-const ROLLS = 4;
+const ROLLS = 3;
 
 const bus_frequency = 120000000;
 const bus_mhz = bus_frequency/1000000;
@@ -324,6 +336,7 @@ var width = SAMPLES*2;  // actual display width after ScaleCanvas()
 var height = 256;
 var bits = 9;
 
+var ver;
 var hostname = "";
 
 var single = false;
@@ -381,28 +394,45 @@ function CalZero()
 {
     if (adcrawcount) {
         var p = parseFloat(document.getElementById("probe").value);
+        var t = Math.round((adcrawsum/adcrawcount - 512) * 4)/4;
         if (p == 1) {
-            cal_zero_x1 = Math.round((adcrawsum/adcrawcount - 512) * 1);
-            once.push("cal_zero_x1 = " + cal_zero_x1 + "\n");
+            if (t >= -5 && t <= 23 || measure == 2) {  // calibration limits
+                cal_zero_x1 = t;
+                once.push("cal_zero_x1 = " + (Math.round(cal_zero_x1*4)+1000));
+            } else {
+                document.getElementById("status").innerHTML = "FAILED " + t;
+                t = 0;
+            }
         } else {
-            cal_zero_x10 = Math.round((adcrawsum/adcrawcount - 512) * 1);
-            once.push("cal_zero_x10 = " + cal_zero_x10 + "\n");
+            if (t >= -5 && t <= 40 || measure == 2) {  // calibration limits
+                cal_zero_x10 = t;
+                once.push("cal_zero_x10 = " + (Math.round(cal_zero_x10*4)+1000));
+            } else {
+                document.getElementById("status").innerHTML = "FAILED " + t;
+                t = 0;
+            }
         }
-        document.getElementById("status").innerHTML = "cal_zero_x"+p + " = " + GetZero();
-    }
+        if (t != 0) {
+            document.getElementById("status").innerHTML = "cal_zero_x"+p + " = " + GetZero();
+        }
+   }
 }
 
 function Get3v3()
 {
-    var a;
+    var a, b;
     var p = parseFloat(document.getElementById("probe").value);
     if (p == 1) {
         a = cal_3v3_x1;
+        b = cal_zero_x1;
     } else {
         a = cal_3v3_x10;
+        b = cal_zero_x10;
     }
     if (a == undefined || a == 0) {
-        document.getElementById("status").innerHTML = "please calibrate x" + p + " probe 3v3";
+        if (! (b == undefined || b == 0)) {
+            document.getElementById("status").innerHTML = "cal_zero_x"+p + " = " + GetZero() + "\n" + "please calibrate x" + p + " probe 3v3";
+        }
         return p==1 ? 259 : 270;  // default calibration values
     }
     return Number(a);
@@ -412,14 +442,27 @@ function Cal3v3()
 {
     if (adcrawcount) {
         var p = parseFloat(document.getElementById("probe").value);
+        var t = Math.round((adcrawsum/adcrawcount - GetZero() - 512) * p*4)/4;
         if (p == 1) {
-            cal_3v3_x1 = Math.round((adcrawsum/adcrawcount - GetZero() - 512) * p);
-            once.push("cal_3v3_x1 = " + cal_3v3_x1 + "\n");
+            if (t >= 235 && t <= 275 || measure == 2) {  // calibration limits
+                cal_3v3_x1 = t;
+                once.push("cal_3v3_x1 = " + (Math.round(cal_3v3_x1*4)+1000));
+            } else {
+                document.getElementById("status").innerHTML = "FAILED " + t;
+                t = 0;
+            }
         } else {
-            cal_3v3_x10 = Math.round((adcrawsum/adcrawcount - GetZero() - 512) * p);
-            once.push("cal_3v3_x10 = " + cal_3v3_x10 + "\n");
+            if (t >= 220 && t <= 300 || measure == 2) {  // calibration limits
+                cal_3v3_x10 = t;
+                once.push("cal_3v3_x10 = " + (Math.round(cal_3v3_x10*4)+1000));
+            } else {
+                document.getElementById("status").innerHTML = "FAILED " + t;
+                t = 0;
+            }
         }
-        document.getElementById("status").innerHTML = "cal_3v3_x"+p + " = " + Get3v3();
+        if (t != 0) {
+            document.getElementById("status").innerHTML = "cal_3v3_x"+p + " = " + Get3v3();
+        }
     }
 }
 
@@ -428,7 +471,7 @@ function Probe()
     var p = parseFloat(document.getElementById("probe").value);
     var e = document.getElementById("volts");
     for (var i = 0; i < e.options.length; i++) {
-        e.options[i].innerHTML = "" + e.options[i].value*p;
+        e.options[i].innerHTML = "" + +(e.options[i].value*p).toFixed(2);
     }
 }
 
@@ -475,8 +518,7 @@ function Wave()
         hz = Math.floor(Number(hz.replace(/m$/,"")*1000000));
     }
 
-    Send(String.fromCharCode(3));  // Ctrl-C
-    pending = "wave " + pattern + " " + hz;
+    once.push("wave " + pattern + " " + hz);
 }
 
 // return time for fraction of display width
@@ -546,7 +588,6 @@ function voltadc(adc, scale, fixed)
     }
     return volts;
 }
-
 
 function ShowStatus()
 {
@@ -634,6 +675,7 @@ function Body()
             Send(String.fromCharCode(3));  // Ctrl-C
             var analogY = Math.min(Math.max(e.offsetY, 0), 255);  // 0..255 (0..height-1)
             analogV = (height/r - (analogY+1))/(height/r)*v;  // 0..v or -v..v
+            analogV += avgV;
             document.getElementById("status").innerHTML = "trigger = " + (analogV*p).toFixed(2) + "V";
             Display();
         } else {
@@ -684,6 +726,7 @@ async function Usb()
             Send(String.fromCharCode(3));  // Ctrl-C
             Send("echo off\n");  // XXX -- figure out how to undo?
             Send("prompt off\n");  // XXX -- figure out how to undo?
+            Send("dim unused[8] as flash\n");
             Send("dim cal_zero_x1 as flash, cal_3v3_x1 as flash\n");
             Send("dim cal_zero_x10 as flash, cal_3v3_x10 as flash\n");
             Wave();
@@ -728,6 +771,7 @@ async function Comm()
             Send(String.fromCharCode(3));  // Ctrl-C
             Send("echo off\n");  // XXX -- figure out how to undo?
             Send("prompt off\n");  // XXX -- figure out how to undo?
+            Send("dim unused[8] as flash\n");
             Send("dim cal_zero_x1 as flash, cal_3v3_x1 as flash\n");
             Send("dim cal_zero_x10 as flash, cal_3v3_x10 as flash\n");
             Wave();
@@ -759,17 +803,15 @@ async function Discard()
 }
 
 var once = [
-    "print cal_zero_x1, cal_3v3_x1, cal_zero_x10, cal_3v3_x10\n",
-    "hostname\n"
+    "print cal_zero_x1, cal_3v3_x1, cal_zero_x10, cal_3v3_x10",
+    "ver",
+    "hostname"
 ];
 
 async function Next()
 {
     if (once.length) {
         SendCommand(once.shift());
-    } else if (pending != "") {
-        SendCommand(pending);
-        pending = "";
     } else {
         if (single) {
             single = false;
@@ -865,6 +907,8 @@ async function Display()
     // result is in string
     var lines = string.split(/\r?\n/);
 
+    var bw = document.querySelector('body').classList.contains('dark')
+
     var ctx;
 
     // draw vertical labels
@@ -877,16 +921,21 @@ async function Display()
     var v = parseFloat(document.getElementById("volts").value);
     var p = parseFloat(document.getElementById("probe").value);
     var r = parseFloat(document.getElementById("polar").value);
+    var ac = document.getElementById("polar").value == "2.";
 
     // voltage
     if (document.getElementById("polar").value == 1) {
-        ctx.fillText("" + v*p + "V", 0, 10);
-        ctx.fillText("" + v*p/2 + "V", 0, 128);
+        ctx.fillText("" + +(v*p).toFixed(2) + "V", 0, 10);
+        ctx.fillText("" + +(v*p/2).toFixed(2) + "V", 0, 128);
         ctx.fillText("0V", 0, 256);
     } else {
-        ctx.fillText("+" + v*p + "V", 0, 10);
-        ctx.fillText("0V", 0, 128);
-        ctx.fillText("-" + v*p + "V", 0, 256);
+        ctx.fillText("+" + +(v*p).toFixed(2) + "V", 0, 10);
+        if (document.getElementById("polar").value == "2") {
+            ctx.fillText("0V", 0, 128);
+        } else {
+            ctx.fillText("avg V", 0, 128);
+        }
+        ctx.fillText("-" + +(v*p).toFixed(2) + "V", 0, 256);
     }
 
     var b;
@@ -929,7 +978,7 @@ async function Display()
 
     if (! digital) {
         var analogY;  // 0..255 (0..height-1)
-        if (analogV > v) {
+        if (analogV > v+avgV) {
             analogY = 0;
             ctx.setLineDash([10, 4]);
             ctx.strokeStyle = '#FF0000';
@@ -937,7 +986,7 @@ async function Display()
             ctx.moveTo(0, analogY);
             ctx.lineTo(width, analogY);
             ctx.stroke();
-        } else if ((r == 1 && analogV < 0) || (r == 2 && analogV < -v)) {
+        } else if ((r == 1 && analogV < 0+avgV) || (r == 2 && analogV < -v+avgV)) {
             analogY = 255;
             ctx.setLineDash([10, 4]);
             ctx.strokeStyle = '#FF0000';
@@ -947,9 +996,9 @@ async function Display()
             ctx.stroke();
         } else {
             if (r == 1) {
-                analogY = 256 - Math.floor(analogV*255/(v));
+                analogY = 256 - Math.floor((analogV-avgV)*255/(v));
             } else {
-                analogY = 256 - Math.floor((analogV+v)*255/(2*v));
+                analogY = 256 - Math.floor((analogV-avgV+v)*255/(2*v));
             }
             ctx.setLineDash([10, 4]);
             ctx.strokeStyle = '#00BF00';
@@ -960,16 +1009,18 @@ async function Display()
         }
     }
 
-    ctx.beginPath();
-    ctx.strokeStyle = '#000000';
-    ctx.setLineDash([5, 5]);
-    ctx.moveTo(0, 0);
-    ctx.lineTo(width, 0);
-    ctx.moveTo(0, (height-1)/2);
-    ctx.lineTo(width, (height-1)/2);
-    ctx.moveTo(0, height-1);
-    ctx.lineTo(width, height-1);
-    ctx.stroke();
+    for (i = 0; i < VERT+1; i++) {
+        ctx.beginPath();
+        ctx.strokeStyle = '#000000';
+        if (i%(VERT/2) == 0) {
+            ctx.setLineDash([bw?4:6, 10]);
+        } else {
+            ctx.setLineDash([bw?1:2, 10]);
+        }
+        ctx.moveTo(0, (height-1)*i/VERT);
+        ctx.lineTo(width, (height-1)*i/VERT);
+        ctx.stroke();
+    }
 
     ctx.setLineDash([]);
 
@@ -1001,7 +1052,7 @@ async function Display()
         var adcmin = 1023;
         var adcmax = 0;
         var adcsum = 0;
-        var adcnoise = 0;
+        var adcrms = 0;
 
         var j;
         var adcroll = [];
@@ -1012,11 +1063,15 @@ async function Display()
 
         var inr = false;
 
+        // compute adcmin, adcmax, adcavg up front
         for (i = 0; i < width/2 && i < lines.length; i++) {
             // XXX -- if we find "done", reset to 0 and keep going
-            var words = lines[i].split(/ /);
+            var twelve = lines[i].match(/,/);
+            var words = lines[i].split(/[ ,]/);
             var adc = parseInt(words[0]);  // 0..1023 for roughly -6.6V to 6.6V at BNC
-            var byte = parseInt(words[1]);
+            if (twelve) {
+                adc /= 4;  // N.B. no longer integer!
+            }
 
             adcrawsum += adc;
             adcrawcount++;
@@ -1040,6 +1095,33 @@ async function Display()
             }
 
             adcsum += adcscaled;
+        }
+        var adcavg = adcsum/i;
+
+        ctx.lineWidth = 1.5;
+
+        // plot points and compute adcrms
+        for (i = 0; i < width/2 && i < lines.length; i++) {
+            // XXX -- if we find "done", reset to 0 and keep going
+            var twelve = lines[i].match(/,/);
+            var words = lines[i].split(/[ ,]/);
+            var adc = parseInt(words[0]);  // 0..1023 for roughly -6.6V to 6.6V at BNC
+            if (twelve) {
+                adc /= 4;  // N.B. no longer integer!
+            }
+            var byte = parseInt(words[1]);
+
+            var adcscaled = (adc-GetZero()-512)/(Get3v3())*256 + 512;  // 0..1023
+
+            if (adcscaled >= adcavg) {
+                adcrms += (adcscaled-adcavg)*(adcscaled-adcavg);
+            } else {
+                adcrms += (adcavg-adcscaled)*(adcavg-adcscaled);
+            }
+
+            if (ac) {
+                adcscaled = (adcscaled-512)-(adcavg-512)+512;
+            }
 
             var adcv = (adcscaled-512) * adcfull/v + 512;  // 0..1023 or more
 
@@ -1048,12 +1130,11 @@ async function Display()
             var oor;
             var minv = 0;
             var divv = 4;
-            oor = (adcv <= minv) || (adcv >= 1023);
             if (document.getElementById("polar").value == 1) {
                 minv = 512;
                 divv = 2;
-                oor = (adcv < minv) || (adcv >= 1023);
             }
+            oor = (adcv < minv*99/100) || (adcv > 1023*101/100);
 
             if (adcv < minv) {
                 adcv = minv;
@@ -1088,25 +1169,13 @@ async function Display()
                 lastBit[b] = bit;
             }
         }
-
-        var adcavg = adcsum/i;
-        var adcrms = 0;
-
-        for (i = 0; i < width/2 && i < lines.length; i++) {
-            // XXX -- if we find "done", reset to 0 and keep going
-            var words = lines[i].split(/ /);
-            var adc = parseInt(words[0]);  // 0..1023 for roughly -6.6V to 6.6V at BNC
-
-            var adcscaled = (adc-GetZero()-512)/(Get3v3())*256 + 512;  // 0..1023
-
-            if (adcscaled >= adcavg) {
-                adcrms += (adcscaled-adcavg)*(adcscaled-adcavg);
-            } else {
-                adcrms += (adcavg-adcscaled)*(adcavg-adcscaled);
-            }
-        }
         adcrms = Math.pow(adcrms/i, 0.5);
 
+        if (ac) {
+            avgV = (adcsum/i-512)/512*adcfull;
+        } else {
+            avgV = 0;
+        }
         document.getElementById("voltage").innerHTML = "" + voltadc(adcsum/i, false, 2) + " avg; " +
                                                             voltadc(adcmax-adcmin+512, false, 2) + " pp; " +
                                                             voltadc(adcrms+512, false, 2) + " rms";
@@ -1134,26 +1203,43 @@ async function Display()
                 ctx.strokeStyle = '#000000';
             }
         }
+
+        ctx.lineWidth = 1;
+
+    } else if (running.match(/ver/) && lines.length > 0) {
+        // ver result
+
+        ver = lines[0];
+        if (ver != "2.27g (checksum 0x7c8e)") {
+            ver += " -- <font color='red'>PLEASE UPGRADE!</font>";
+        }
+        document.getElementById("ver").innerHTML = "<b>" + ver + "</b>";
+
     } else if (running.match(/hostname/) && lines.length > 0) {
         // hostname result
 
         hostname = lines[0];
-        
+
+        if (hostname == "") {
+            debugger;  // XXX -- deleteme!
+        }
+
         if (hostname != "Flea-Scope") {
             document.getElementById("h1").innerHTML += " (" + hostname + ")";
+            document.title += " (" + hostname + ")";
         }
     } else if (running.match(/print/) && lines.length > 0) {
         // calibration value result
 
         var words = lines[0].split(/ /);
 
-        if (words[0] > 0 && words[1] > 0) {
-            cal_zero_x1 = Number(words[0]);
-            cal_3v3_x1 = Number(words[1]);
+        if (words[0] != 0 && words[1] != 0) {
+            cal_zero_x1 = (Number(words[0])-1000)/4;
+            cal_3v3_x1 = (Number(words[1])-1000)/4;
         }
-        if (words[2] > 0 && words[3] > 0) {
-            cal_zero_x10 = Number(words[2]);
-            cal_3v3_x10 = Number(words[3]);
+        if (words[2] != 0 && words[3] != 0) {
+            cal_zero_x10 = (Number(words[2])-1000)/4;
+            cal_3v3_x10 = (Number(words[3])-1000)/4;
         }
     }
 
