@@ -1134,7 +1134,7 @@ async function Display()
                 minv = 512;
                 divv = 2;
             }
-            oor = (adcv < minv) || (adcv > 1023);
+            oor = (adcv < minv*99/100) || (adcv > 1023*101/100);
 
             if (adcv < minv) {
                 adcv = minv;
