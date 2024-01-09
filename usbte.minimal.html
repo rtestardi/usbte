@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<!-- USBTE -->
+<!-- See: https://wicg.github.io/webusb/ -->
+<!-- See: https://wicg.github.io/serial/ -->
+
+<head>
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+<title>USBTE</title>
+</head>
+
+<body onload='Body()'>
+
+<h1>Web USB Terminal Emulator</h1>
+
+<p>
+Select:
+<button type='button' onclick="Comm();">COM</button>
+
+or
+<!-- bulk endpoint from device -->
+epin: <input id='epin' name='epin' size='1' value='2'/>
+<!-- bulk endpoint to device -->
+epout: <input id='epout' name='epout' size='1' value='3'/>
+and:
+<button type='button' onclick="Usb();">USB</button>
+
+<pre id='results'></pre>
+
+<input id='command' name='command' disabled='true' autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false'/>
+<br>
+
+<script>
+'use strict';
+
+var comm;
+var reader;
+var writer;
+var usb;
+var enc = new TextEncoder();
+var dec = new TextDecoder();
+
+// the user loaded the webpage; set up keyboard listeners
+function Body()
+{
+    document.body.addEventListener("keydown", function(event) {
+        if (event.keyCode === 13) {
+            // enter -- run the command line
+            event.preventDefault();
+            Enter();
+        }
+    })
+}
+
+// the user wants to connect to a USB device's bulk endpoints directly
+async function Usb()
+{
+    var filter = {};
+
+    try {
+        usb = await navigator.usb.requestDevice({ filters: [filter] });
+        await usb.open();
+        await usb.selectConfiguration(1);
+        await usb.claimInterface(1);
+
+        setTimeout(Receive, 10);
+
+        document.getElementById("command").disabled = false;
+        document.getElementById("command").focus();
+    } catch(err) {
+        document.getElementById("results").innerHTML += err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
+    }
+}
+
+// the user wants to connect to an emulated COM port
+async function Comm()
+{
+    var filter = {};
+
+    if ('serial' in navigator) {
+        try {
+            comm = await navigator.serial.requestPort("usbVendorId" in filter ? { filters: [filter] } : {});
+            await comm.open({ baudRate: 115200, bufferSize: 64 });
+            reader = comm.readable.getReader();
+            writer = comm.writable.getWriter();
+
+            setTimeout(Receive, 10);
+
+            document.getElementById("command").disabled = false;
+            document.getElementById("command").focus();
+        } catch(err) {
+            document.getElementById("results").innerHTML += err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
+        }
+    } else {
+        document.getElementById("results").innerHTML +=
+`The Web serial API needs to be enabled in your browser thru:
+   - <a href=edge://flags/#enable-experimental-web-platform-features>edge://flags/#enable-experimental-web-platform-features</a>
+   - <a href=chrome://flags/#enable-experimental-web-platform-features>chrome://flags/#enable-experimental-web-platform-features</a>
+   - <a href=opera://flags/#enable-experimental-web-platform-features>opera://flags/#enable-experimental-web-platform-features</a>
+`;
+    }
+}
+
+// receive a string from the device
+async function Receive()
+{
+    var result;
+    var str;
+    if (usb) {
+        result = await usb.transferIn(document.getElementById("epin").value, 64);
+        str = dec.decode(result.data.buffer);
+    } else {
+        result = await reader.read();
+        str = dec.decode(result.value);
+    }
+    if (str.match(/\033[[]2J/)) {
+        // clear screen on cls  XXX -- misses fragmented escape
+        Clear();
+    } else {
+        document.getElementById("results").innerHTML += str.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'');
+    }
+    document.getElementById("command").scrollIntoView();
+    setTimeout(Receive, 10);
+}
+
+// send a string to the device
+async function Send(str)
+{
+    if (usb) {
+        await usb.transferOut(document.getElementById("epout").value, enc.encode(str).buffer);
+    } else {
+        await writer.write(enc.encode(str).buffer);
+    }
+    document.getElementById("command").value = "";
+    document.getElementById("command").focus();
+}
+
+// the user pressed the Enter button; run the user command line
+async function Enter()
+{
+    var str = document.getElementById("command").value;
+    Send(str + "\r");
+}
+
+</script>
+</body>
+</html>

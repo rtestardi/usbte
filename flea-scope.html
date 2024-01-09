@@ -383,7 +383,7 @@ function GetZero()
     } else {
         a = cal_zero_x10;
     }
-    if (a == undefined || a == 0) {
+    if (a == undefined) {
         document.getElementById("status").innerHTML = "please calibrate x" + p + " probe zero";
         return p==1 ? 14 : 28;  // default calibration values
     }
@@ -401,7 +401,7 @@ function CalZero()
                 once.push("cal_zero_x1 = " + (Math.round(cal_zero_x1*4)+1000));
             } else {
                 document.getElementById("status").innerHTML = "FAILED " + t;
-                t = 0;
+                t = undefined;
             }
         } else {
             if (t >= -5 && t <= 40 || measure == 2) {  // calibration limits
@@ -409,10 +409,10 @@ function CalZero()
                 once.push("cal_zero_x10 = " + (Math.round(cal_zero_x10*4)+1000));
             } else {
                 document.getElementById("status").innerHTML = "FAILED " + t;
-                t = 0;
+                t = undefined;
             }
         }
-        if (t != 0) {
+        if (t != undefined) {
             document.getElementById("status").innerHTML = "cal_zero_x"+p + " = " + GetZero();
         }
    }
@@ -429,8 +429,8 @@ function Get3v3()
         a = cal_3v3_x10;
         b = cal_zero_x10;
     }
-    if (a == undefined || a == 0) {
-        if (! (b == undefined || b == 0)) {
+    if (a == undefined) {
+        if (! (b == undefined)) {
             document.getElementById("status").innerHTML = "cal_zero_x"+p + " = " + GetZero() + "\n" + "please calibrate x" + p + " probe 3v3";
         }
         return p==1 ? 259 : 270;  // default calibration values
@@ -449,7 +449,7 @@ function Cal3v3()
                 once.push("cal_3v3_x1 = " + (Math.round(cal_3v3_x1*4)+1000));
             } else {
                 document.getElementById("status").innerHTML = "FAILED " + t;
-                t = 0;
+                t = undefined;
             }
         } else {
             if (t >= 220 && t <= 300 || measure == 2) {  // calibration limits
@@ -457,10 +457,10 @@ function Cal3v3()
                 once.push("cal_3v3_x10 = " + (Math.round(cal_3v3_x10*4)+1000));
             } else {
                 document.getElementById("status").innerHTML = "FAILED " + t;
-                t = 0;
+                t = undefined;
             }
         }
-        if (t != 0) {
+        if (t != undefined) {
             document.getElementById("status").innerHTML = "cal_3v3_x"+p + " = " + Get3v3();
         }
     }
