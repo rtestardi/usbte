@@ -113,12 +113,7 @@ async function Receive()
         result = await reader.read();
         str = dec.decode(result.value);
     }
-    if (str.match(/\033[[]2J/)) {
-        // clear screen on cls  XXX -- misses fragmented escape
-        Clear();
-    } else {
-        document.getElementById("results").innerHTML += str.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'');
-    }
+    document.getElementById("results").innerHTML += str.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'');
     document.getElementById("command").scrollIntoView();
     setTimeout(Receive, 10);
 }
