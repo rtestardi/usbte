@@ -198,7 +198,7 @@ Select:
 </select>
 </td>
 <td>
-<button type="button" onclick="for (var b = 0; b < bits; b++) { document.getElementById('b'+b).selectedIndex = 0; }; Send(String.fromCharCode(3));">clear</button>
+<button type="button" onclick="Clear()">clear</button>
 </td>
 <td>
 <input type="text" id="delay" onchange='Send(String.fromCharCode(3));'' value="0u" size="2"></input>
@@ -372,6 +372,16 @@ function ScaleCanvas()
     canvas.setAttribute("height", height+30*bits+20);
     labels.setAttribute("width", 50);
     labels.setAttribute("height", height+30*bits+20);
+}
+
+function Clear()
+{
+    for (var b = 0; b < bits; b++) {
+        document.getElementById('b'+b).selectedIndex = 0;
+    };
+    document.getElementById('trigger').selectedIndex = 0;
+    analogV = 0;
+    Send(String.fromCharCode(3));
 }
 
 function GetZero()
