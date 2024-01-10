@@ -380,6 +380,7 @@ function Clear()
         document.getElementById('b'+b).selectedIndex = 0;
     };
     document.getElementById('trigger').selectedIndex = 0;
+    document.getElementById('delay').value = "0u";
     analogV = 0;
     Send(String.fromCharCode(3));
 }
