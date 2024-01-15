@@ -325,8 +325,6 @@ const DIVSV = 10;
 const DIVST = 20;
 const VERT = 4;
 
-const ROLLS = 3;
-
 const bus_frequency = 120000000;
 const bus_mhz = bus_frequency/1000000;
 
@@ -1066,8 +1064,6 @@ async function Display()
         var adcrms = 0;
 
         var j;
-        var adcroll = [];
-        var adcrolled;
 
         adcrawcount = 0;
         adcrawsum = 0;
@@ -1089,20 +1085,11 @@ async function Display()
 
             var adcscaled = (adc-GetZero()-512)/(Get3v3())*256 + 512;  // 0..1023
 
-            // filter noise from pp reading
-            adcroll[i%ROLLS] = adcscaled;
-            if (i >= ROLLS) {
-                adcrolled = 0;
-                for (j = 0; j < ROLLS; j++) {
-                    adcrolled += adcroll[j];
-                }
-                adcrolled /= ROLLS;
-                if (adcrolled < adcmin) {
-                    adcmin = adcrolled;
-                }
-                if (adcrolled > adcmax) {
-                    adcmax = adcrolled;
-                }
+            if (adcscaled < adcmin) {
+                adcmin = adcscaled;
+            }
+            if (adcscaled > adcmax) {
+                adcmax = adcscaled;
             }
 
             adcsum += adcscaled;
