@@ -18,8 +18,8 @@ a { text-decoration: none; }
 * { overflow-wrap: anywhere; word-wrap: anywhere; }
 button { overflow-wrap: normal; word-wrap: normal; }
 td { text-align: center; padding: 0px 10px 0px 0px; white-space: nowrap; }
-html,button,input,select { font: 34px Arial, Helvetica, sans-serif; padding: 10px 7px 10px 7px; margin: 0px 0px 10px 0px; }
-@media(min-width:80em){ html,button,input { font: 22px Arial, Helvetica, sans-serif; padding: 10px 7px 10px 7px; margin: 0px 0px 10px 0px; } }
+html,button,input,select { font: 34px Arial, Helvetica, sans-serif; padding: 10px 8px 10px 8px; margin: 0px 0px 10px 0px; }
+@media(min-width:80em){ html,button,input { font: 22px Arial, Helvetica, sans-serif; padding: 10px 8px 10px 8px; margin: 0px 0px 10px 0px; } }
 @supports(-webkit-touch-callout:none) { button,input { -webkit-appearance: none; border-radius: 2px; } }
 body,html { margin: 0px; }
 select { direction: rtl; }
@@ -198,7 +198,7 @@ Select:
 </select>
 </td>
 <td>
-<button type="button" onclick="for (var b = 0; b < bits; b++) { document.getElementById('b'+b).selectedIndex = 0; }; Send(String.fromCharCode(3));">clear</button>
+<button type="button" onclick="Clear()">clear</button>
 </td>
 <td>
 <input type="text" id="delay" onchange='Send(String.fromCharCode(3));'' value="0u" size="2"></input>
@@ -325,8 +325,6 @@ const DIVSV = 10;
 const DIVST = 20;
 const VERT = 4;
 
-const ROLLS = 3;
-
 const bus_frequency = 120000000;
 const bus_mhz = bus_frequency/1000000;
 
@@ -374,6 +372,17 @@ function ScaleCanvas()
     labels.setAttribute("height", height+30*bits+20);
 }
 
+function Clear()
+{
+    for (var b = 0; b < bits; b++) {
+        document.getElementById('b'+b).selectedIndex = 0;
+    };
+    document.getElementById('trigger').selectedIndex = 0;
+    document.getElementById('delay').value = "0u";
+    analogV = 0;
+    Send(String.fromCharCode(3));
+}
+
 function GetZero()
 {
     var a;
@@ -383,7 +392,7 @@ function GetZero()
     } else {
         a = cal_zero_x10;
     }
-    if (a == undefined || a == 0) {
+    if (a == undefined) {
         document.getElementById("status").innerHTML = "please calibrate x" + p + " probe zero";
         return p==1 ? 14 : 28;  // default calibration values
     }
@@ -401,7 +410,7 @@ function CalZero()
                 once.push("cal_zero_x1 = " + (Math.round(cal_zero_x1*4)+1000));
             } else {
                 document.getElementById("status").innerHTML = "FAILED " + t;
-                t = 0;
+                t = undefined;
             }
         } else {
             if (t >= -5 && t <= 40 || measure == 2) {  // calibration limits
@@ -409,10 +418,10 @@ function CalZero()
                 once.push("cal_zero_x10 = " + (Math.round(cal_zero_x10*4)+1000));
             } else {
                 document.getElementById("status").innerHTML = "FAILED " + t;
-                t = 0;
+                t = undefined;
             }
         }
-        if (t != 0) {
+        if (t != undefined) {
             document.getElementById("status").innerHTML = "cal_zero_x"+p + " = " + GetZero();
         }
    }
@@ -429,8 +438,8 @@ function Get3v3()
         a = cal_3v3_x10;
         b = cal_zero_x10;
     }
-    if (a == undefined || a == 0) {
-        if (! (b == undefined || b == 0)) {
+    if (a == undefined) {
+        if (! (b == undefined)) {
             document.getElementById("status").innerHTML = "cal_zero_x"+p + " = " + GetZero() + "\n" + "please calibrate x" + p + " probe 3v3";
         }
         return p==1 ? 259 : 270;  // default calibration values
@@ -449,7 +458,7 @@ function Cal3v3()
                 once.push("cal_3v3_x1 = " + (Math.round(cal_3v3_x1*4)+1000));
             } else {
                 document.getElementById("status").innerHTML = "FAILED " + t;
-                t = 0;
+                t = undefined;
             }
         } else {
             if (t >= 220 && t <= 300 || measure == 2) {  // calibration limits
@@ -457,10 +466,10 @@ function Cal3v3()
                 once.push("cal_3v3_x10 = " + (Math.round(cal_3v3_x10*4)+1000));
             } else {
                 document.getElementById("status").innerHTML = "FAILED " + t;
-                t = 0;
+                t = undefined;
             }
         }
-        if (t != 0) {
+        if (t != undefined) {
             document.getElementById("status").innerHTML = "cal_3v3_x"+p + " = " + Get3v3();
         }
     }
@@ -1055,8 +1064,6 @@ async function Display()
         var adcrms = 0;
 
         var j;
-        var adcroll = [];
-        var adcrolled;
 
         adcrawcount = 0;
         adcrawsum = 0;
@@ -1078,20 +1085,11 @@ async function Display()
 
             var adcscaled = (adc-GetZero()-512)/(Get3v3())*256 + 512;  // 0..1023
 
-            // filter noise from pp reading
-            adcroll[i%ROLLS] = adcscaled;
-            if (i >= ROLLS) {
-                adcrolled = 0;
-                for (j = 0; j < ROLLS; j++) {
-                    adcrolled += adcroll[j];
-                }
-                adcrolled /= ROLLS;
-                if (adcrolled < adcmin) {
-                    adcmin = adcrolled;
-                }
-                if (adcrolled > adcmax) {
-                    adcmax = adcrolled;
-                }
+            if (adcscaled < adcmin) {
+                adcmin = adcscaled;
+            }
+            if (adcscaled > adcmax) {
+                adcmax = adcscaled;
             }
 
             adcsum += adcscaled;
@@ -1134,7 +1132,7 @@ async function Display()
                 minv = 512;
                 divv = 2;
             }
-            oor = (adcv < minv*99/100) || (adcv > 1023*101/100);
+            oor = (adcv < minv*98/100) || (adcv > 1023*102/100);
 
             if (adcv < minv) {
                 adcv = minv;
