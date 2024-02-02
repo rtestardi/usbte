@@ -26,7 +26,7 @@ body,html { margin: 0px; }
 
 <body onload='Body()'>
 
-<h1>StickOS® BASIC</h1>
+<h1 id="h1">StickOS® BASIC</h1>
 
 <div id="config">
 Select:
@@ -68,6 +68,7 @@ var dec = new TextDecoder();
 var lines = [];
 var cursor = 0;
 var first = false;
+var hostname = "";
 
 // the user loaded the webpage; set up keyboard listeners
 function Body()
@@ -119,6 +120,7 @@ async function Usb()
             Send("\r");
             Send("echo on\r");
             Send("prompt on\r");
+            Send("hostname\r");
 
             setTimeout(Receive, 1);
             document.getElementById("command").disabled = false;
@@ -158,6 +160,7 @@ async function Comm()
             Send("\r");
             Send("echo on\r");
             Send("prompt on\r");
+            Send("hostname\r");
 
             setTimeout(Receive, 1);
             document.getElementById("command").disabled = false;
@@ -180,6 +183,7 @@ async function Receive()
 {
     var result;
     var str;
+    var temp;
 
     if (usb) {
         result = await usb.transferIn(epin, 1024);
@@ -193,6 +197,20 @@ async function Receive()
         Clear();
     } else {
         document.getElementById("results").innerHTML += str.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'');
+        if (hostname == "") {
+            temp = document.getElementById("results").innerHTML;
+            if (temp.match(/hostname/)) {
+                temp = temp.replace(/[\s\S]*hostname/,'');
+                temp = temp.split(/\r?\n|\r|\n/g);
+                if (temp[1]) {
+                    hostname = temp[1];
+                    if (hostname != "Flea-Scope") {
+                        document.getElementById("h1").innerHTML += " (" + hostname + ")";
+                        document.title += " (" + hostname + ")";
+                    }
+                }
+            }
+        }
     }
     document.getElementById("command").scrollIntoView();
     setTimeout(Receive, 1);

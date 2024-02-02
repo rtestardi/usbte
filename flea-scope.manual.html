@@ -1219,10 +1219,6 @@ async function Display()
 
         hostname = lines[0];
 
-        if (hostname == "") {
-            debugger;  // XXX -- deleteme!
-        }
-
         if (hostname != "Flea-Scope") {
             document.getElementById("h1").innerHTML += " (" + hostname + ")";
             document.title += " (" + hostname + ")";
