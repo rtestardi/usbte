@@ -218,7 +218,7 @@ async function Receive()
                         document.getElementById("h1").innerHTML += " (" + hostname + ")";
                         document.title += " (" + hostname + ")";
                     }
-                } else if (last.match(/edit/) && temp[0].match(/list/)) {
+                } else if (last.match(/^ *edit/) && temp[0].match(/list/)) {
                     if (temp[1].match(/^ *[1-9]/)) {
                         document.getElementById("command").value = temp[1].trim();
                     }
@@ -234,7 +234,7 @@ async function Receive()
 async function Send(str)
 {
     last = str;
-    str = str.replace(/edit/, 'list');
+    str = str.replace(/^ *edit/, 'list');
     if (usb) {
         await usb.transferOut(epout, enc.encode(str).buffer);
     } else {
