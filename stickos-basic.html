@@ -66,6 +66,7 @@ var writer;
 var enc = new TextEncoder();
 var dec = new TextDecoder();
 var lines = [];
+var last;
 var cursor = 0;
 var first = false;
 var hostname = "";
@@ -181,6 +182,7 @@ async function Comm()
 // receive a string from the device
 async function Receive()
 {
+    var j;
     var result;
     var str;
     var temp;
@@ -195,19 +197,29 @@ async function Receive()
     if (str.match(/\033[[]2J/)) {
         // clear screen on cls  XXX -- misses fragmented escape
         Clear();
-    } else {
+    } else if (str.length) {
+        // gather data
         document.getElementById("results").innerHTML += str.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'');
-        if (hostname == "") {
-            temp = document.getElementById("results").innerHTML;
-            if (temp.match(/hostname/)) {
-                temp = temp.replace(/[\s\S]*hostname/,'');
-                temp = temp.split(/\r?\n|\r|\n/g);
-                if (temp[1]) {
-                    hostname = temp[1];
-                    if (hostname != "Flea-Scope") {
-                        document.getElementById("h1").innerHTML += " (" + hostname + ")";
-                        document.title += " (" + hostname + ")";
-                    }
+
+        // parse gathered data
+        temp = document.getElementById("results").innerHTML;
+        temp = temp.split(/\r?\n|\r|\n/g);
+        for (j = temp.length-2; j >= 0; j--) {
+            if (temp[j].match(/^&gt;/)) {
+                break;
+            }
+        }
+        if (j >= 0) {
+            temp = temp.slice(j, temp.length);
+            if (hostname == "" && temp[0].match(/hostname/)) {
+                hostname = temp[1];
+                if (hostname != "Flea-Scope") {
+                    document.getElementById("h1").innerHTML += " (" + hostname + ")";
+                    document.title += " (" + hostname + ")";
+                }
+            } else if (last.match(/edit/) && temp[0].match(/list/)) {
+                if (temp[1].match(/^ *[1-9]/)) {
+                    document.getElementById("command").value = temp[1].trim();
                 }
             }
         }
@@ -219,6 +231,8 @@ async function Receive()
 // send a string to the device
 async function Send(str)
 {
+    last = str;
+    str = str.replace(/edit/, 'list');
     if (usb) {
         await usb.transferOut(epout, enc.encode(str).buffer);
     } else {
