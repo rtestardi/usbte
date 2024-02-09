@@ -197,7 +197,7 @@ async function Receive()
     if (str.match(/\033[[]2J/)) {
         // clear screen on cls  XXX -- misses fragmented escape
         Clear();
-    } else if (str.length) {
+    } else {
         // gather data
         document.getElementById("results").innerHTML += str.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'');
 
