@@ -204,7 +204,7 @@ async function Receive()
         // parse gathered data at final prompt up to preceeding prompt
         temp = document.getElementById("results").innerHTML;
         temp = temp.split(/\r?\n|\r|\n/g);
-        if (temp[temp.length-1].match(/^&gt;/)) {
+        if (temp[temp.length-1].match(/^&gt; $/)) {
             for (j = temp.length-2; j >= 0; j--) {
                 if (temp[j].match(/^&gt;/)) {
                     break;
