@@ -1,3 +1,7 @@
+For Flea-Scope™ links see: https://rtestardi.github.io/pages/
+
+-----
+
 USBTE -- Web USB Terminal Emulator (well, without actual emulation :-)
 
 This uses webusb/winusb or usbser to allow a webpage to become a terminal emulator for a cdc/acm serial port USB
