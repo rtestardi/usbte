@@ -734,6 +734,7 @@ async function Usb()
             setTimeout(Receive, 1);
 
             Send(String.fromCharCode(3));  // Ctrl-C
+            await new Promise(r => setTimeout(r, 200));  // allow autorun program to stop?
             Send("echo off\n");  // XXX -- figure out how to undo?
             Send("prompt off\n");  // XXX -- figure out how to undo?
             Send("dim unused[8] as flash\n");
@@ -779,6 +780,7 @@ async function Comm()
             setTimeout(Receive, 1);
 
             Send(String.fromCharCode(3));  // Ctrl-C
+            await new Promise(r => setTimeout(r, 200));  // allow autorun program to stop?
             Send("echo off\n");  // XXX -- figure out how to undo?
             Send("prompt off\n");  // XXX -- figure out how to undo?
             Send("dim unused[8] as flash\n");
