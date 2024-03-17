@@ -38,11 +38,8 @@ select { direction: rtl; }
 <h1 id="h1">Flea-Scope™</h1>
 
 <div id="config">
-Select:
-<button type='button' onclick="Comm();">Connect Comm</button>
-<button type='button' onclick="Usb();">Connect USB</button>
-</div>
-
+<button type='button' onclick="Comm();">Start Connect Comm</button>
+<button type='button' onclick="Usb();">Start Connect USB</button></div>
 <table>
 <tr>
 <td>
@@ -244,7 +241,25 @@ Select:
 
 <div id="wrapper">
 <div id="view">
-<canvas id="canvas"></canvas>
+<div id="help">
+<i>
+To connect this web-page user interface to your Flea-Scope:
+<ol>
+<li>plug Flea-Scope's micro-USB connector into your computer, tablet, or phone
+<ul>
+<li>LED e1 (blue) should blink at 2Hz for 2 blinks, and then settle to a 1Hz blink while Flea-Scope is idle</li>
+</ul>
+<li><u>click or tap</u> the "Start Connect" button above to authorize web browser access to a selected USB device</li>
+<ul>
+<li>the web browser will open a WebUSB or Web Serial dialog box</li>
+<li>you should see your Flea-Scope device listed in the WebUSB or Web Serial dialog box</li>
+</ul>
+<li><b><u>click or tap</u> the desired Flea-Scope USB device or serial port (or customized hostname) to select it!</b></li>
+<li>finally, <u>click or tap</u> "Connect" to confirm the selected Flea-Scope USB device!</li>
+</ol>
+</i>
+</div>
+<canvas id="canvas" hidden=true></canvas>
 </div>
 <div id="view2">
 <canvas id="labels"></canvas>
@@ -731,6 +746,8 @@ async function Usb()
             await usb.claimInterface(1);
 
             document.getElementById("config").hidden = true;
+            document.getElementById("help").hidden = true;
+            document.getElementById("canvas").hidden = false;
 
             discard = 1;
             setTimeout(Receive, 1);
@@ -777,6 +794,8 @@ async function Comm()
             writer = comm.writable.getWriter();
 
             document.getElementById("config").hidden = true;
+            document.getElementById("help").hidden = true;
+            document.getElementById("canvas").hidden = false;
 
             discard = 1;
             setTimeout(Receive, 1);
