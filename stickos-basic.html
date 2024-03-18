@@ -149,6 +149,11 @@ async function Usb()
         { vendorId: 0x04D8, productId: 0xE66E },
     ];
 
+    usb = undefined;
+    comm = undefined;
+    reader = undefined;
+    writer = undefined;
+
     if ('usb' in navigator) {
         try {
             usb = await navigator.usb.requestDevice({ filters: filter });
@@ -184,6 +189,11 @@ async function Comm()
         { usbVendorId: 0x1b4f, usbProductId: 0xE66E },
         { usbVendorId: 0x04D8, usbProductId: 0xE66E },
     ];
+
+    usb = undefined;
+    comm = undefined;
+    reader = undefined;
+    writer = undefined;
 
     if ('serial' in navigator) {
         try {
