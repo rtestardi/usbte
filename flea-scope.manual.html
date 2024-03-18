@@ -39,8 +39,16 @@ select { direction: rtl; }
 <h1 id="h1">Flea-Scope™</h1>
 
 <div id="config">
-<button type='button' onclick="Comm();">Start Connect Comm</button>
-<button type='button' onclick="Usb();">Start Connect USB</button></div>
+<button type='button'
+        onclick="if (/\b(Linux|CrOS|Windows)\b/.test(navigator.userAgent) && ! navigator.userAgent.match(/android/i)) {
+                     Comm();
+                 } else {
+                     Usb();
+                 }">Start Connect</button>
+<button type='button' id="start1" hidden=true onclick="Comm();">Start Connect Comm</button>
+<button type='button' id="start2" hidden=true onclick="Usb();">Start Connect USB</button>
+</div>
+
 <table>
 <tr>
 <td>
@@ -306,6 +314,8 @@ firmware version:
 
 <script>
 'use strict';
+
+var webpage;
 
 var usb;
 var comm;
@@ -681,9 +691,17 @@ function Measure()
 // the user loaded the webpage; set up keyboard listeners
 function Body()
 {
-    document.getElementById("status").innerHTML = navigator.userAgent;
-    for (var vv in navigator) {
-        document.getElementById("command").innerHTML += vv + ", ";
+    webpage = location.pathname.split("/").slice(-1)[0];
+
+    if (webpage.match(/manual/)) {
+        document.getElementById("start1").hidden = false;
+        document.getElementById("start2").hidden = false;
+
+        document.getElementById("help").innerHTML += "<p>" + navigator.userAgent;
+        for (var vv in navigator) {
+            document.getElementById("help").innerHTML += vv + ", ";
+        }
+        document.getElementById("help").innerHTML += "</p>";
     }
 
     if (/\b(Linux)\b/.test(navigator.userAgent)) {
@@ -740,6 +758,11 @@ async function Usb()
         { vendorId: 0x04D8, productId: 0xE66E },
     ];
 
+    usb = undefined;
+    comm = undefined;
+    reader = undefined;
+    writer = undefined;
+
     if ('usb' in navigator) {
         try {
             usb = await navigator.usb.requestDevice({ filters: filter });
@@ -766,15 +789,10 @@ async function Usb()
             discarded = false;
             setTimeout(Discard, 200);
         } catch(err) {
-            document.getElementById("status").innerHTML = err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
+            document.getElementById("help").innerHTML += "<p><font color='red'>" + err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "</font></p>";
         }
     } else {
-        document.getElementById("status").innerHTML =
-`The usb API needs to be enabled in your browser thru:
-   - <a href=edge://flags/#enable-experimental-web-platform-features>edge://flags/#enable-experimental-web-platform-features</a>
-   - <a href=chrome://flags/#enable-experimental-web-platform-features>chrome://flags/#enable-experimental-web-platform-features</a>
-   - <a href=opera://flags/#enable-experimental-web-platform-features>opera://flags/#enable-experimental-web-platform-features</a>
-`;
+        document.getElementById("help").innerHTML += "<p><font color='red'>WebUSB API not found.</font></p>";
     }
 }
 
@@ -787,6 +805,11 @@ async function Comm()
         { usbVendorId: 0x1b4f, usbProductId: 0xE66E },
         { usbVendorId: 0x04D8, usbProductId: 0xE66E },
     ];
+
+    usb = undefined;
+    comm = undefined;
+    reader = undefined;
+    writer = undefined;
 
     if ('serial' in navigator) {
         try {
@@ -814,15 +837,10 @@ async function Comm()
             discarded = false;
             setTimeout(Discard, 200);
         } catch(err) {
-            document.getElementById("status").innerHTML = err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\r";
+            document.getElementById("help").innerHTML += "<p><font color='red'>" + err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;') + "</font></p>";
         }
     } else {
-        document.getElementById("status").innerHTML =
-`The Web serial API needs to be enabled in your browser thru:
-   - <a href=edge://flags/#enable-experimental-web-platform-features>edge://flags/#enable-experimental-web-platform-features</a>
-   - <a href=chrome://flags/#enable-experimental-web-platform-features>chrome://flags/#enable-experimental-web-platform-features</a>
-   - <a href=opera://flags/#enable-experimental-web-platform-features>opera://flags/#enable-experimental-web-platform-features</a>
-`;
+        document.getElementById("help").innerHTML += "<p><font color='red'>Web Serial API not found.</font></p>";
     }
 }
 
