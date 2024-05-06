@@ -30,7 +30,7 @@ select { direction: rtl; }
 #view2 { flex: 3; padding: 0px 5px 0px 5px; }
 #labels { width: 50px; }
 #command { font-size:65%; }
-.dark { filter: invert(1); background: black; }
+.dark { filter: invert(1); background: rgb(105, 105, 105); }
     </style>
 </head>
 
@@ -249,7 +249,7 @@ select { direction: rtl; }
 </table>
 
 <div id="wrapper">
-<div id="view">
+<div id="view" color='red'>
 <div id="help">
 <i>
 To connect this graphical user interface web-page to your Flea-Scope:
@@ -272,7 +272,7 @@ To connect this graphical user interface web-page to your Flea-Scope:
 <canvas id="canvas" hidden=true></canvas>
 </div>
 <div id="view2">
-<canvas id="labels"></canvas>
+<canvas id="labels" color='red'></canvas>
 </div>
 </div>
 
@@ -1026,7 +1026,9 @@ async function Display()
 
         var t = "" + usec(i/DIVST, true, 1).replace(/[.]0/,"");
         var w = (i==DIVST)?(ctx.measureText(t).width):((i)?(ctx.measureText(t).width/2):0);
+        ctx.fillStyle = '#B22222';
         ctx.fillText(t, (width/DIVST*i)-w, 274);
+        ctx.fillStyle = '#000000';
     }
 
     if (! digital) {
