@@ -11,6 +11,7 @@
 <meta name="viewport" content="width=1870">
 <title>Flea-Scope™</title>
     <style>
+body,select,input { background: #eeeeee }
 pre { white-space: pre-wrap; word-wrap: break-word; }
 a { text-decoration: none; }
 #status { color: red; padding: 0px 10px 0px 10px; margin: 0px 0px 0px 0px; }
@@ -30,7 +31,7 @@ select { direction: rtl; }
 #view2 { flex: 3; padding: 0px 5px 0px 5px; }
 #labels { width: 50px; }
 #command { font-size:65%; }
-.dark { filter: invert(1); background: black; }
+.dark { filter: invert(1); background: #111111; }
     </style>
 </head>
 
@@ -1002,6 +1003,8 @@ async function Display()
 
     // draw lines and horizontal labels
     ctx = canvas.getContext('2d');
+
+    ctx.font = `12px Verdana`;
 
     ctx.clearRect(0, 0, width, 546);
 
