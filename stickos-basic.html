@@ -10,6 +10,7 @@
 <meta name="viewport" content="width=1870">
 <title>StickOS® BASIC</title>
     <style>
+body,select,input { background: #eeeeee }
 pre { white-space: pre-wrap; word-wrap: break-word; }
 a { text-decoration: none; }
 #results { line-height: 1.2; }
@@ -22,6 +23,7 @@ html,button,input,select { font: 34px Arial, Helvetica, sans-serif; padding: 10p
 @media(min-width:80em){ html,button,input { font: 22px Arial, Helvetica, sans-serif; padding: 10px 10px 10px 10px; margin: 0px 0px 10px 0px; } }
 @supports(-webkit-touch-callout:none) { button,input { -webkit-appearance: none; border-radius: 2px; } }
 body,html { margin: 0px; }
+.dark { filter: invert(1); background: #111111; }
     </style>
 </head>
 
@@ -69,6 +71,7 @@ To connect this user interface web-page to your Flea-Scope:
 <button type='button' onclick='Send(String.fromCharCode(4));'>Ctrl-D</button>
 <button type='button' onclick='Paste();'>Paste</button>
 <button type='button' onclick='Clear();'>Clear</button>
+<button type="button" id="bw" onclick="document.querySelector('body').classList.toggle('dark');">bw</button>
 
 <p id='copyright'>
 <a href=https://rtestardi.github.io/pages target=_blank>rtestardi's pages</a>
