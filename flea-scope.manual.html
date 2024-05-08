@@ -1027,7 +1027,7 @@ async function Display()
         ctx.stroke();
         ctx.setLineDash([]);
 
-        var t = "" + usec(i/DIVST, true, 1).replace(/[.]0/,"");
+        var t = "" + usec(i/DIVST, true, 2).replace(/[.]*0+([mu])/,"$1");
         var w = (i==DIVST)?(ctx.measureText(t).width):((i)?(ctx.measureText(t).width/2):0);
         ctx.fillText(t, (width/DIVST*i)-w, 274);
     }
