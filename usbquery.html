@@ -34,10 +34,7 @@ PID: <input id='productId' name='productId' size='4'/>
 
 <p>
 Select:
-<!-- bulk endpoint from device -->
-epin: <input id='epin' name='epin' size='1' value='2'/>
-<!-- bulk endpoint to device -->
-epout: <input id='epout' name='epout' size='1' value='3'/>
+configuration: <input id='config' name='config' size='1' value='1'/>
 and:
 <button type='button' onclick="Usb();">USB</button>
 
@@ -57,18 +54,22 @@ function Log(s)
 
 async function QueryOne(usb, number, name, index)
 {
-    var result = await usb.controlTransferIn({
-                         requestType: 'standard',
-                         recipient: 'device',
-                         request: 0x06,  // get descriptor
-                         value: (number<<8)|index,
-                         index: 0x0}, 255);
-    Log(name+"("+index+")\n");
-    for (var i = 0; i < result.data.byteLength; i++) {
-        Log("0x"+result.data.getUint8(i).toString(16)+" ");
+    try {
+        var result = await usb.controlTransferIn({
+                             requestType: 'standard',
+                             recipient: 'device',
+                             request: 0x06,  // get descriptor
+                             value: (number<<8)|index,
+                             index: 0x0}, 255);
+        Log(name+"("+index+")\n");
+        for (var i = 0; i < result.data.byteLength; i++) {
+            Log("0x"+result.data.getUint8(i).toString(16)+" ");
+        }
+        Log("\n");
+        return result.status == "ok";
+    } catch(err) {
+        return false;
     }
-    Log("\n");
-    return result.status == "ok";
 }
 
 async function QueryAll(usb, number, name, limit)
@@ -94,8 +95,8 @@ async function Usb()
     try {
         usb = await navigator.usb.requestDevice({ filters: [filter] });
         await usb.open();
-        await usb.selectConfiguration(1);
-        await usb.claimInterface(1);
+        await usb.selectConfiguration(document.getElementById("config").value);
+        await usb.claimInterface(usb.configuration.interfaces[0].interfaceNumber);
 
         await QueryOne(usb, 0x1, "DEVICE DESCRIPTOR:", 0);
         await QueryAll(usb, 0x2, "CONFIGURATION DESCRIPTOR:", 4);
