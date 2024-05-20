@@ -265,7 +265,7 @@ async function Receive()
                     }
                 } else if (last.match(/^ *edit/) && temp[0].match(/list/)) {
                     if (temp[1].match(/^ *[1-9]/)) {
-                        document.getElementById("command").value = temp[1].trim();
+                        document.getElementById("command").value = temp[1].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim();
                     }
                 }
             }
