@@ -15,7 +15,7 @@ a { text-decoration: none; }
 #copyright { font-size:65%; padding: 0px; }
 * { overflow-wrap: anywhere; word-wrap: anywhere; }
 button { overflow-wrap: normal; word-wrap: normal; }
-html,button,input { font: 36px Arial, Helvetica, sans-serif; padding: 15px 10px 15px 10px; margin: 15px 0px 15px 0px; }
+html,button,select,input { font: 36px Arial, Helvetica, sans-serif; padding: 15px 10px 15px 10px; margin: 15px 0px 15px 0px; }
 @media(min-width:80em){ html,button,input { font: 24px Arial, Helvetica, sans-serif; padding: 10px; margin: 10px 0px 10px 0px; } }
 @supports(-webkit-touch-callout:none) { button,input { -webkit-appearance: none; border-radius: 2px; } }
 body,html { margin: 0px; }
@@ -34,9 +34,34 @@ PID: <input id='productId' name='productId' size='4'/>
 
 <p>
 Select:
+baudRate:
+<select id="baudRate">
+<option value="9600" selected>9600</option>
+<option value="19200">19200</option>
+<option value="38400">38400</option>
+<option value="115200">115200</option>
+</select>
+dataBits:
+<select id="dataBits">
+<option value="7">7</option>
+<option value="8" selected>8</option>
+</select>
+parity:
+<select id="parity">
+<option value="none" selected>none</option>
+<option value="even">even</option>
+<option value="odd">odd</option>
+</select>
+stopBits:
+<select id="stopBits">
+<option value="1" selected>1</option>
+<option value="2">2</option>
+</select>
+and:
 <button type='button' onclick="Comm();">COM</button>
 
-or
+<p>
+Or:
 <!-- bulk endpoint from device -->
 epin: <input id='epin' name='epin' size='1' value='2'/>
 <!-- bulk endpoint to device -->
@@ -142,7 +167,11 @@ async function Comm()
     if ('serial' in navigator) {
         try {
             comm = await navigator.serial.requestPort("usbVendorId" in filter ? { filters: [filter] } : {});
-            await comm.open({ baudRate: 115200, bufferSize: 64 });
+            await comm.open({ baudRate: document.getElementById("baudRate").value,
+                              dataBits: document.getElementById("dataBits").value,
+                              parity: document.getElementById("parity").value,
+                              stopBits: document.getElementById("stopBits").value,
+                              bufferSize: 64 });
             reader = comm.readable.getReader();
             writer = comm.writable.getWriter();
 
