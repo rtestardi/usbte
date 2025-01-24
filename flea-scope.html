@@ -882,6 +882,9 @@ async function WarnCommand()
 {
     document.getElementById('command').style.color = 'red';
     document.getElementById("command").innerHTML += " [waiting]";
+
+    string = "";
+    Display();
 }
 
 async function SendCommand(command)
@@ -1079,7 +1082,7 @@ async function Display()
 
     ctx.setLineDash([]);
 
-    if (lines.length >= 100) {
+    if (lines.length >= 100 || string == "") {
         // scope result
 
         var sx, sy, sh;
