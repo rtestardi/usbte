@@ -702,7 +702,7 @@ function Export()
     var result = "";
 
     var e = document.getElementById("qusec");
-    var name = e.options[e.selectedIndex].text;
+    var name = e.options[e.selectedIndex].text.replace("*", "");
     result += "approximately " + name + "s per division (i.e., per 90 lines)";
     result += "\n";
 
