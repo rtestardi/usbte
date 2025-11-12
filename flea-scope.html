@@ -722,7 +722,7 @@ function Export()
             var adcscaled = (adc-GetZero()-512)/(Get3v3())*256 + 512;  // 0..1023
 
             result += voltadc(adcscaled, false, 2);
-            result += " ";
+            result += ", ";
             result += "0x" + byte.toString(16);
             result += "\n";
         }
