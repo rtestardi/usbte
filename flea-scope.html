@@ -284,6 +284,7 @@ To connect this graphical user interface web-page to your Flea-Scope:
 <button type="button" id="pause" onclick="Pause();">pause</button>
 <button type="button" id="single" onclick="Single();" disabled=true>single</button>
 <button type="button" id="measure" onclick="Measure();">measure</button>
+<button type="button" id="export" onclick="Export();">export</button>
 <button type="button" id="background" onclick="Background();">background</button>
 <button type="button" id="bw" onclick="document.querySelector('body').classList.toggle('dark');">bw</button>
 </td>
@@ -686,6 +687,50 @@ function Measure()
         measure = 2;
     }
     newX = oldX = -1;
+}
+
+function ClearStatus()
+{
+    document.getElementById("status").innerHTML = "";
+}
+
+function Export()
+{
+    // result is in string
+    var lines = string.split(/\r?\n/);
+
+    var result = "";
+
+    var e = document.getElementById("qusec");
+    var name = e.options[e.selectedIndex].text;
+    result += "approximately " + name + "s per division (i.e., per 90 lines)";
+    result += "\n";
+
+    if (lines.length >= 100 || string == "") {
+        // scope result
+
+        for (var i = 0; i < width/2 && i < lines.length-1; i++) {
+            // XXX -- if we find "done", reset to 0 and keep going
+            var twelve = lines[i].match(/,/);
+            var words = lines[i].split(/[ ,]/);
+            var adc = parseInt(words[0]);  // 0..1023 for roughly -6.6V to 6.6V at BNC
+            if (twelve) {
+                adc /= 4;  // N.B. no longer integer!
+            }
+            var byte = parseInt(words[1]);
+
+            var adcscaled = (adc-GetZero()-512)/(Get3v3())*256 + 512;  // 0..1023
+
+            result += voltadc(adcscaled, false, 2);
+            result += " ";
+            result += "0x" + byte.toString(16);
+            result += "\n";
+        }
+
+        navigator.clipboard.writeText(result);
+        document.getElementById("status").innerHTML = "copied to clipboard";
+        setTimeout(ClearStatus, 1000);
+    }
 }
 
 // the user loaded the webpage; set up keyboard listeners
@@ -1120,7 +1165,7 @@ async function Display()
         var inr = false;
 
         // compute adcmin, adcmax, adcavg up front
-        for (i = 0; i < width/2 && i < lines.length; i++) {
+        for (i = 0; i < width/2 && i < lines.length-1; i++) {
             // XXX -- if we find "done", reset to 0 and keep going
             var twelve = lines[i].match(/,/);
             var words = lines[i].split(/[ ,]/);
@@ -1148,7 +1193,7 @@ async function Display()
         ctx.lineWidth = 1.5;
 
         // plot points and compute adcrms
-        for (i = 0; i < width/2 && i < lines.length; i++) {
+        for (i = 0; i < width/2 && i < lines.length-1; i++) {
             // XXX -- if we find "done", reset to 0 and keep going
             var twelve = lines[i].match(/,/);
             var words = lines[i].split(/[ ,]/);
