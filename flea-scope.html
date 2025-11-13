@@ -285,7 +285,7 @@ To connect this graphical user interface web-page to your Flea-Scope:
 <button type="button" id="single" onclick="Single();" disabled=true>single</button>
 <button type="button" id="measure" onclick="Measure();">measure</button>
 <button type="button" id="export" onclick="Export();">export</button>
-<button type="button" id="background" onclick="Background();">background</button>
+<button type="button" id="background" onclick="Background();">bg</button>
 <button type="button" id="bw" onclick="document.querySelector('body').classList.toggle('dark');">bw</button>
 </td>
 <td WIDTH=25%>
@@ -536,10 +536,10 @@ function Background()
 {
     if (! bg) {
         bg = true;
-        document.getElementById('background').innerHTML = "foreground";
+        document.getElementById('background').innerHTML = "fg";
     } else {
         bg = false;
-        document.getElementById('background').innerHTML = "background";
+        document.getElementById('background').innerHTML = "bg";
     }
 }
 
